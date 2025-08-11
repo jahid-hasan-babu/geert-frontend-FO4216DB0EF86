@@ -11,6 +11,9 @@ export const courseData = [
     isBestseller: true,
     type: "video",
     completed: 15,
+    description:
+      "Learn how to create stunning designs, social media graphics, and marketing materials using Canva’s powerful tools.",
+    instructor: "Emma Roberts",
   },
   {
     id: 2,
@@ -24,6 +27,9 @@ export const courseData = [
     isBestseller: false,
     type: "video",
     completed: 16,
+    description:
+      "Master the fundamentals of JavaScript, from variables and functions to DOM manipulation and modern ES6 features.",
+    instructor: "James Anderson",
   },
   {
     id: 3,
@@ -37,6 +43,9 @@ export const courseData = [
     isBestseller: false,
     type: "docs",
     completed: 10,
+    description:
+      "Get a complete introduction to digital marketing strategies, including SEO, email campaigns, and social media tactics.",
+    instructor: "Sophia Mitchell",
   },
   {
     id: 4,
@@ -50,6 +59,9 @@ export const courseData = [
     isBestseller: false,
     type: "video",
     completed: 12,
+    description:
+      "Learn to design interactive and visually appealing UI prototypes in Figma, perfect for both web and mobile applications.",
+    instructor: "Daniel Clark",
   },
   {
     id: 5,
@@ -63,6 +75,9 @@ export const courseData = [
     isBestseller: true,
     type: "video",
     completed: 19,
+    description:
+      "Analyze, clean, and visualize data effectively with Python using Pandas, NumPy, and Matplotlib libraries.",
+    instructor: "Olivia Bennett",
   },
   {
     id: 6,
@@ -76,6 +91,9 @@ export const courseData = [
     isBestseller: false,
     type: "docs",
     completed: 18,
+    description:
+      "Understand the basics of machine learning algorithms, including supervised and unsupervised models.",
+    instructor: "Liam Johnson",
   },
   {
     id: 7,
@@ -89,6 +107,9 @@ export const courseData = [
     isBestseller: false,
     type: "video",
     completed: 14,
+    description:
+      "Take your CSS skills to the next level with animations, responsive layouts, and CSS Grid/Flexbox mastery.",
+    instructor: "Mia Carter",
   },
   {
     id: 8,
@@ -102,6 +123,9 @@ export const courseData = [
     isBestseller: false,
     type: "docs",
     completed: 18,
+    description:
+      "Boost your website ranking with proven SEO strategies, keyword optimization, and backlink building.",
+    instructor: "Ethan White",
   },
   {
     id: 9,
@@ -115,6 +139,9 @@ export const courseData = [
     isBestseller: false,
     type: "video",
     completed: 14,
+    description:
+      "Create insightful and interactive dashboards with Tableau to turn raw data into actionable insights.",
+    instructor: "Ava Brooks",
   },
   {
     id: 10,
@@ -128,6 +155,9 @@ export const courseData = [
     isBestseller: true,
     type: "video",
     completed: 13,
+    description:
+      "Dive into the fundamentals of neural networks, deep learning, and how machines learn from data.",
+    instructor: "Noah Harris",
   },
   {
     id: 11,
@@ -141,6 +171,9 @@ export const courseData = [
     isBestseller: false,
     type: "docs",
     completed: 8,
+    description:
+      "Learn how to use typography effectively to enhance user experience and create visually stunning websites.",
+    instructor: "Grace Foster",
   },
   {
     id: 12,
@@ -154,6 +187,9 @@ export const courseData = [
     isBestseller: true,
     type: "video",
     completed: 12,
+    description:
+      "Quickly get up to speed with React.js by building dynamic, component-based web applications.",
+    instructor: "Lucas Parker",
   },
   {
     id: 13,
@@ -167,6 +203,9 @@ export const courseData = [
     isBestseller: false,
     type: "docs",
     completed: 16,
+    description:
+      "Learn how to create, manage, and optimize social media campaigns that grow brand awareness and engagement.",
+    instructor: "Chloe Reed",
   },
 ];
 

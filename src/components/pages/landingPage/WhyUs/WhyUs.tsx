@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import { StaticImageData } from "next/image";
 import WhyUs_1 from "@/assets/images/WhyUs_1.png";
 import WhyUs_2 from "@/assets/images/WhyUs_2.png";
 import WhyUs_3 from "@/assets/images/WhyUs_3.png";
@@ -99,7 +100,7 @@ const WhyUs = () => {
 export default WhyUs;
 
 // Desktop Feature Block
-const FeatureBlock = ({ image, text }: { image: any; text: string }) => (
+const FeatureBlock = ({ image, text }: { image: StaticImageData; text: string }) => (
   <div className="flex flex-col items-start justify-between space-y-4 bg-[#F4FAFD] h-full p-6 rounded-xl shadow-sm">
     <div className="w-16 h-16 bg-sky-100 rounded-full flex items-center justify-center">
       <Image src={image} alt="Feature Icon" width={32} height={32} />
@@ -109,7 +110,7 @@ const FeatureBlock = ({ image, text }: { image: any; text: string }) => (
 );
 
 // Mobile Feature Block
-const MobileFeature = ({ image, text }: { image: any; text: string }) => (
+const MobileFeature = ({ image, text }: { image: StaticImageData; text: string }) => (
   <div className="flex flex-col items-center text-center space-y-4">
     <div className="w-16 h-16 bg-sky-100 rounded-full flex items-center justify-center">
       <Image src={image} alt="Feature Icon" width={32} height={32} />

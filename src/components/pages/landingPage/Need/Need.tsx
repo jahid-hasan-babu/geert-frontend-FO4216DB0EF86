@@ -10,11 +10,11 @@ const Need = () => {
       <section className="py-16 lg:py-24">
         <div className="container mx-auto px-6">
           {/* Header */}
-          <div className="text-center mb-16 w-1/2 mx-auto">
+          <div className="text-center mb-16 lg:w-1/2 mx-auto">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-gray-900 mb-6 font-playfairDisplay">
               Everything You Need to Succeed in One Platform
             </h2>
-            <p className="text-lg md:text-[18px] text-gray-600 leading-relaxed w-[65%] mx-auto">
+            <p className="text-lg md:text-[18px] text-gray-600 leading-relaxed lg:w-[65%] mx-auto">
               Top-quality courses, expert mentors, and lifetime access. Learn at
               your own pace and turn knowledge into action.
             </p>
