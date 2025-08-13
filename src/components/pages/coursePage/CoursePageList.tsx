@@ -1,12 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import CourseCard from "@/components/ui/card/CourseCard";
 import CourseFilter from "@/components/ui/filter/CourseFilter";
 import CoursePagination from "@/components/ui/pagination/CoursePagination";
 import CourseSearch from "@/components/ui/search/CourseSearch";
 import { courseCategoryData, courseData } from "@/utils/dummyData";
 import Link from "next/link";
-import { useState } from "react";
 
 export default function CoursesPageList() {
   const [activeFilter, setActiveFilter] = useState("All");

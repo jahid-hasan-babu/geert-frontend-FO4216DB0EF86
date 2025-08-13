@@ -1,7 +1,7 @@
-
 import { Star } from "lucide-react";
 import Image from "next/image";
 import course_image from "@/assets/images/course_image.png";
+import { reviewData } from "@/utils/dummyData";
 
 interface Course {
   id: number;
@@ -9,16 +9,23 @@ interface Course {
   lessons: number;
   duration: string;
   rating: number;
-  reviews: number;
   type: string;
 }
 
 export default function CourseCard({ course }: { course: Course }) {
+  const filteredReviews = reviewData.filter(
+    (review) => review.courseId === course.id
+  );
+
   return (
     <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
       {/* Image */}
       <div className="relative flex items-center justify-center">
-        <Image className="w-full h-full" src={course_image} alt="Course Image" />
+        <Image
+          className="w-full h-full"
+          src={course_image}
+          alt="Course Image"
+        />
       </div>
 
       {/* Course Content */}
@@ -39,7 +46,7 @@ export default function CourseCard({ course }: { course: Course }) {
           <div className="flex items-center space-x-1">
             <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
             <span className="font-medium text-[#404040]">
-              {course.rating} ({course.reviews})
+              {course.rating} ({filteredReviews.length})
             </span>
           </div>
         </div>

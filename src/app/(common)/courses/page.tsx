@@ -4,6 +4,7 @@ import Promotion from "@/components/shared/Promotion/Promotion";
 import Partners from "@/components/common/Partners";
 
 const CoursePage = () => {
+
   return (
     <>
       <CoursesPageList />
