@@ -65,7 +65,7 @@ export default function Navbar() {
             </div>
           </div>
         ) : (
-          <ul className="hidden md:flex items-center space-x-8 font-medium">
+          <ul className="hidden md:flex items-center space-x-8 font-medium font-sans">
             {navLinks.map(({ href, label }) => (
               <li key={href}>
                 <Link
@@ -182,13 +182,6 @@ export default function Navbar() {
               className="rounded-full border border-gray-200"
             />
           </div>
-
-          {/* Sign In Button */}
-          <Link href="/signInUp">
-            <button className="w-full bg-[#3399CC] text-white rounded-full px-5 py-2.5 font-medium transition duration-300 mt-4">
-              Sign In
-            </button>
-          </Link>
         </Dialog.Panel>
       </Dialog>
     </header>

@@ -116,7 +116,7 @@ export default function ContactForm() {
                 Get in touch with our experts team
               </h2>
 
-              <div className="space-y-[12px]">
+              <div className="space-y-[12px] font-sans">
                 {/* Email */}
                 <div className="bg-[#EBF5FA] p-6 rounded-xl">
                   <div className="space-y-[12px]">

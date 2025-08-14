@@ -1,6 +1,6 @@
 "use client";
 
-import course_details_image from "@/assets/images/course_details_image.png"
+import course_details_image from "@/assets/images/course_details_image.png";
 import instructorImage from "@/assets/images/about_dp.png";
 import CourseReviewAbout from "@/components/ui/review/CourseReviewAbout";
 import Promotion from "@/components/shared/Promotion/Promotion";
@@ -11,7 +11,7 @@ import CourseDocs from "./CourseDocs";
 
 interface CourseDetailsProps {
   course: {
-    id: number;
+    id?: number;
     title: string;
     type: string;
     description: string;
@@ -32,7 +32,6 @@ export default function CourseDetailsPage({ course }: CourseDetailsProps) {
   );
 
   const lessonsList = course.lessonsList;
-  console.log("Course Details Page", course);
 
   return (
     <div className="container">
@@ -46,7 +45,7 @@ export default function CourseDetailsPage({ course }: CourseDetailsProps) {
               />
             ) : (
               <>
-              <CourseDocs />
+                <CourseDocs />
               </>
             )}
 
@@ -69,7 +68,6 @@ export default function CourseDetailsPage({ course }: CourseDetailsProps) {
                 </h1>
               </div>
               <div className="flex flex-col sm:flex-row gap-6 sm:gap-12">
-                {/* Stats could go here */}
               </div>
             </div>
             <CourseReviewAbout

@@ -5,19 +5,16 @@ import Link from "next/link";
 
 export default function HomeCourse() {
   return (
-    <section className="py-16 lg:py-24 bg-white">
+    <section className="pb-16 lg:pb-24">
       <div className="container mx-auto px-6">
         {/* Header */}
-        <div className="flex justify-between items-center mb-12">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl text-gray-900 font-playfairDisplay font-semibold">
+        <div className="flex justify-between items-center mb-6 lg:mb-12">
+          <h2 className="text-center lg:text-left text-3xl md:text-4xl lg:text-5xl text-gray-900 font-playfairDisplay font-semibold">
             Start Learning Something Today
           </h2>
-          <PrimaryButton label="View All Course" />
-        </div>
-
-        {/* Mobile Button */}
-        <div className="mb-8 md:hidden">
-          <PrimaryButton label="View All Course" />
+          <div className="hidden md:block">
+            <PrimaryButton label="View All Course" />
+          </div>
         </div>
 
         {/* Course Cards */}
@@ -27,6 +24,11 @@ export default function HomeCourse() {
               <CourseCard course={course} />
             </Link>
           ))}
+        </div>
+
+        {/* Mobile Button */}
+        <div className="mt-8 md:hidden">
+          <PrimaryButton label="View All Course" className="w-full" />
         </div>
       </div>
     </section>

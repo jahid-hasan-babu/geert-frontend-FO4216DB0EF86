@@ -32,20 +32,20 @@ export default function LearningPageList() {
   );
 
   return (
-    <div className="container mx-auto px-6 pb-[80px]">
+    <div className="container mx-auto px-6 lg:pb-[80px]">
       {/* Header */}
-      <div className="text-center mb-12 max-w-4xl mx-auto">
-        <h1 className="text-[64px] font-bold text-gray-900 mb-6 font-playfairDisplay">
+      <div className="text-center mb-3 lg:mb-12 max-w-4xl mx-auto">
+        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 font-playfairDisplay">
           My Learning
         </h1>
-        <p className="text-lg text-gray-600">
+        <p className="text-sm lg:text-lg text-gray-600">
           Access all your courses, track progress, and unlock new skills in one
           place.
         </p>
       </div>
 
       {/* Filter */}
-      <div className="flex flex-col lg:flex-row justify-center items-center my-[40px] gap-6">
+      <div className="flex flex-col lg:flex-row justify-center items-center my-[20px] lg:my-[40px] gap-6">
         <CourseFilter
           filters={filters}
           activeFilter={activeFilter}
@@ -60,8 +60,8 @@ export default function LearningPageList() {
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mb-12">
         {currentCourses.map((course) => (
           <>
-            <Link href="/courses/a">
-              <LearningCard key={course.id} course={course} />
+            <Link href={`/courses/${course.slug}`} key={course.id}>
+              <LearningCard course={course} />
             </Link>
           </>
         ))}

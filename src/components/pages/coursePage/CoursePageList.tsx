@@ -32,9 +32,9 @@ export default function CoursesPageList() {
   );
 
   return (
-    <div className="container mx-auto px-6 pb-[80px]">
-      <div className="text-center mb-12 max-w-4xl mx-auto">
-        <h1 className="text-[64px] font-semibold text-gray-900 mb-6 font-playfairDisplay">
+    <div className="container mx-auto px-3 lg:px-6 py-5 lg:py-[80px]">
+      <div className="text-center mb-12 lg:max-w-1/2 mx-auto">
+        <h1 className="text-2xl md:text-5xl lg:text-[64px] font-semibold text-gray-900 mb-6 font-playfairDisplay">
           Start Learning Something Today
         </h1>
         <p className="text-lg text-gray-600">

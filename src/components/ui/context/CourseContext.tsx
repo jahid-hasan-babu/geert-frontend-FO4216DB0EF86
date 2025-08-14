@@ -4,27 +4,21 @@ import CourseCertification from "@/components/certification/CourseCertification"
 import { ChevronDown, CheckCircle, Play, Circle } from "lucide-react";
 import React, { useState } from "react";
 
-export type LessonsItem =
-  | {
-      id: string;
-      title: string;
-      type: "video";
-      duration: string;
-      completed?: boolean;
-    }
-  | {
-      id: string;
-      title: string;
-      type: "quiz";
-      description: string;
-      completed?: boolean;
-    };
+// id: string; title: string; type: string; duration: string; completed: boolean; description?: undefined; } | { id: string; title: string; type: string; description: string; completed: boolean; duration?: undefined; 
+export type LessonsItem = {
+  id: string;
+  title: string;
+  type?: string;
+  duration?: string;
+  completed?: boolean;
+};
+
 
 export interface Lesson {
   id: string;
   title: string;
-  items: LessonsItem[];
   isOpen?: boolean;
+  items: LessonsItem[];
 }
 
 interface CourseContextProps {
@@ -125,7 +119,7 @@ const CourseContext: React.FC<CourseContextProps> = ({ lessonsList }) => {
                       <p className="text-sm text-gray-600">
                         {item.type === "video"
                           ? `Video: ${item.duration}`
-                          : item.description}
+                          : item.duration}
                       </p>
                     </div>
 
