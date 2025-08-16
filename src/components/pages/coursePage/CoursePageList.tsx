@@ -3,7 +3,7 @@
 import { useState } from "react";
 import CourseCard from "@/components/ui/card/CourseCard";
 import CourseFilter from "@/components/ui/filter/CourseFilter";
-import CoursePagination from "@/components/ui/pagination/CoursePagination";
+import Pagination from "@/components/ui/pagination/Pagination";
 import CourseSearch from "@/components/ui/search/CourseSearch";
 import { courseCategoryData, courseData } from "@/utils/dummyData";
 import Link from "next/link";
@@ -69,7 +69,7 @@ export default function CoursesPageList() {
       </div>
 
       {totalPages > 1 && (
-        <CoursePagination
+        <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
           onChange={setCurrentPage}

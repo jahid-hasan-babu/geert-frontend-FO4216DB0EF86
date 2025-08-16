@@ -1,11 +1,11 @@
 "use client";
-import NavBar from "@/components/shared/NavBar/navComponent/NavBar";
+// import NavBar from "@/components/shared/NavBar/navComponent/NavBar";
 import Link from "next/link";
 
 const NotFoundPage = () => {
   return (
     <>
-      <NavBar />
+      {/* <NavBar /> */}
       <div className="relative flex items-center justify-center px-6 mt-20 lg:mt-32 min-h-[60vh]">
         {/* Background 404 */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">

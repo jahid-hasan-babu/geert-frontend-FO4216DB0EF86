@@ -1,12 +1,12 @@
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
-interface CoursePaginationProps {
+interface PaginationProps {
   currentPage: number
   totalPages: number
   onChange: (page: number) => void
 }
 
-export default function CoursePagination({ currentPage, totalPages, onChange }: CoursePaginationProps) {
+export default function Pagination({ currentPage, totalPages, onChange }: PaginationProps) {
   const generatePaginationNumbers = () => {
     const pages: (number | "...")[] = []
     const maxVisiblePages = 9

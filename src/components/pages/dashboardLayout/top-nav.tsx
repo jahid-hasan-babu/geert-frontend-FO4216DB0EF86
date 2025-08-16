@@ -1,24 +1,14 @@
 import { DropdownMenu, DropdownMenuTrigger } from "./dropdown-menu";
 import Image from "next/image";
-import { ChevronRight } from "lucide-react";
-import Link from "next/link";
+// import Link from "next/link";
 import NotificationDetails from "./NotificationDetails";
 
-interface BreadcrumbItem {
-  label: string;
-  href?: string;
-}
 
 export default function TopNav() {
-  const breadcrumbs: BreadcrumbItem[] = [
-    { label: "ProjectTitle", href: "#" },
-    { label: "dashboard", href: "#" },
-  ];
-
   return (
-    <nav className="px-3 sm:px-6 flex items-center justify-between bg-white   h-full">
-      <div className="font-medium text-sm hidden lg:flex items-center space-x-1 truncate max-w-[300px]">
-        {breadcrumbs.map((item, index) => (
+    <nav className="px-3 sm:px-6 flex items-center justify-between bg-white h-full">
+      <div className="font-medium text-2xl hidden lg:flex truncate max-w-[300px]">
+        {/* {breadcrumbs.map((item, index) => (
           <div key={item.label} className="flex items-center">
             {index > 0 && (
               <ChevronRight className="h-4 w-4 text-gray-500 dark:text-gray-500 mx-1" />
@@ -36,7 +26,8 @@ export default function TopNav() {
               </span>
             )}
           </div>
-        ))}
+        ))} */}
+        Overview
       </div>
 
       <div className="flex items-center gap-2 ml-auto lg:ml-0">
