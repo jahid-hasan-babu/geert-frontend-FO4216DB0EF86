@@ -18,6 +18,7 @@ interface CourseDetailsProps {
     instructor: string;
     rating: number;
     lessonsList: Lesson[];
+    isMicro?: boolean;
   };
 }
 
@@ -63,12 +64,22 @@ export default function CourseDetailsPage({ course }: CourseDetailsProps) {
                     {course.rating} ({filteredReviews.length})
                   </span>
                 </div>
-                <h1 className="text-3xl md:text-4xl lg:text-[24px] font-bold text-gray-900 mb-[24px] font-playfairDisplay">
-                  {course.title}
-                </h1>
+                <div className="flex space-x-4">
+                  <div className="text-3xl md:text-4xl lg:text-[24px] font-bold text-gray-900 mb-[24px] font-playfairDisplay">
+                    {course.title}
+                  </div>
+                  <div>
+                    <div
+                      className={
+                        course.isMicro ? "bg-[#3399CC] text-white py-1 px-2 rounded-full text-[10px]" : ""
+                      }
+                    >
+                      {course.isMicro ? "Microlearning" : ""}
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="flex flex-col sm:flex-row gap-6 sm:gap-12">
-              </div>
+              <div className="flex flex-col sm:flex-row gap-6 sm:gap-12"></div>
             </div>
             <CourseReviewAbout
               description={course.description}

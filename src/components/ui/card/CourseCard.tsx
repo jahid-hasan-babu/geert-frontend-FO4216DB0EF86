@@ -4,7 +4,7 @@ import course_image from "@/assets/images/course_image.png";
 import { reviewData } from "@/utils/dummyData";
 
 interface Course {
-  id: number;
+  id: string;
   title: string;
   lessons: number;
   duration: string;

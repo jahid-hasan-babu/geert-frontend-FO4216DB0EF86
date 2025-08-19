@@ -1,6 +1,6 @@
 export const courseData = [
   {
-    id: 1,
+    id: "1",
     title: "Mastering Graphic Design with Canva",
     slug: "mastering-graphic-design-canva-1",
     lessonsList: [
@@ -179,13 +179,13 @@ export const courseData = [
     category: "Design",
     isBestseller: true,
     type: "video",
+    isMicro: true,
     completed: 15,
     description:
       "Learn how to create stunning designs, social media graphics, and marketing materials using Canva’s powerful tools.",
-    instructor: "Emma Roberts",
   },
   {
-    id: 2,
+    id: "2",
     title: "JavaScript Essentials",
     slug: "javascript-essentials",
     lessonsList: [
@@ -234,8 +234,7 @@ export const courseData = [
             id: "2-2",
             title: "Primitive Data Types",
             type: "quiz",
-            duration:
-              "4-question quiz on variable types and memory concepts.",
+            duration: "4-question quiz on variable types and memory concepts.",
             completed: false,
           },
         ],
@@ -312,8 +311,7 @@ export const courseData = [
             id: "5-3",
             title: "DOM Quiz",
             type: "quiz",
-            duration:
-              "5 questions to check your DOM manipulation knowledge.",
+            duration: "5 questions to check your DOM manipulation knowledge.",
             completed: false,
           },
         ],
@@ -367,13 +365,13 @@ export const courseData = [
     category: "Development",
     isBestseller: false,
     type: "video",
+    isMicro: true,
     completed: 16,
     description:
       "Master the fundamentals of JavaScript, from variables and functions to DOM manipulation and modern ES6 features.",
-    instructor: "James Anderson",
   },
   {
-    id: 3,
+    id: "3",
     title: "React.js for Beginners",
     slug: "reactjs-for-beginners",
     lessonsList: [
@@ -530,14 +528,14 @@ export const courseData = [
     rating: 4.7,
     category: "Development",
     isBestseller: true,
-    type: "video",
+    type: "docs",
+    isMicro: false,
     completed: 20,
     description:
       "Learn the fundamentals of React.js and build interactive user interfaces from scratch.",
-    instructor: "Sophia Carter",
   },
   {
-    id: 4,
+    id: "4",
     title: "UI/UX Design Fundamentals",
     slug: "ui-ux-design-fundamentals",
     lessonsList: [
@@ -667,13 +665,13 @@ export const courseData = [
     category: "Design",
     isBestseller: false,
     type: "video",
+    isMicro: false,
     completed: 10,
     description:
       "A beginner-friendly guide to designing beautiful, user-centered interfaces.",
-    instructor: "Michael Green",
   },
   {
-    id: 5,
+    id: "5",
     title: "Python Programming for Beginners",
     slug: "python-programming-beginners",
     lessonsList: [
@@ -788,14 +786,14 @@ export const courseData = [
     rating: 4.9,
     category: "Programming",
     isBestseller: true,
-    type: "video",
+    type: "docs",
+    isMicro: false,
     completed: 9,
     description:
       "Learn Python programming from scratch and start your coding journey.",
-    instructor: "Olivia Brown",
   },
   {
-    id: 6,
+    id: "6",
     title: "Digital Marketing Basics",
     slug: "digital-marketing-basics",
     lessonsList: [
@@ -890,13 +888,13 @@ export const courseData = [
     category: "Marketing",
     isBestseller: false,
     type: "video",
+    isMicro: false,
     completed: 12,
     description:
       "A beginner’s guide to promoting products and services in the digital space.",
-    instructor: "Daniel Wilson",
   },
   {
-    id: 7,
+    id: "7",
     title: "Photography Masterclass",
     slug: "photography-masterclass",
     lessonsList: [
@@ -990,119 +988,245 @@ export const courseData = [
     rating: 4.8,
     category: "Photography",
     isBestseller: true,
-    type: "video",
+    type: "docs",
+    isMicro: false,
     completed: 11,
     description:
       "A complete photography course to help you capture stunning images.",
-    instructor: "Lucas White",
   },
 ];
 
-export const students = [
+export const studentsData = [
   {
-    id: 1,
+    id: "1",
+    assignedCoursesId: "3",
     name: "Olivia Martinez",
     email: "olivia.martinez@example.com",
     phone: "+1 202 555 0147",
     status: "Active",
   },
   {
-    id: 2,
+    id: "2",
+    assignedCoursesId: "1",
     name: "Liam Johnson",
     email: "liam.johnson@example.com",
     phone: "+1 202 555 0199",
     status: "Block",
   },
   {
-    id: 3,
+    id: "3",
+    assignedCoursesId: "1",
     name: "Sophia Lee",
     email: "sophia.lee@example.com",
     phone: "+1 303 555 0174",
     status: "Active",
   },
   {
-    id: 4,
+    id: "4",
+    assignedCoursesId: "2",
     name: "Ethan Williams",
     email: "ethan.williams@example.com",
     phone: "+1 404 555 0188",
     status: "Active",
   },
   {
-    id: 5,
+    id: "5",
+    assignedCoursesId: "3",
     name: "Isabella Davis",
     email: "isabella.davis@example.com",
     phone: "+1 505 555 0165",
     status: "Block",
   },
   {
-    id: 6,
+    id: "6",
+    assignedCoursesId: "4",
     name: "Noah Brown",
     email: "noah.brown@example.com",
     phone: "+1 606 555 0191",
     status: "Active",
   },
   {
-    id: 7,
+    id: "7",
+    assignedCoursesId: "7",
     name: "Mia Wilson",
     email: "mia.wilson@example.com",
     phone: "+1 707 555 0133",
     status: "Active",
   },
   {
-    id: 8,
+    id: "8",
+    assignedCoursesId: "7",
     name: "James Miller",
     email: "james.miller@example.com",
     phone: "+1 808 555 0120",
     status: "Block",
   },
   {
-    id: 9,
+    id: "9",
+    assignedCoursesId: "5",
     name: "Ava Thompson",
     email: "ava.thompson@example.com",
     phone: "+1 909 555 0177",
     status: "Active",
   },
   {
-    id: 10,
+    id: "10",
+    assignedCoursesId: "6",
     name: "Lucas Anderson",
     email: "lucas.anderson@example.com",
     phone: "+1 212 555 0142",
     status: "Active",
   },
   {
-    id: 11,
+    id: "11",
+    assignedCoursesId: "4",
     name: "Charlotte Garcia",
     email: "charlotte.garcia@example.com",
     phone: "+1 213 555 0186",
     status: "Block",
   },
   {
-    id: 12,
+    id: "12",
+    assignedCoursesId: "2",
     name: "Benjamin Rodriguez",
     email: "benjamin.rodriguez@example.com",
     phone: "+1 214 555 0179",
     status: "Active",
   },
   {
-    id: 13,
+    id: "13",
+    assignedCoursesId: "2",
     name: "Amelia Martinez",
     email: "amelia.martinez@example.com",
     phone: "+1 215 555 0131",
     status: "Active",
   },
   {
-    id: 14,
+    id: "14",
+    assignedCoursesId: "1",
     name: "Henry Lopez",
     email: "henry.lopez@example.com",
     phone: "+1 216 555 0155",
     status: "Block",
   },
   {
-    id: 15,
+    id: "15",
+    assignedCoursesId: "1",
     name: "Ella Gonzalez",
     email: "ella.gonzalez@example.com",
     phone: "+1 217 555 0193",
     status: "Active",
+  },
+];
+
+export const instructorsData = [
+  {
+    id: "1",
+    assignedCoursesId: ["1", "3"],
+    name: "James Anderson",
+    email: "james.anderson@example.com",
+    phone: "+1 202 555 0147",
+    expertise: "Web Development",
+    status: "Active",
+  },
+  {
+    id: "2",
+    assignedCoursesId: ["2", "5"],
+    name: "Sophia Martinez",
+    email: "sophia.martinez@example.com",
+    phone: "+44 7700 900123",
+    expertise: "Data Science",
+    status: "Active",
+  },
+  {
+    id: "3",
+    assignedCoursesId: ["6"],
+    name: "David Chen",
+    email: "david.chen@example.com",
+    phone: "+61 412 345 678",
+    expertise: "Machine Learning",
+    status: "Inactive",
+  },
+  {
+    id: "4",
+    assignedCoursesId: ["4", "7"],
+    name: "Olivia Johnson",
+    email: "olivia.johnson@example.com",
+    phone: "+1 303 555 0199",
+    expertise: "UI/UX Design",
+    status: "Active",
+  },
+  {
+    id: "5",
+    assignedCoursesId: ["3"],
+    name: "Ethan Brown",
+    email: "ethan.brown@example.com",
+    phone: "+1 646 555 0111",
+    expertise: "Cybersecurity",
+    status: "Active",
+  },
+  {
+    id: "6",
+    assignedCoursesId: ["5"],
+    name: "Mia Taylor",
+    email: "mia.taylor@example.com",
+    phone: "+49 151 23456789",
+    expertise: "Cloud Computing",
+    status: "Inactive",
+  },
+  {
+    id: "7",
+    assignedCoursesId: ["2", "6"],
+    name: "Lucas Wilson",
+    email: "lucas.wilson@example.com",
+    phone: "+33 6 12 34 56 78",
+    expertise: "AI & Robotics",
+    status: "Active",
+  },
+  {
+    id: "8",
+    assignedCoursesId: ["1"],
+    name: "Amelia Davis",
+    email: "amelia.davis@example.com",
+    phone: "+1 415 555 0177",
+    expertise: "Mobile Development",
+    status: "Active",
+  },
+  {
+    id: "9",
+    assignedCoursesId: ["4"],
+    name: "Daniel Garcia",
+    email: "daniel.garcia@example.com",
+    phone: "+34 612 345 678",
+    expertise: "DevOps",
+    status: "Active",
+  },
+  {
+    id: "10",
+    assignedCoursesId: ["7"],
+    name: "Emma Wilson",
+    email: "emma.wilson@example.com",
+    phone: "+1 718 555 0133",
+    expertise: "Blockchain",
+    status: "Inactive",
+  },
+];
+
+export const notificationsData = [
+  {
+    id: "1",
+    message: "New course React Basics has been added.",
+    time: new Date("2025-08-17T10:00:00Z"),
+  },
+  {
+    id: "2",
+    message: "Your progress in Next.js Advanced is 70%.",
+    time: new Date("2025-08-16T11:30:00Z"),
+  },
+  {
+    id: "3",
+    message: "Instructor replied to your review.",
+    time: new Date("2025-08-14T15:45:00Z"),
   },
 ];
 
@@ -1117,19 +1241,19 @@ export const courseCategoryData = [
 
 export const testimonialsData = [
   {
-    id: 1,
+    id: "1",
     text: "I had no background in this subject, but the instructor explained everything step by step. I didn't feel overwhelmed at all.",
     name: "Rafiq Ajgar",
     role: "Content Strategist",
   },
   {
-    id: 2,
+    id: "2",
     text: "The hands-on projects and real-world examples made learning fun and effective. I now feel confident applying for higher roles.",
     name: "Sarah Roots",
     role: "User Experience Designer",
   },
   {
-    id: 3,
+    id: "3",
     text: "Course quality was top-notch, and getting lifetime access means I can always come back and review. Highly recommended!",
     name: "Nabila Harsh",
     role: "Marketing Specialist",
@@ -1154,7 +1278,7 @@ export const statisticsData = [
 export const reviewData = [
   {
     id: "1",
-    courseId: 1,
+    courseId: "1",
     text: "The lessons are clear and easy to follow. I had zero design experience before, and now I feel confident using Figma and building clean UIs.",
     rating: 4.9,
     date: "May 12, 2025",
@@ -1162,7 +1286,7 @@ export const reviewData = [
   },
   {
     id: "2",
-    courseId: 1,
+    courseId: "1",
     text: "Amazing course! I love the practical exercises.",
     rating: 5.0,
     date: "May 14, 2025",
@@ -1170,7 +1294,7 @@ export const reviewData = [
   },
   {
     id: "3",
-    courseId: 1,
+    courseId: "1",
     text: "Well-structured and easy to follow lessons.",
     rating: 4.8,
     date: "May 16, 2025",
@@ -1178,7 +1302,7 @@ export const reviewData = [
   },
   {
     id: "4",
-    courseId: 2,
+    courseId: "2",
     text: "Great pacing and examples. I finally understand JavaScript better!",
     rating: 4.7,
     date: "May 15, 2025",
@@ -1186,7 +1310,7 @@ export const reviewData = [
   },
   {
     id: "5",
-    courseId: 2,
+    courseId: "2",
     text: "JavaScript concepts were explained clearly.",
     rating: 4.6,
     date: "May 17, 2025",
@@ -1194,7 +1318,7 @@ export const reviewData = [
   },
   {
     id: "6",
-    courseId: 2,
+    courseId: "2",
     text: "Good intro course, helped me get started fast.",
     rating: 4.5,
     date: "May 19, 2025",
@@ -1202,7 +1326,7 @@ export const reviewData = [
   },
   {
     id: "7",
-    courseId: 2,
+    courseId: "2",
     text: "Loved the exercises and real-world examples.",
     rating: 4.8,
     date: "May 21, 2025",
@@ -1210,7 +1334,7 @@ export const reviewData = [
   },
   {
     id: "8",
-    courseId: 3,
+    courseId: "3",
     text: "Digital marketing basics were covered really well.",
     rating: 4.8,
     date: "May 20, 2025",
@@ -1218,7 +1342,7 @@ export const reviewData = [
   },
   {
     id: "9",
-    courseId: 3,
+    courseId: "3",
     text: "I learned a lot about SEO and email campaigns.",
     rating: 4.7,
     date: "May 22, 2025",
@@ -1226,7 +1350,7 @@ export const reviewData = [
   },
   {
     id: "10",
-    courseId: 3,
+    courseId: "3",
     text: "Perfect for beginners with actionable advice.",
     rating: 4.6,
     date: "May 23, 2025",
@@ -1234,7 +1358,7 @@ export const reviewData = [
   },
   {
     id: "11",
-    courseId: 4,
+    courseId: "4",
     text: "Excellent Figma techniques taught step-by-step.",
     rating: 4.8,
     date: "May 26, 2025",
@@ -1242,7 +1366,7 @@ export const reviewData = [
   },
   {
     id: "12",
-    courseId: 4,
+    courseId: "4",
     text: "Very practical and useful for UI design.",
     rating: 4.9,
     date: "May 28, 2025",
@@ -1250,7 +1374,7 @@ export const reviewData = [
   },
   {
     id: "13",
-    courseId: 4,
+    courseId: "4",
     text: "I feel confident prototyping after this course.",
     rating: 5.0,
     date: "May 29, 2025",
@@ -1258,7 +1382,7 @@ export const reviewData = [
   },
   {
     id: "14",
-    courseId: 5,
+    courseId: "5",
     text: "Python for data analysis was clear and detailed.",
     rating: 4.7,
     date: "May 27, 2025",
@@ -1266,7 +1390,7 @@ export const reviewData = [
   },
   {
     id: "15",
-    courseId: 5,
+    courseId: "5",
     text: "Great examples on data visualization.",
     rating: 4.8,
     date: "May 30, 2025",
@@ -1274,7 +1398,7 @@ export const reviewData = [
   },
   {
     id: "16",
-    courseId: 5,
+    courseId: "5",
     text: "Helped me understand Pandas and NumPy easily.",
     rating: 4.9,
     date: "June 1, 2025",
@@ -1282,7 +1406,7 @@ export const reviewData = [
   },
   {
     id: "17",
-    courseId: 5,
+    courseId: "5",
     text: "Loved the practical projects, very helpful.",
     rating: 4.7,
     date: "June 3, 2025",
@@ -1290,7 +1414,7 @@ export const reviewData = [
   },
   {
     id: "18",
-    courseId: 6,
+    courseId: "6",
     text: "The ML basics course made complex topics simple.",
     rating: 4.8,
     date: "May 28, 2025",
@@ -1298,7 +1422,7 @@ export const reviewData = [
   },
   {
     id: "19",
-    courseId: 6,
+    courseId: "6",
     text: "Great intro to supervised and unsupervised learning.",
     rating: 4.7,
     date: "May 30, 2025",
@@ -1306,7 +1430,7 @@ export const reviewData = [
   },
   {
     id: "20",
-    courseId: 6,
+    courseId: "6",
     text: "The concepts are clear and well-explained.",
     rating: 4.9,
     date: "June 2, 2025",
@@ -1314,7 +1438,7 @@ export const reviewData = [
   },
   {
     id: "21",
-    courseId: 7,
+    courseId: "7",
     text: "Advanced CSS concepts really boosted my skills.",
     rating: 4.7,
     date: "June 1, 2025",
@@ -1322,7 +1446,7 @@ export const reviewData = [
   },
   {
     id: "22",
-    courseId: 7,
+    courseId: "7",
     text: "Loved the animations and Flexbox examples.",
     rating: 4.8,
     date: "June 3, 2025",
@@ -1330,7 +1454,7 @@ export const reviewData = [
   },
   {
     id: "23",
-    courseId: 7,
+    courseId: "7",
     text: "Very practical course with useful tips.",
     rating: 4.6,
     date: "June 5, 2025",
@@ -1338,7 +1462,7 @@ export const reviewData = [
   },
   {
     id: "24",
-    courseId: 8,
+    courseId: "8",
     text: "SEO strategies here helped my site traffic grow.",
     rating: 4.5,
     date: "June 4, 2025",
@@ -1346,7 +1470,7 @@ export const reviewData = [
   },
   {
     id: "25",
-    courseId: 8,
+    courseId: "8",
     text: "Good insights on keyword optimization.",
     rating: 4.6,
     date: "June 6, 2025",
@@ -1354,7 +1478,7 @@ export const reviewData = [
   },
   {
     id: "26",
-    courseId: 8,
+    courseId: "8",
     text: "The backlink building section was very useful.",
     rating: 4.7,
     date: "June 7, 2025",
@@ -1362,7 +1486,7 @@ export const reviewData = [
   },
   {
     id: "27",
-    courseId: 9,
+    courseId: "9",
     text: "Tableau dashboards are so much easier after this course.",
     rating: 4.6,
     date: "June 5, 2025",
@@ -1370,7 +1494,7 @@ export const reviewData = [
   },
   {
     id: "28",
-    courseId: 9,
+    courseId: "9",
     text: "Loved the hands-on data visualization projects.",
     rating: 4.8,
     date: "June 7, 2025",
@@ -1378,7 +1502,7 @@ export const reviewData = [
   },
   {
     id: "29",
-    courseId: 9,
+    courseId: "9",
     text: "Great course for beginners to Tableau.",
     rating: 4.7,
     date: "June 8, 2025",
@@ -1386,7 +1510,7 @@ export const reviewData = [
   },
   {
     id: "30",
-    courseId: 10,
+    courseId: "10",
     text: "Neural networks explained simply and clearly.",
     rating: 4.9,
     date: "June 6, 2025",
@@ -1394,7 +1518,7 @@ export const reviewData = [
   },
   {
     id: "31",
-    courseId: 10,
+    courseId: "10",
     text: "Deep learning fundamentals are well covered.",
     rating: 5.0,
     date: "June 8, 2025",
@@ -1402,7 +1526,7 @@ export const reviewData = [
   },
   {
     id: "32",
-    courseId: 10,
+    courseId: "10",
     text: "This course gave me a solid foundation in neural networks.",
     rating: 4.8,
     date: "June 10, 2025",
@@ -1410,7 +1534,7 @@ export const reviewData = [
   },
   {
     id: "33",
-    courseId: 10,
+    courseId: "10",
     text: "Highly recommend for anyone starting in AI.",
     rating: 4.9,
     date: "June 12, 2025",
@@ -1418,7 +1542,7 @@ export const reviewData = [
   },
   {
     id: "34",
-    courseId: 11,
+    courseId: "11",
     text: "Typography tips really improved my web designs.",
     rating: 4.4,
     date: "June 9, 2025",
@@ -1426,7 +1550,7 @@ export const reviewData = [
   },
   {
     id: "35",
-    courseId: 11,
+    courseId: "11",
     text: "Clear explanations and practical advice.",
     rating: 4.5,
     date: "June 10, 2025",
@@ -1434,7 +1558,7 @@ export const reviewData = [
   },
   {
     id: "36",
-    courseId: 11,
+    courseId: "11",
     text: "A great course for improving design aesthetics.",
     rating: 4.6,
     date: "June 12, 2025",
@@ -1442,7 +1566,7 @@ export const reviewData = [
   },
   {
     id: "37",
-    courseId: 12,
+    courseId: "12",
     text: "React.js crash course was fast-paced but comprehensive.",
     rating: 4.8,
     date: "June 11, 2025",
@@ -1450,7 +1574,7 @@ export const reviewData = [
   },
   {
     id: "38",
-    courseId: 12,
+    courseId: "12",
     text: "Good practical examples with hooks and components.",
     rating: 4.7,
     date: "June 13, 2025",
@@ -1458,7 +1582,7 @@ export const reviewData = [
   },
   {
     id: "39",
-    courseId: 12,
+    courseId: "12",
     text: "Helped me understand React quickly and clearly.",
     rating: 4.9,
     date: "June 15, 2025",
@@ -1466,7 +1590,7 @@ export const reviewData = [
   },
   {
     id: "40",
-    courseId: 13,
+    courseId: "13",
     text: "Social media strategies were easy to apply.",
     rating: 4.5,
     date: "June 14, 2025",
@@ -1474,7 +1598,7 @@ export const reviewData = [
   },
   {
     id: "41",
-    courseId: 13,
+    courseId: "13",
     text: "Great insights on brand engagement.",
     rating: 4.6,
     date: "June 16, 2025",
@@ -1482,7 +1606,7 @@ export const reviewData = [
   },
   {
     id: "42",
-    courseId: 13,
+    courseId: "13",
     text: "Loved the campaign management tips.",
     rating: 4.7,
     date: "June 18, 2025",

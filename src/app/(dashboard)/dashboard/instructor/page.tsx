@@ -1,9 +1,12 @@
-import React from 'react'
+import React from "react";
+import InstructorPage from "@/components/pages/AdminDashbaordPages/InstructorPage";
 
 const page = () => {
   return (
-    <div>page</div>
-  )
-}
+    <>
+      <InstructorPage />
+    </>
+  );
+};
 
-export default page
+export default page;

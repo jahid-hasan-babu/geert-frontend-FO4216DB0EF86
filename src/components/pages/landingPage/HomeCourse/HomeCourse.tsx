@@ -13,7 +13,9 @@ export default function HomeCourse() {
             Start Learning Something Today
           </h2>
           <div className="hidden md:block">
-            <PrimaryButton label="View All Course" />
+            <Link href="/courses">
+              <PrimaryButton label="View All Course" />
+            </Link>
           </div>
         </div>
 

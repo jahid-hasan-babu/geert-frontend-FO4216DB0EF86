@@ -2,9 +2,9 @@
 
 import CourseCertification from "@/components/certification/CourseCertification";
 import { ChevronDown, CheckCircle, Play, Circle } from "lucide-react";
-import React, { useState } from "react";
+import { useState } from "react";
+import { QuizModal } from "../modals/QuizModal";
 
-// id: string; title: string; type: string; duration: string; completed: boolean; description?: undefined; } | { id: string; title: string; type: string; description: string; completed: boolean; duration?: undefined; 
 export type LessonsItem = {
   id: string;
   title: string;
@@ -12,7 +12,6 @@ export type LessonsItem = {
   duration?: string;
   completed?: boolean;
 };
-
 
 export interface Lesson {
   id: string;
@@ -26,7 +25,6 @@ interface CourseContextProps {
 }
 
 const CourseContext: React.FC<CourseContextProps> = ({ lessonsList }) => {
-  // State for lessons accordion open/close
   const [lessons, setLessons] = useState<Lesson[]>(() =>
     lessonsList.map((lesson, idx) => ({
       ...lesson,
@@ -34,8 +32,10 @@ const CourseContext: React.FC<CourseContextProps> = ({ lessonsList }) => {
     }))
   );
 
-  // State for Certification toggle
   const [isCertOpen, setIsCertOpen] = useState(false);
+
+  // Quiz modal state
+  const [quizModalOpen, setQuizModalOpen] = useState(false);
 
   const toggleLesson = (lessonId: string) => {
     setLessons((prevLessons) =>
@@ -44,12 +44,10 @@ const CourseContext: React.FC<CourseContextProps> = ({ lessonsList }) => {
         isOpen: lesson.id === lessonId ? !lesson.isOpen : false,
       }))
     );
-    // Close certification if any lesson toggled open
     setIsCertOpen(false);
   };
 
   const toggleCertification = () => {
-    // Close all lessons when cert opens
     const willOpen = !isCertOpen;
     if (willOpen) {
       setLessons((prevLessons) =>
@@ -57,6 +55,10 @@ const CourseContext: React.FC<CourseContextProps> = ({ lessonsList }) => {
       );
     }
     setIsCertOpen(willOpen);
+  };
+
+  const openQuiz = () => {
+    setQuizModalOpen(true);
   };
 
   return (
@@ -94,7 +96,6 @@ const CourseContext: React.FC<CourseContextProps> = ({ lessonsList }) => {
                   key={item.id}
                   className="flex items-center p-4 border-b border-gray-100 last:border-b-0 hover:bg-gray-50"
                 >
-                  {/* Left line & status circle */}
                   <div className="flex flex-col items-center mr-4">
                     <div
                       className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
@@ -112,10 +113,11 @@ const CourseContext: React.FC<CourseContextProps> = ({ lessonsList }) => {
                     )}
                   </div>
 
-                  {/* Lesson text */}
                   <div className="flex-1 flex justify-between">
                     <div>
-                      <h4 className="font-medium text-gray-900">{item.title}</h4>
+                      <h4 className="font-medium text-gray-900">
+                        {item.title}
+                      </h4>
                       <p className="text-sm text-gray-600">
                         {item.type === "video"
                           ? `Video: ${item.duration}`
@@ -124,7 +126,10 @@ const CourseContext: React.FC<CourseContextProps> = ({ lessonsList }) => {
                     </div>
 
                     {/* Action button */}
-                    <button className="ml-4 p-2 rounded-full hover:bg-gray-200">
+                    <button
+                      onClick={() => (item.type === "video" ? null : openQuiz())}
+                      className="ml-4 p-2 rounded-full hover:bg-gray-200 cursor-pointer"
+                    >
                       {item.type === "video" ? (
                         <Play className="w-5 h-5 text-gray-600" />
                       ) : item.completed ? (
@@ -141,6 +146,7 @@ const CourseContext: React.FC<CourseContextProps> = ({ lessonsList }) => {
         </div>
       ))}
 
+      {/* Certification */}
       <div
         className="border border-gray-200 rounded-lg overflow-hidden transition-all duration-300"
         key="certification"
@@ -169,6 +175,12 @@ const CourseContext: React.FC<CourseContextProps> = ({ lessonsList }) => {
           <CourseCertification />
         </div>
       </div>
+
+      {/* Quiz Modal */}
+      <QuizModal
+        isOpen={quizModalOpen}
+        onClose={() => setQuizModalOpen(false)}
+      />
     </div>
   );
 };

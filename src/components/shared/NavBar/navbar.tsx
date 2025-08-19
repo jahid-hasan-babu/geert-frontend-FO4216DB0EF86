@@ -5,21 +5,29 @@ import { Dialog } from "@headlessui/react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Bell, ChevronDown, Star } from "lucide-react";
+import { Bell, ChevronDown, Star, X } from "lucide-react";
 import logo from "@/assets/images/logo.png";
 import profile_dp from "@/assets/images/profile_dp.png";
-import { courseData } from "@/utils/dummyData";
+import { courseData, notificationsData } from "@/utils/dummyData";
+import NotificationModal from "@/components/ui/modals/NotificationModal";
+import { ReviewModal } from "@/components/ui/modals/ReviewModal";
+import { CourseProgressModal } from "@/components/ui/modals/CourseProgressModal";
+import { MenuModal } from "@/components/ui/modals/MenuModal";
 
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/features", label: "Features" },
   { href: "/courses", label: "Courses" },
-  { href: "/learning", label: "Learning" },
   { href: "/contact", label: "Contact" },
+  { href: "/help-support", label: "Support" },
 ];
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
+  const [isProgressOpen, setIsProgressOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const pathname = usePathname();
 
   let courseTitle: string | null = null;
@@ -38,29 +46,34 @@ export default function Navbar() {
           href="/"
           className="cursor-pointer flex items-center justify-center"
         >
-          <Image src={logo} alt="Logo" className="" />
+          <Image src={logo} alt="Logo" />
         </Link>
 
+        {/* Course Title or Links */}
         {courseTitle ? (
           <div className="w-full px-4 flex justify-between items-center">
             <div className="text-[24px] font-medium font-playfairDisplay text-[#101010]">
               {courseTitle}
             </div>
-            <div>
-              <div className="flex items-center justify-between py-3 px-4 space-x-[12px]">
-                <div className="flex items-center space-x-2 font-sans">
-                  <Star className="w-5 h-5 text-gray-500" />
-                  <span className="text-gray-700 font-medium leading-[120%]">
-                    Leave Review
-                  </span>
-                </div>
+            <div className="flex items-center space-x-[12px]">
+              <button
+                onClick={() => setIsReviewOpen(true)}
+                className="flex items-center space-x-2 font-sans"
+              >
+                <Star className="w-5 h-5 text-gray-500" />
+                <span className="text-gray-700 font-medium leading-[120%] cursor-pointer">
+                  Leave Review
+                </span>
+              </button>
 
-                <div className="flex items-center space-x-2 font-sans">
-                  <span className="text-gray-700 font-medium leading-[120%]">
-                    Your Progress
-                  </span>
-                  <ChevronDown className="w-6 h-6 text-gray-500" />
-                </div>
+              <div
+                className="flex items-center space-x-2 font-sans cursor-pointer"
+                onClick={() => setIsProgressOpen(true)}
+              >
+                <span className="text-gray-700 font-medium leading-[120%]">
+                  Your Progress
+                </span>
+                <ChevronDown className="w-6 h-6 text-gray-500" />
               </div>
             </div>
           </div>
@@ -83,20 +96,31 @@ export default function Navbar() {
           </ul>
         )}
 
+        {/* Right Section */}
         <div className="hidden md:flex items-center space-x-5">
-          <button className="relative p-2 rounded-full bg-[#EBF5FA] transition">
-            <Bell className="w-6 h-6 text-[#5F5F5F]" />
-            {/* <span className="absolute top-2 right-2 block w-2 h-2 bg-red-500 rounded-full"></span> */}
+          {/* Notification Button */}
+          <button
+            className="relative p-2 rounded-full bg-[#EBF5FA] transition"
+            onClick={() => setIsNotifOpen(true)}
+          >
+            <Bell className="w-6 h-6 text-[#5F5F5F] cursor-pointer" />
+            {notificationsData.length > 0 && (
+              <span className="absolute top-2 right-2 block w-2 h-2 bg-red-500 rounded-full"></span>
+            )}
           </button>
+
+          {/* Profile */}
           <Image
             src={profile_dp}
             alt="Profile"
             width={40}
             height={40}
-            className="rounded-full border border-gray-200"
+            className="rounded-full border border-gray-200 cursor-pointer"
+            onClick={() => setIsMenuOpen((prev) => !prev)}
           />
         </div>
 
+        {/* Mobile Menu Button */}
         <button
           className="md:hidden text-gray-800"
           onClick={() => setIsOpen(true)}
@@ -130,19 +154,7 @@ export default function Navbar() {
           <div className="flex justify-between items-center">
             <Image src={logo} alt="Logo" width={120} height={36} />
             <button onClick={() => setIsOpen(false)} aria-label="Close menu">
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
+              <X className="w-6 h-6" />
             </button>
           </div>
 
@@ -169,21 +181,48 @@ export default function Navbar() {
             </ul>
           )}
 
+          {/* Mobile Profile + Notification */}
           <div className="flex items-center space-x-4 pt-4 border-t">
-            <button className="relative p-2 rounded-full hover:bg-gray-100 transition">
+            <button
+              className="relative p-2 rounded-full hover:bg-gray-100 transition"
+              onClick={() => setIsNotifOpen(true)}
+            >
               <Bell className="w-6 h-6 text-gray-600" />
-              <span className="absolute top-2 right-2 block w-2 h-2 bg-red-500 rounded-full"></span>
+              {notificationsData.length > 0 && (
+                <span className="absolute top-2 right-2 block w-2 h-2 bg-red-500 rounded-full"></span>
+              )}
             </button>
             <Image
               src={profile_dp}
               alt="Profile"
               width={40}
               height={40}
-              className="rounded-full border border-gray-200"
+              className="rounded-full border border-gray-200 cursor-pointer"
             />
           </div>
         </Dialog.Panel>
       </Dialog>
+
+      {/* Notification Modal Component */}
+      <NotificationModal
+        isOpen={isNotifOpen}
+        onClose={() => setIsNotifOpen(false)}
+        notifications={notificationsData}
+      />
+
+      <ReviewModal
+        isOpen={isReviewOpen}
+        onClose={() => setIsReviewOpen(false)}
+      />
+
+      <CourseProgressModal
+        isOpen={isProgressOpen}
+        onClose={() => setIsProgressOpen(false)}
+        current={12}
+        total={18}
+      />
+
+      <MenuModal isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
     </header>
   );
 }

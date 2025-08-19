@@ -13,7 +13,7 @@ export default function RootLayout({
         <header className="h-16 border-b border-gray-200">
           <TopNav />
         </header>
-        <main className="flex-1 overflow-auto p-6 bg-white ">{children}</main>
+        <main className="flex-1 overflow-auto p-6 bg-[#F6FCFF] ">{children}</main>
       </div>
     </div>
   );

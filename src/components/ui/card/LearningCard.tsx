@@ -2,7 +2,7 @@ import Image from "next/image";
 import course_image from "@/assets/images/course_image.png";
 
 interface Course {
-  id: number;
+  id: string;
   title: string;
   lessons: number;
   completed: number;

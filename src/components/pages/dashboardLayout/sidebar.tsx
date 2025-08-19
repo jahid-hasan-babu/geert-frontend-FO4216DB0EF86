@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import {
@@ -25,8 +24,12 @@ export default function Sidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
-  // Function to check if a menu item is active
-  const isActive = (href: string) => pathname === href;
+  const isActive = (href: string) => {
+    if (href === "/dashboard") {
+      return pathname === "/dashboard";
+    }
+    return pathname.startsWith(href);
+  };
 
   function NavItem({
     href = "#",
@@ -34,7 +37,7 @@ export default function Sidebar() {
     children,
   }: {
     href?: string;
-    icon?: React.ComponentType<any>;
+    icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
     children: React.ReactNode;
   }) {
     return (
@@ -74,17 +77,13 @@ export default function Sidebar() {
         <div className="h-full flex flex-col">
           <Link
             href="/dashboard"
-            target="_blank"
-            rel="noopener noreferrer"
             className="h-16 px-6 flex items-center justify-center"
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center gap-3">
               <Image
                 src={logo}
                 alt="Logo"
-                width={150}
-                height={50}
-                className="flex-shrink-0 hidden dark:block"
+                className="flex-shrink-0 w-[150px] "
               />
             </div>
           </Link>
