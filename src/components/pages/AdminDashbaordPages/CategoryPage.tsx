@@ -25,7 +25,7 @@ const CategoryPage = () => {
     try {
       setLoading(true);
       const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/category/all-category`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/category/all-category`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setCategories(res.data.data.data || []);
@@ -49,7 +49,7 @@ const CategoryPage = () => {
     }
     try {
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/category/create-category`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/category/create-category`,
         { name: newCategory },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -76,7 +76,7 @@ const CategoryPage = () => {
     }
     try {
       const res = await axios.patch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/category/update-category/${editCategoryId}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/category/update-category/${editCategoryId}`,
         { name: editCategoryName },
         { headers: { Authorization: `Bearer ${token}` } }
       );

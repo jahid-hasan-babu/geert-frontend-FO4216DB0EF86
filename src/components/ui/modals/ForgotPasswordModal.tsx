@@ -24,7 +24,7 @@ export default function ForgotPasswordModal({ open, onClose }: ForgotPasswordMod
     setLoading(true);
     try {
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/forgot-password`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/auth/forgot-password`,
         { email: fpEmail }
       );
       setUserId(response.data.data.userId);
@@ -43,7 +43,7 @@ export default function ForgotPasswordModal({ open, onClose }: ForgotPasswordMod
     setLoading(true);
     try {
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/verify-reset-password-otp`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/auth/verify-reset-password-otp`,
         { userId, otp: Number(otpCode) }
       );
       setAccessToken(response.data.data.accessToken);
@@ -62,7 +62,7 @@ export default function ForgotPasswordModal({ open, onClose }: ForgotPasswordMod
     setLoading(true);
     try {
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/reset-password`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/auth/reset-password`,
         { newPassword },
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );

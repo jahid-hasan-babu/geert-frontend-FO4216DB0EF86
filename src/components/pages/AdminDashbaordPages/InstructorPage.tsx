@@ -50,7 +50,7 @@ export default function InstructorPage() {
       setLoading(true);
       const token = localStorage.getItem("token");
       const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/users/all-users?filter=INSTRUCTOR`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/users/all-users?filter=INSTRUCTOR`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setInstructors(res.data.data.data);
@@ -107,7 +107,7 @@ export default function InstructorPage() {
       if (data.image) formData.append("profileImage", data.image);
 
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/users/add-instructor`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/users/add-instructor`,
         formData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -129,7 +129,7 @@ export default function InstructorPage() {
     try {
       const token = localStorage.getItem("token");
       await axios.patch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/users/update-status/${instructorId}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/users/update-status/${instructorId}`,
         { status },
         { headers: { Authorization: `Bearer ${token}` } }
       );

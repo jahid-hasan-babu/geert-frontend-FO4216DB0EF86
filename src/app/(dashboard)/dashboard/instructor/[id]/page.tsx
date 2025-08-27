@@ -22,7 +22,7 @@ export default function Page({ params }: PageProps) {
         const token = localStorage.getItem("token");
 
         const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/users/single-instructor/${id}`,
+          `${process.env.NEXT_PUBLIC_BASE_URL}/users/single-instructor/${id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

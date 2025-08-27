@@ -32,7 +32,7 @@ export default function DashboardHome() {
       const token = localStorage.getItem("token");
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
-      const dashboardRes = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/users/dashboard`, config);
+      const dashboardRes = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/users/dashboard`, config);
       setTotals({
         totalCourses: dashboardRes.data.data.totalCourses,
         totalStudents: dashboardRes.data.data.totalStudents,
@@ -49,7 +49,7 @@ export default function DashboardHome() {
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
       const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/users/performance?search=${year}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/users/performance?search=${year}`,
         config
       );
 

@@ -92,7 +92,7 @@ export function PersonalInfoModal({
 
       const token = localStorage.getItem("token");
       const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/users/update`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/users/update`,
         formPayload,
         { headers: { Authorization: `Bearer ${token}` } }
       );

@@ -28,7 +28,7 @@ const Testimonial = () => {
         if (!token) return;
 
         const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/users/get-course-stats`,
+          `${process.env.NEXT_PUBLIC_BASE_URL}/users/get-course-stats`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 

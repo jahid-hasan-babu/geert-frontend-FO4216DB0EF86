@@ -36,7 +36,7 @@ export default function AddStudentModal({ onAddSuccess }: AddStudentModalProps) 
       setLoading(true);
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/users/add-student`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/users/add-student`,
         { email, password },
         { headers: { Authorization: `Bearer ${token}` } }
       );

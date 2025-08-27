@@ -42,7 +42,7 @@ export default function StudentsPage() {
       setLoading(true);
       const token = localStorage.getItem("token");
       const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/users/all-users?filter=STUDENT`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/users/all-users?filter=STUDENT`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setStudents(res.data.data.data);
@@ -81,7 +81,7 @@ export default function StudentsPage() {
     try {
       const token = localStorage.getItem("token");
       await axios.patch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/users/update-status/${student.id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/users/update-status/${student.id}`,
         { status },
         { headers: { Authorization: `Bearer ${token}` } }
       );

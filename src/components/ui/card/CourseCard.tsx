@@ -44,7 +44,7 @@ export default function CourseCard({ course }: { course: Course }) {
     try {
       setLoading(true);
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/favorites`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/favorites`,
         { courseId: course.id },
         {
           headers: {

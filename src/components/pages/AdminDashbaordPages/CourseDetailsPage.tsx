@@ -69,7 +69,7 @@ const CourseDetailsPage = () => {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/courses/single-course/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/courses/single-course/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setCourse(res.data.data);
