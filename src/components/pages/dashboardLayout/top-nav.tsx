@@ -1,42 +1,47 @@
+"use client";
+
 import { DropdownMenu, DropdownMenuTrigger } from "./dropdown-menu";
 import Image from "next/image";
-import { ChevronRight } from "lucide-react";
-import Link from "next/link";
 import NotificationDetails from "./NotificationDetails";
-
-interface BreadcrumbItem {
-  label: string;
-  href?: string;
-}
+import { usePathname } from "next/navigation";
 
 export default function TopNav() {
-  const breadcrumbs: BreadcrumbItem[] = [
-    { label: "ProjectTitle", href: "#" },
-    { label: "dashboard", href: "#" },
-  ];
+  const pathname = usePathname();
+
+  // Map your base routes to titles
+  const routeTitles: Record<string, string> = {
+    "/dashboard": "Dashboard",
+    "/dashboard/course": "Courses",
+    "/dashboard/micro-learning": "MicroLearning",
+    "/dashboard/students": "Students",
+    "/dashboard/instructor": "Instructors",
+    "/dashboard/notifications": "Notifications",
+    "/settings": "Settings",
+  };
+
+  const getPageTitle = () => {
+    // Handle "startsWith" cases for parent routes
+    if (pathname.startsWith("/dashboard/instructor")) return "Instructors";
+    if (pathname.startsWith("/dashboard/course")) return "Courses";
+    if (pathname.startsWith("/dashboard/students")) return "Students";
+    if (pathname.startsWith("/dashboard/micro-learning")) return "MicroLearning";
+
+    // Exact matches
+    if (routeTitles[pathname]) return routeTitles[pathname];
+
+    // Fallback: format last segment
+    const parts = pathname.split("/").filter(Boolean);
+    return parts.length > 0
+      ? parts[parts.length - 1]
+          .replace(/-/g, " ")
+          .replace(/\b\w/g, (c) => c.toUpperCase())
+      : "Overview";
+  };
 
   return (
-    <nav className="px-3 sm:px-6 flex items-center justify-between bg-white   h-full">
-      <div className="font-medium text-sm hidden lg:flex items-center space-x-1 truncate max-w-[300px]">
-        {breadcrumbs.map((item, index) => (
-          <div key={item.label} className="flex items-center">
-            {index > 0 && (
-              <ChevronRight className="h-4 w-4 text-gray-500 dark:text-gray-500 mx-1" />
-            )}
-            {item.href ? (
-              <Link
-                href={item.href}
-                className="text-gray-700 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-400 transition-colors"
-              >
-                {item.label}
-              </Link>
-            ) : (
-              <span className="text-gray-900 dark:text-gray-100">
-                {item.label}
-              </span>
-            )}
-          </div>
-        ))}
+    <nav className="px-3 sm:px-6 flex items-center justify-between bg-white h-full">
+      <div className="font-medium text-2xl hidden lg:flex truncate max-w-[300px]">
+        {getPageTitle()}
       </div>
 
       <div className="flex items-center gap-2 ml-auto lg:ml-0">

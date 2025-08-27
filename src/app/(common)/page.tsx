@@ -8,9 +8,11 @@ const HomePage = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
-    if (!isLoggedIn || isLoggedIn !== "true") {
-      router.push("/auth/login");
+    const userString = localStorage.getItem("user");
+    const user = userString ? JSON.parse(userString) : null;
+    console.log("User >>> ", user)
+    if (user?.role === "STUDENT") {
+      router.push("/");
     }
   }, [router]);
 

@@ -15,7 +15,7 @@ export default function Hero() {
         <div className="grid lg:grid-cols-5 gap-8 items-center">
           {/* Left Content */}
           <div className="space-y-8 lg:col-span-3">
-            <div className="space-y-6">
+            <div className="space-y-6 text-center lg:text-left">
               <h1 className="text-2xl md:text-5xl lg:text-[64px] font-bold text-gray-900 font-playfairDisplay">
                 Unlock Your Potential with Expert Courses
               </h1>

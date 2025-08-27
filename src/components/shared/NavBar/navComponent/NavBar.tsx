@@ -4,7 +4,7 @@ import Navbar from "../navbar";
 
 const NavBar = () => {
   return (
-    <div className="mb-4">
+    <div className="">
       <Navbar />
     </div>
   );

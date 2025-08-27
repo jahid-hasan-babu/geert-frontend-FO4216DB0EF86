@@ -8,7 +8,7 @@ const CoursePage = () => {
     <>
       <LearningPageList />
       <Partners />
-      <div className="mt-[80px]">
+      <div className="mt-10 lg:mt-[80px]">
         <Promotion />
       </div>
     </>

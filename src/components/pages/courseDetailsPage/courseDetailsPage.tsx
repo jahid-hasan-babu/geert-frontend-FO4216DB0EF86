@@ -1,28 +1,56 @@
 "use client";
 
-import Image from "next/image";
-import courseImage from "@/assets/images/course_details_image.png";
+import course_details_image from "@/assets/images/course_details_image.png";
 import instructorImage from "@/assets/images/about_dp.png";
 import CourseReviewAbout from "@/components/ui/review/CourseReviewAbout";
 import Promotion from "@/components/shared/Promotion/Promotion";
-import CourseContext from "@/components/ui/context/CourseContext";
+import CourseContext, { Lesson } from "@/components/ui/context/CourseContext";
 import { reviewData } from "@/utils/dummyData";
+import CourseVideoPlayer from "@/components/ui/videoPlayer/CourseVideoPlayer";
+import CourseDocs from "./CourseDocs";
 
-export default function CourseDetailsPage() {
-  const courseDescription = "Master the art of modern UI design! In this hands-on course, you’ll learn the fundamentals of layout, color, typography, and design tools like Figma. Perfect for beginners looking to create clean, user-friendly interfaces for web and mobile.";
+interface CourseDetailsProps {
+  course: {
+    id?: string;
+    title: string;
+    type: string;
+    description: string;
+    rating: number;
+    courseContexts: Lesson[];
+    isMicroLearning?: boolean;
+  };
+}
 
+export default function CourseDetailsPage({ course }: CourseDetailsProps) {
+  console.log("Courses ---", course)
   const instructor = {
-    name: "Alex Endean",
+    name: "",
     avatar: instructorImage,
   };
 
+  const filteredReviews = reviewData.filter(
+    (review) => review.courseId === course.id
+  );
+
+  const courseContexts = course.courseContexts;
+
   return (
     <div className="container">
-      <section className="py-12 lg:py-16 mx-auto">
+      <section className="py-8 lg:py-12 mx-auto">
         <div className="grid lg:grid-cols-4 gap-12 items-start">
-          <div className="col-span-3">
-            <Image src={courseImage} className="w-full h-full" alt="Course" />
-            <div className="flex col-span-3 justify-between py-6">
+          <div className="lg:col-span-3">
+            {course.type === "video" ? (
+              <CourseVideoPlayer
+                src="/videos/course-video.mp4"
+                poster={course_details_image.src}
+              />
+            ) : (
+              <>
+                <CourseDocs />
+              </>
+            )}
+
+            <div className="flex col-span-3 justify-between pt-5">
               <div>
                 <div className="flex items-center space-x-2">
                   <div className="flex space-x-1">
@@ -33,25 +61,34 @@ export default function CourseDetailsPage() {
                     ))}
                   </div>
                   <span className="text-gray-700 font-medium text-[14px]">
-                    4.9 (250)
+                    {course.rating} ({filteredReviews.length})
                   </span>
                 </div>
-                <h1 className="text-3xl md:text-4xl lg:text-[24px] font-bold text-gray-900 mb-8 font-playfairDisplay">
-                  UI Design Bootcamp: Build Beautiful Interfaces
-                </h1>
+                <div className="flex space-x-4">
+                  <div className="text-3xl md:text-4xl lg:text-[24px] font-bold text-gray-900 mb-[24px] font-playfairDisplay">
+                    {course.title}
+                  </div>
+                  <div>
+                    <div
+                      className={
+                        course.isMicroLearning ? "bg-[#3399CC] text-white py-1 px-2 rounded-full text-[10px]" : ""
+                      }
+                    >
+                      {course.isMicroLearning ? "Microlearning" : ""}
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="flex flex-col sm:flex-row gap-6 sm:gap-12">
-                {/* Stats */}
-              </div>
+              <div className="flex flex-col sm:flex-row gap-6 sm:gap-12"></div>
             </div>
             <CourseReviewAbout
-              description={courseDescription}
+              description={course.description}
               instructor={instructor}
-              reviews={reviewData}
+              reviews={filteredReviews}
             />
           </div>
-          <div className="col-span-1">
-            <CourseContext />
+          <div className="lg:col-span-1">
+            <CourseContext courseContexts={courseContexts} />
           </div>
         </div>
       </section>

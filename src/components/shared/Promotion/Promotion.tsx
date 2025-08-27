@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default function Promotion() {
   return (
-    <section className="container bg-[#F4FAFD] mb-[80px]">
+    <section className="container bg-[#F4FAFD] mb-[80px] py-8 lg:py-0">
       <div className="mx-auto px-6">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
@@ -21,7 +21,7 @@ export default function Promotion() {
             </div>
 
             {/* App Store Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex gap-4">
               {/* App Store Button */}
               <Link
                 href="#"

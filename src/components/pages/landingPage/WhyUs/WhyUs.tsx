@@ -9,10 +9,10 @@ import WhyUs_Banner from "@/assets/images/WhyUs_Banner.png";
 
 const WhyUs = () => {
   return (
-    <section className="py-16 lg:py-24 bg-white">
+    <section className="py-16 lg:py-24">
       <div className="container">
         <div className="text-center mb-16 max-w-4xl mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-gray-900 mb-6 leading-tight font-heading">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-gray-900 mb-6 leading-tight font-playfairDisplay">
             Built for Learners.
             <br />
             Backed by Results.

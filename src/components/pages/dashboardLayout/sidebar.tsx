@@ -1,30 +1,35 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import {
-  BarChart2,
-  Building2,
-  Folder,
-  Settings,
   LogOut,
   Menu,
+  Contact,
+  CircleUserRound,
+  Users,
+  UserCog,
+  Bell,
+  LayoutDashboard,
+  Layers,
 } from "lucide-react";
 
-import { Home } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-// import Image from "next/image";
 import { logoutHandler } from "@/utils/handleLogout";
 import { useRouter, usePathname } from "next/navigation";
 import { useDispatch } from "react-redux";
-import { FcCdLogo } from "react-icons/fc";
+import Image from "next/image";
+import logo from "@/assets/images/logo.png";
 
 export default function Sidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
-  // Function to check if a menu item is active
-  const isActive = (href: string) => pathname === href;
+  const isActive = (href: string) => {
+    if (href === "/dashboard") {
+      return pathname === "/dashboard";
+    }
+    return pathname.startsWith(href);
+  };
 
   function NavItem({
     href = "#",
@@ -32,7 +37,7 @@ export default function Sidebar() {
     children,
   }: {
     href?: string;
-    icon?: React.ComponentType<any>;
+    icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
     children: React.ReactNode;
   }) {
     return (
@@ -71,56 +76,55 @@ export default function Sidebar() {
       >
         <div className="h-full flex flex-col">
           <Link
-            href="/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="h-16 px-6 flex items-center border-b border-gray-200"
+            href="/dashboard"
+            className="h-16 px-6 flex items-center justify-center"
           >
-            <div className="flex items-center gap-3">
-              {/* <Image
-                src=""
+            <div className="flex items-center justify-center gap-3">
+              <Image
+                src={logo}
                 alt="Logo"
-                width={32}
-                height={32}
-                className="flex-shrink-0 hidden dark:block"
-              /> */}
-              <FcCdLogo size={150} className="h-10 w-auto mr-3" />
-              <span className="text-lg font-semibold hover:cursor-pointer text-gray-900 dark:text-white">
-                Logo
-              </span>
+                className="flex-shrink-0 w-[150px] "
+              />
             </div>
           </Link>
 
           <div className="flex-1 overflow-y-auto py-4 px-4">
             <div className="space-y-6">
-              <div>
-                <div className="space-y-1">
-                  <NavItem href="/dashboard" icon={Home}>
-                    Dashboard
-                  </NavItem>
-                  <NavItem href="/demo" icon={BarChart2}>
-                    Demo
-                  </NavItem>
-                  <NavItem href="/organization" icon={Building2}>
-                    Demo 2
-                  </NavItem>
-                  <NavItem href="/projects" icon={Folder}>
-                    Demo 3
-                  </NavItem>
-                </div>
+              <div className="space-y-[12px]">
+                <NavItem href="/dashboard" icon={LayoutDashboard}>
+                  Dashboard
+                </NavItem>
+                <NavItem href="/dashboard/course" icon={Contact}>
+                  Course
+                </NavItem>
+                <NavItem href="/dashboard/category" icon={Layers}>
+                  Category
+                </NavItem>
+                <NavItem
+                  href="/dashboard/micro-learning"
+                  icon={CircleUserRound}
+                >
+                  MicroLearning
+                </NavItem>
+                <NavItem href="/dashboard/students" icon={Users}>
+                  Students
+                </NavItem>
+                <NavItem href="/dashboard/instructor" icon={UserCog}>
+                  Instructor
+                </NavItem>
+                <NavItem href="/dashboard/notifications" icon={Bell}>
+                  Notification
+                </NavItem>
               </div>
             </div>
           </div>
 
           <div className="px-4 py-4 border-t border-gray-200">
             <div className="space-y-1">
-              <NavItem href="/settings" icon={Settings}>
-                Settings
-              </NavItem>
               <NavItem>
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center"
+                  className="w-full flex items-center cursor-pointer"
                 >
                   <LogOut size={35} className="h-5 w-5 mr-3" />
                   <span className="text-sm md:text-base text-gray-600">
