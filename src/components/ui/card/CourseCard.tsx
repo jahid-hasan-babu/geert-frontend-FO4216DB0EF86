@@ -23,10 +23,11 @@ interface Course {
   isBestseller?: boolean;
   isMicroLearning?: boolean;
   description: string;
-  coverImage: string;
+  coverImage?: string;
 }
 
 export default function CourseCard({ course }: { course: Course }) {
+  console.log("Course", course);
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -44,7 +45,7 @@ export default function CourseCard({ course }: { course: Course }) {
     try {
       setLoading(true);
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/favorites`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/favorites`,
         { courseId: course.id },
         {
           headers: {
@@ -76,6 +77,7 @@ export default function CourseCard({ course }: { course: Course }) {
 
   return (
     <div className="bg-white h-full rounded-2xl overflow-hidden transition-shadow duration-300 relative">
+      {/* Favorite button */}
       <button
         onClick={toggleFavorite}
         disabled={loading}

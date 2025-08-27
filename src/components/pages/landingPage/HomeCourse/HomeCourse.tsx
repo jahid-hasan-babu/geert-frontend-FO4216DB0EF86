@@ -6,8 +6,24 @@ import CourseCard from "@/components/ui/card/CourseCard";
 import Link from "next/link";
 import axios from "axios";
 
+interface APICourse {
+  id: string;
+  title: string;
+  slug?: string;
+  coverImage?: string;
+  duration?: string;
+  totalLessons?: number;
+  avgRating?: number;
+  category?: string;
+  type?: string;
+  completed?: number;
+  isBestseller?: boolean;
+  isMicroLearning?: boolean;
+  description?: string;
+}
+
 export default function HomeCourse() {
-  const [courses, setCourses] = useState<any[]>([]);
+  const [courses, setCourses] = useState<APICourse[]>([]);
   const [loading, setLoading] = useState(false);
 
   const fetchCourses = async () => {
@@ -56,15 +72,20 @@ export default function HomeCourse() {
               <Link href={`/courses/${course.id}`} key={course.id}>
                 <CourseCard
                   course={{
+                    id: course.id,
                     title: course.title,
-                    slug: course.id,
-                    coverImage: course.coverImage,
-                    duration: course.duration,
-                    price: course.price,
-                    totalRaters: course.totalRaters,
-                    avgRating: course.avgRating,
-                    totalLessons: course.totalLessons,
-                    isFavorite: course.isFavorite,
+                    slug: course.slug || course.id, // fallback to id if slug not available
+                    coverImage: course.coverImage || "",
+                    duration: course.duration || "",
+                    lessons: course.totalLessons || 0,
+                    rating: course.avgRating || 0,
+                    category: course.category || "",
+                    type: course.type || "video",
+                    completed: course.completed || 0,
+                    isBestseller: course.isBestseller,
+                    isMicroLearning: course.isMicroLearning,
+                    description: course.description || "",
+                    courseContexts: [], // required by CourseCard
                   }}
                 />
               </Link>

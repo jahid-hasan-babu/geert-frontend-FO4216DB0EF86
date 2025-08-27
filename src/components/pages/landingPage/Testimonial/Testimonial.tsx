@@ -1,8 +1,39 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { testimonialsData } from "@/utils/dummyData";
+
+interface TestimonialType {
+  id: string;
+  text: string;
+  name: string;
+  role: string;
+  rating: number;
+}
+
+export const testimonialsData: TestimonialType[] = [
+  {
+    id: "1",
+    text: "I had no background in this subject, but the instructor explained everything step by step. I didn't feel overwhelmed at all.",
+    name: "Rafiq Ajgar",
+    role: "Content Strategist",
+    rating: 4,
+  },
+  {
+    id: "2",
+    text: "The hands-on projects and real-world examples made learning fun and effective. I now feel confident applying for higher roles.",
+    name: "Sarah Roots",
+    role: "User Experience Designer",
+    rating: 5,
+  },
+  {
+    id: "3",
+    text: "Course quality was top-notch, and getting lifetime access means I can always come back and review. Highly recommended!",
+    name: "Nabila Harsh",
+    role: "Marketing Specialist",
+    rating: 3,
+  },
+];
 
 interface CourseStats {
   totalTutorials: number;
@@ -12,7 +43,7 @@ interface CourseStats {
 
 const Testimonial = () => {
   const [stats, setStats] = useState<CourseStats | null>(null);
-  const [displayStats, setDisplayStats] = useState({
+  const [displayStats, setDisplayStats] = useState<CourseStats>({
     totalTutorials: 0,
     totalHours: 0,
     satisfactionRate: 0,
@@ -20,7 +51,7 @@ const Testimonial = () => {
 
   const sectionRef = useRef<HTMLDivElement | null>(null);
 
-  // ✅ Fetch stats with axios
+  // Fetch stats from API
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -29,23 +60,24 @@ const Testimonial = () => {
 
         const res = await axios.get(
           `${process.env.NEXT_PUBLIC_BASE_URL}/users/get-course-stats`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
         );
 
         if (res.data.success) {
           setStats(res.data.data);
         }
-      } catch (error) {
-        console.error("Error fetching course stats:", error);
+      } catch (err) {
+        console.error("Error fetching course stats:", err);
       }
     };
 
     fetchStats();
   }, []);
 
-  // ✅ Smooth count-up function
-  const countUp = (target: number, key: keyof typeof displayStats, duration = 1500) => {
-    let start = 0;
+  // Smooth count-up function
+  const countUp = (target: number, key: keyof CourseStats, duration = 1500) => {
     const startTime = performance.now();
 
     const animate = (time: number) => {
@@ -54,7 +86,6 @@ const Testimonial = () => {
         ...prev,
         [key]: Math.round(progress * target),
       }));
-
       if (progress < 1) {
         requestAnimationFrame(animate);
       }
@@ -63,7 +94,7 @@ const Testimonial = () => {
     requestAnimationFrame(animate);
   };
 
-  // ✅ Intersection observer triggers smooth count-up every time section comes into view
+  // Intersection Observer to trigger count-up
   useEffect(() => {
     if (!sectionRef.current || !stats) return;
 
@@ -98,11 +129,13 @@ const Testimonial = () => {
         <div className="grid md:grid-cols-3 gap-8 lg:gap-12 mb-20">
           {testimonialsData.map((testimonial) => (
             <div key={testimonial.id} className="text-center space-y-[20px]">
-              <p className="text-[#404040] leading-[120%] text-lg">{testimonial.text}</p>
+              <p className="text-[#404040] leading-[120%] text-lg">
+                {testimonial.text}
+              </p>
 
               <div>
                 <div className="flex justify-center space-x-1">
-                  {[...Array(testimonial.rating || 5)].map((_, i) => (
+                  {Array.from({ length: testimonial.rating }).map((_, i) => (
                     <span key={i} className="text-yellow-400 text-lg font-bold">
                       ★
                     </span>

@@ -1,16 +1,18 @@
-import CourseDetails from "@/components/pages/AdminDashbaordPages/CourseDetailsPage";
+// import CourseDetails from "@/components/pages/AdminDashbaordPages/CourseDetailsPage";
 import { courseData } from "@/utils/dummyData";
 import { instructorsData } from "@/utils/dummyData";
 import React from "react";
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-const Page = ({ params }: PageProps) => {
-  const course = courseData.find((c) => c.id === params.id);
+const Page = async ({ params }: PageProps) => {
+  const { id } = await params;
+  
+  const course = courseData.find((c) => c.id === id);
   const instructor = instructorsData.find((i) =>
-    i.assignedCoursesId.includes(params.id)
+    i.assignedCoursesId.includes(id)
   );
   console.log("Instructor", instructor)
 
@@ -18,7 +20,14 @@ const Page = ({ params }: PageProps) => {
     return <div>Course not found</div>;
   }
 
-  return <CourseDetails course={course} instructor={instructor} />;
+  return
+  
+ <div>
+working
+   {/* <CourseDetails course={course} instructor={instructor} /> */}
+ </div>
+  
+  ;
 };
 
 export default Page;

@@ -3,7 +3,7 @@
 import CourseCertification from "@/components/certification/CourseCertification";
 import { ChevronDown, CheckCircle, Play, Circle } from "lucide-react";
 import { useState } from "react";
-import { QuizModal } from "../modals/QuizModal";
+import { QuizModal, Quiz } from "../modals/QuizModal";
 
 export type LessonsItem = {
   id: string;
@@ -11,6 +11,7 @@ export type LessonsItem = {
   type?: string;
   duration?: string;
   completed?: boolean;
+  quiz?: Quiz | null;
 };
 
 export interface Lesson {
@@ -20,22 +21,62 @@ export interface Lesson {
   items: LessonsItem[];
 }
 
-interface CourseContextProps {
-  courseContexts: Lesson[];
+interface ModuleFromAPI {
+  id: string;
+  title: string;
+  lessons: LessonsItem[];
+  Quiz?: Quiz[];
 }
 
-const CourseContext: React.FC<CourseContextProps> = ({ courseContexts }) => {
-  const [lessons, setLessons] = useState<Lesson[]>(() =>
-    courseContexts.map((lesson, idx) => ({
-      ...lesson,
-      isOpen: idx === 0,
-    }))
+interface ModuleMapped {
+  id: string;
+  title: string;
+  isOpen?: boolean;
+  items: LessonsItem[];
+  quiz?: Quiz | null;
+}
+
+interface CourseContextProps {
+  modules: ModuleFromAPI[];
+}
+
+const CourseContext: React.FC<CourseContextProps> = ({ modules }) => {
+  const mapModulesToLessons = (modules: ModuleFromAPI[]): ModuleMapped[] => {
+    return modules.map((module, idx) => {
+      const lessonItems: LessonsItem[] = module.lessons.map((lesson) => ({
+        id: lesson.id,
+        title: lesson.title,
+        type: lesson.type,
+        duration: lesson.duration,
+        completed: lesson.completed || false,
+        quiz: lesson.quiz || null,
+      }));
+
+      if (module.Quiz?.[0]) {
+        lessonItems.push({
+          id: module.Quiz[0].id,
+          title: module.Quiz[0].title,
+          quiz: module.Quiz[0],
+        });
+      }
+
+      return {
+        id: module.id,
+        title: module.title,
+        isOpen: idx === 0,
+        items: lessonItems,
+        quiz: module.Quiz?.[0] || null,
+      };
+    });
+  };
+
+  const [lessons, setLessons] = useState<ModuleMapped[]>(() =>
+    mapModulesToLessons(modules)
   );
 
   const [isCertOpen, setIsCertOpen] = useState(false);
-
-  // Quiz modal state
   const [quizModalOpen, setQuizModalOpen] = useState(false);
+  const [currentQuiz, setCurrentQuiz] = useState<Quiz | null>(null);
 
   const toggleLesson = (lessonId: string) => {
     setLessons((prevLessons) =>
@@ -57,13 +98,13 @@ const CourseContext: React.FC<CourseContextProps> = ({ courseContexts }) => {
     setIsCertOpen(willOpen);
   };
 
-  const openQuiz = () => {
+  const openQuiz = (quiz: Quiz | null) => {
+    setCurrentQuiz(quiz);
     setQuizModalOpen(true);
   };
 
   return (
     <div className="space-y-4">
-      {/* Lessons List */}
       {lessons.map((lesson, index) => (
         <div
           key={lesson.id}
@@ -76,7 +117,7 @@ const CourseContext: React.FC<CourseContextProps> = ({ courseContexts }) => {
             }`}
           >
             <h3 className="text-[16px] font-semibold text-gray-900 text-left">
-              Lesson {index + 1}: {lesson.title}
+              Module {index + 1}: {lesson.title}
             </h3>
             <ChevronDown
               className={`w-5 h-5 text-gray-600 transition-transform duration-300 transform ${
@@ -115,9 +156,7 @@ const CourseContext: React.FC<CourseContextProps> = ({ courseContexts }) => {
 
                   <div className="flex-1 flex justify-between">
                     <div>
-                      <h4 className="font-medium text-gray-900">
-                        {item.title}
-                      </h4>
+                      <h4 className="font-medium text-gray-900">{item.title}</h4>
                       <p className="text-sm text-gray-600">
                         {item.type === "video"
                           ? `Video: ${item.duration}`
@@ -125,13 +164,14 @@ const CourseContext: React.FC<CourseContextProps> = ({ courseContexts }) => {
                       </p>
                     </div>
 
-                    {/* Action button */}
                     <button
-                      onClick={() => (item.type === "video" ? null : openQuiz())}
+                      onClick={() => item.quiz && openQuiz(item.quiz)}
                       className="ml-4 p-2 rounded-full hover:bg-gray-200 cursor-pointer"
                     >
                       {item.type === "video" ? (
                         <Play className="w-5 h-5 text-gray-600" />
+                      ) : item.quiz ? (
+                        <CheckCircle className="w-5 h-5 " />
                       ) : item.completed ? (
                         <CheckCircle className="w-5 h-5 text-green-500" />
                       ) : (
@@ -157,9 +197,7 @@ const CourseContext: React.FC<CourseContextProps> = ({ courseContexts }) => {
             isCertOpen ? "border-b border-[#E7E7E7]" : ""
           }`}
         >
-          <h3 className="text-[16px] font-semibold text-gray-900 ">
-            Certification
-          </h3>
+          <h3 className="text-[16px] font-semibold text-gray-900 ">Certification</h3>
           <ChevronDown
             className={`w-5 h-5 text-gray-600 transition-transform duration-300 transform ${
               isCertOpen ? "rotate-180" : "rotate-0"
@@ -178,6 +216,7 @@ const CourseContext: React.FC<CourseContextProps> = ({ courseContexts }) => {
 
       {/* Quiz Modal */}
       <QuizModal
+        quiz={currentQuiz}
         isOpen={quizModalOpen}
         onClose={() => setQuizModalOpen(false)}
       />

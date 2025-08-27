@@ -1,50 +1,11 @@
-"use client";
 
-import { use, useEffect, useState } from "react";
-import InstructorCourses from "@/components/pages/AdminDashbaordPages/InstructorCourses";
-import axios from "axios";
+import React from "react";
+import InstructorClient from "@/components/pages/AdminDashbaordPages/InstructorClient";
 
-interface PageProps {
-  params: Promise<{
-    id: string;
-  }>;
-}
+// Server component version (recommended for Next.js 15)
+const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
+  const { id } = await params;
+  return <InstructorClient id={id} />;
+};
 
-export default function Page({ params }: PageProps) {
-  const { id } = use(params);
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchInstructor = async () => {
-      try {
-        const token = localStorage.getItem("token");
-
-        const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/users/single-instructor/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        console.log("Respose >>", res)
-        setData(res?.data.data?.data);
-      } catch (error) {
-        setError("Failed to load instructor");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchInstructor();
-  }, [id]);
-
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>{error}</p>;
-  if (!data) return <p>No data found</p>;
-
-  return <InstructorCourses instructor={data.instructor} courses={data.course} />;
-}
+export default Page;

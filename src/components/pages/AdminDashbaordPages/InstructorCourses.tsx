@@ -27,6 +27,7 @@ interface Course {
   isBestseller?: boolean;
   isMicroLearning?: boolean;
   description: string;
+  coverImage: string;
 }
 
 interface Props {

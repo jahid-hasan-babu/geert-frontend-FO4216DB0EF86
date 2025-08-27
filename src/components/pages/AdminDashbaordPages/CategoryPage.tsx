@@ -21,25 +21,26 @@ const CategoryPage = () => {
 
   const token = localStorage.getItem("token");
 
-  const fetchCategories = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/category/all-category`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setCategories(res.data.data.data || []);
-    } catch (err) {
-      const error = err as AxiosError<{ message: string }>;
-      toast.error(error.response?.data?.message || "Failed to update category");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Fetch categories
   useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/category/all-category`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setCategories(res.data.data.data || []);
+      } catch (err) {
+        const error = err as AxiosError<{ message: string }>;
+        toast.error(error.response?.data?.message || "Failed to load categories");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchCategories();
-  }, []);
+  }, [token]);
 
   // Add new category
   const handleAddCategory = async () => {
@@ -58,7 +59,7 @@ const CategoryPage = () => {
       toast.success("Category added successfully");
     } catch (err) {
       const error = err as AxiosError<{ message: string }>;
-      toast.error(error.response?.data?.message || "Failed to update category");
+      toast.error(error.response?.data?.message || "Failed to add category");
     }
   };
 
@@ -98,6 +99,7 @@ const CategoryPage = () => {
     <div className="p-6 bg-white min-h-screen">
       <h1 className="text-2xl font-bold mb-6">Category Management</h1>
 
+      {/* Add new category */}
       <div className="flex gap-2 mb-6">
         <Input
           placeholder="Enter new category"
@@ -112,6 +114,7 @@ const CategoryPage = () => {
         </Button>
       </div>
 
+      {/* Categories list */}
       {loading ? (
         <div className="flex justify-center">
           <Loader2 className="w-6 h-6 animate-spin" />

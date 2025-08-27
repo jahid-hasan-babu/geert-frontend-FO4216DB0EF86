@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Upload, Info } from "lucide-react";
 import CourseModuleAdd from "./CourseModuleAdd";
+import { toast } from "sonner";
 
 type Lesson = {
   lessonType: "video" | "docs" | "";
@@ -90,13 +91,9 @@ export default function CourseAddPage() {
     };
 
     axios
-      .get(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/category/all-category`,
-        config
-      )
+      .get(`${process.env.NEXT_PUBLIC_BASE_URL}/category/all-category`, config)
       .then((res) => {
-        console.log("Category response >>>", res.data);
-        setCategories(res?.data?.data?.data);
+        setCategories(res?.data?.data?.data || []);
       })
       .catch((err) => console.error("Failed to fetch categories", err));
 
@@ -106,8 +103,7 @@ export default function CourseAddPage() {
         config
       )
       .then((res) => {
-        console.log("Instructor response >>>", res.data);
-        setInstructors(res?.data?.data?.data);
+        setInstructors(res?.data?.data?.data || []);
       })
       .catch((err) => console.error("Failed to fetch instructors", err));
   }, []);
@@ -117,7 +113,6 @@ export default function CourseAddPage() {
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setCoverImageName(e.target.files[0].name);
-      console.log("Selected cover image:", e.target.files[0]);
     }
   };
 
@@ -160,7 +155,7 @@ export default function CourseAddPage() {
 
       formData.append("bodyData", JSON.stringify(bodyData));
 
-      const res = await axios.post(
+      await axios.post(
         `${process.env.NEXT_PUBLIC_BASE_URL}/courses/create-course`,
         formData,
         {
@@ -171,11 +166,10 @@ export default function CourseAddPage() {
         }
       );
 
-      console.log("✅ Course created:", res.data);
-      alert("Course created successfully!");
+      toast.success("✅ Course created successfully!");
     } catch (err) {
       const error = err as AxiosError<{ message: string }>;
-      alert("Error creating course");
+      toast.error(error.response?.data?.message || "❌ Error creating course");
     }
   };
 
@@ -242,7 +236,7 @@ export default function CourseAddPage() {
                 }
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Write category" />
+                  <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((cat) => (
@@ -307,7 +301,7 @@ export default function CourseAddPage() {
               }
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Write here" />
+                <SelectValue placeholder="Select instructor" />
               </SelectTrigger>
               <SelectContent>
                 {instructors.map((ins) => (
