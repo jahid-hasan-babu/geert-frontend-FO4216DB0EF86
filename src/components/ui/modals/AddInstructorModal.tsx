@@ -1,55 +1,52 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Upload } from "lucide-react"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Upload } from "lucide-react";
 
 interface AddInstructorModalProps {
   onAdd: (instructor: {
-    name: string
-    email: string
-    designation: string
-    image: File | null
-  }) => void
+    username: string;
+    email: string;
+    designation: string;
+    image: File | null;
+  }) => void;
 }
 
 export default function AddInstructorModal({ onAdd }: AddInstructorModalProps) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
+    username: "",
     email: "",
     designation: "",
     image: null as File | null,
-  })
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onAdd(formData) // 🔹 Pass data back to parent
-    setOpen(false)
-    setFormData({ name: "", email: "", designation: "", image: null })
-  }
+    e.preventDefault();
+    onAdd(formData);
+    setOpen(false); // close modal
+    setFormData({ username: "", email: "", designation: "", image: null });
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setFormData((prev) => ({ ...prev, image: file }))
-    }
-  }
+    const file = e.target.files?.[0];
+    if (file) setFormData((prev) => ({ ...prev, image: file }));
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {/* Trigger button */}
       <DialogTrigger asChild>
-        <Button className="bg-[#3399CC] hover:bg-[#3399CC] cursor-pointer text-white">
+        <Button className="bg-[#3399CC] hover:bg-[#3399CC] text-white cursor-pointer">
           + Add Instructor
         </Button>
       </DialogTrigger>
@@ -61,22 +58,20 @@ export default function AddInstructorModal({ onAdd }: AddInstructorModalProps) {
           </DialogTitle>
         </DialogHeader>
 
-        {/* FORM IS INSIDE MODAL */}
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Name */}
           <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="username">Name</Label>
             <Input
-              id="name"
+              id="username"
               placeholder="Enter name"
-              value={formData.name}
+              value={formData.username}
               onChange={(e) =>
-                setFormData((prev) => ({ ...prev, name: e.target.value }))
+                setFormData((prev) => ({ ...prev, username: e.target.value }))
               }
+              required
             />
           </div>
 
-          {/* Email */}
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -87,10 +82,10 @@ export default function AddInstructorModal({ onAdd }: AddInstructorModalProps) {
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, email: e.target.value }))
               }
+              required
             />
           </div>
 
-          {/* Designation */}
           <div className="space-y-2">
             <Label htmlFor="designation">Designation</Label>
             <Input
@@ -98,17 +93,14 @@ export default function AddInstructorModal({ onAdd }: AddInstructorModalProps) {
               placeholder="Enter designation"
               value={formData.designation}
               onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  designation: e.target.value,
-                }))
+                setFormData((prev) => ({ ...prev, designation: e.target.value }))
               }
+              required
             />
           </div>
 
-          {/* Image Upload */}
           <div className="space-y-2">
-            <Label htmlFor="image">Image</Label>
+            <Label htmlFor="image">Profile Image</Label>
             <div className="relative">
               <input
                 id="image"
@@ -128,12 +120,12 @@ export default function AddInstructorModal({ onAdd }: AddInstructorModalProps) {
 
           <Button
             type="submit"
-            className="w-full bg-[#3399CC] hover:bg-[#3399CC] cursor-pointer text-white py-3 rounded-lg font-medium"
+            className="w-full bg-[#3399CC] hover:bg-[#3399CC] text-white py-3 rounded-lg font-medium cursor-pointer"
           >
             Add Instructor
           </Button>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

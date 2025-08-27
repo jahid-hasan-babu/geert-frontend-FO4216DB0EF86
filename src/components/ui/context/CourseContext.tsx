@@ -21,12 +21,12 @@ export interface Lesson {
 }
 
 interface CourseContextProps {
-  lessonsList: Lesson[];
+  courseContexts: Lesson[];
 }
 
-const CourseContext: React.FC<CourseContextProps> = ({ lessonsList }) => {
+const CourseContext: React.FC<CourseContextProps> = ({ courseContexts }) => {
   const [lessons, setLessons] = useState<Lesson[]>(() =>
-    lessonsList.map((lesson, idx) => ({
+    courseContexts.map((lesson, idx) => ({
       ...lesson,
       isOpen: idx === 0,
     }))

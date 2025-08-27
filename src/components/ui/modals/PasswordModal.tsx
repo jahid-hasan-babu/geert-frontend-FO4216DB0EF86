@@ -1,11 +1,10 @@
 "use client";
 
-import type React from "react";
-
-import { useState } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Eye, EyeOff } from "lucide-react";
+import axios from "axios";
 
 interface PasswordModalProps {
   isOpen: boolean;
@@ -30,19 +30,58 @@ export function PasswordModal({ isOpen, onClose }: PasswordModalProps) {
     newPassword: false,
     confirmPassword: false,
   });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Password change submitted:", passwords);
-    // Add password validation logic here
-    onClose();
-  };
+  const [loading, setLoading] = useState(false);
 
   const togglePasswordVisibility = (field: keyof typeof showPasswords) => {
     setShowPasswords((prev) => ({
       ...prev,
       [field]: !prev[field],
     }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (passwords.newPassword !== passwords.confirmPassword) {
+      toast.error("New password and confirm password do not match!");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.patch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/users/update-password`,
+        {
+          currentPass: passwords.oldPassword,
+          newPass: passwords.newPassword,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (res.data.success) {
+        toast.success("Password changed successfully!");
+        onClose();
+        setPasswords({ oldPassword: "", newPassword: "", confirmPassword: "" });
+      } else {
+        toast.error(res.data.message || "Failed to change password");
+      }
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        toast.error(
+          err.response?.data?.message ||
+            "An error occurred while changing password"
+        );
+      } else {
+        toast.error("Something went wrong");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -55,6 +94,7 @@ export function PasswordModal({ isOpen, onClose }: PasswordModalProps) {
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6 pt-4">
+          {/** Old Password */}
           <div className="space-y-2">
             <Label
               htmlFor="oldPassword"
@@ -92,6 +132,7 @@ export function PasswordModal({ isOpen, onClose }: PasswordModalProps) {
             </div>
           </div>
 
+          {/** New Password */}
           <div className="space-y-2">
             <Label
               htmlFor="newPassword"
@@ -129,6 +170,7 @@ export function PasswordModal({ isOpen, onClose }: PasswordModalProps) {
             </div>
           </div>
 
+          {/** Confirm Password */}
           <div className="space-y-2">
             <Label
               htmlFor="confirmPassword"
@@ -169,8 +211,9 @@ export function PasswordModal({ isOpen, onClose }: PasswordModalProps) {
           <Button
             type="submit"
             className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-full text-lg font-medium"
+            disabled={loading}
           >
-            Change Password
+            {loading ? "Changing..." : "Change Password"}
           </Button>
         </form>
       </DialogContent>

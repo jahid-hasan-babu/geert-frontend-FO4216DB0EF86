@@ -1,11 +1,11 @@
-import CoursesPage from "@/components/pages/AdminDashbaordPages/CoursesPage";
+import MicroLearningPage from "@/components/pages/AdminDashbaordPages/MicroLearningPage";
 import React from "react";
 
 const page = () => {
   return (
     <>
       <div>
-        <CoursesPage/>
+        <MicroLearningPage/>
       </div>
     </>
   );

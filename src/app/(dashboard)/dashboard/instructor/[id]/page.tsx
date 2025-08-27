@@ -1,26 +1,50 @@
-import React from "react";
+"use client";
+
+import { use, useEffect, useState } from "react";
 import InstructorCourses from "@/components/pages/AdminDashbaordPages/InstructorCourses";
-import { instructorsData } from "@/utils/dummyData";
+import axios from "axios";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-const Page = ({ params }: PageProps) => {
-  const instructorId = params.id;
-  const instructor = instructorsData.find((inst) => inst.id === instructorId);
+export default function Page({ params }: PageProps) {
+  const { id } = use(params);
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!instructor) {
-    return <p>Instructor not found</p>;
-  }
+  useEffect(() => {
+    const fetchInstructor = async () => {
+      try {
+        const token = localStorage.getItem("token");
 
-  return (
-    <>
-      <InstructorCourses instructor={instructor} />
-    </>
-  );
-};
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/users/single-instructor/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-export default Page;
+        console.log("Respose >>", res)
+        setData(res?.data.data?.data);
+      } catch (error) {
+        setError("Failed to load instructor");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInstructor();
+  }, [id]);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error}</p>;
+  if (!data) return <p>No data found</p>;
+
+  return <InstructorCourses instructor={data.instructor} courses={data.course} />;
+}

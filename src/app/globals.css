@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -45,9 +46,17 @@
 }
 
 @layer components {
+
+  /* Existing container styles */
   .container {
     @apply max-w-[1200px] mx-auto px-4;
   }
+
+  /* Default button styling */
+  .button-bg {
+  @apply bg-[#3399CC] hover:bg-[#4686a7];
+}
+
 }
 
 :root {
@@ -123,6 +132,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }

@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Settings,
   LogOut,
   Menu,
   Contact,
@@ -10,6 +9,7 @@ import {
   UserCog,
   Bell,
   LayoutDashboard,
+  Layers,
 } from "lucide-react";
 
 import Link from "next/link";
@@ -97,7 +97,13 @@ export default function Sidebar() {
                 <NavItem href="/dashboard/course" icon={Contact}>
                   Course
                 </NavItem>
-                <NavItem href="/dashboard/microLearning" icon={CircleUserRound}>
+                <NavItem href="/dashboard/category" icon={Layers}>
+                  Category
+                </NavItem>
+                <NavItem
+                  href="/dashboard/micro-learning"
+                  icon={CircleUserRound}
+                >
                   MicroLearning
                 </NavItem>
                 <NavItem href="/dashboard/students" icon={Users}>
@@ -115,9 +121,6 @@ export default function Sidebar() {
 
           <div className="px-4 py-4 border-t border-gray-200">
             <div className="space-y-1">
-              <NavItem href="/settings" icon={Settings}>
-                Settings
-              </NavItem>
               <NavItem>
                 <button
                   onClick={handleLogout}

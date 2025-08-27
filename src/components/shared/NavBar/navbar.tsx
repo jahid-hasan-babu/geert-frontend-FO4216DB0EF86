@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog } from "@headlessui/react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Bell, ChevronDown, Star, X } from "lucide-react";
+import axios from "axios";
 import logo from "@/assets/images/logo.png";
 import profile_dp from "@/assets/images/profile_dp.png";
 import { courseData, notificationsData } from "@/utils/dummyData";
@@ -22,13 +23,45 @@ const navLinks = [
   { href: "/help-support", label: "Support" },
 ];
 
+interface User {
+  id: string;
+  username: string | null;
+  email: string;
+  profileImage: string | null;
+  role: string;
+}
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [isProgressOpen, setIsProgressOpen] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [userData, setUserData] = useState<User | null>(null);
+
   const pathname = usePathname();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/users/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res.data.success) {
+          setUserData(res.data.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch user:", err);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  console.log("User Data >>>", userData)
 
   let courseTitle: string | null = null;
   if (pathname.startsWith("/courses/")) {
@@ -42,14 +75,10 @@ export default function Navbar() {
   return (
     <header className="bg-white sticky top-0 z-50">
       <nav className="container mx-auto px-4 py-3 flex items-center justify-between">
-        <Link
-          href="/"
-          className="cursor-pointer flex items-center justify-center"
-        >
+        <Link href="/" className="cursor-pointer flex items-center justify-center">
           <Image src={logo} alt="Logo" />
         </Link>
 
-        {/* Course Title or Links */}
         {courseTitle ? (
           <div className="w-full px-4 flex justify-between items-center">
             <div className="text-[24px] font-medium font-playfairDisplay text-[#101010]">
@@ -98,7 +127,6 @@ export default function Navbar() {
 
         {/* Right Section */}
         <div className="hidden md:flex items-center space-x-5">
-          {/* Notification Button */}
           <button
             className="relative p-2 rounded-full bg-[#EBF5FA] transition"
             onClick={() => setIsNotifOpen(true)}
@@ -111,7 +139,7 @@ export default function Navbar() {
 
           {/* Profile */}
           <Image
-            src={profile_dp}
+            src={userData?.profileImage || profile_dp}
             alt="Profile"
             width={40}
             height={40}
@@ -158,7 +186,6 @@ export default function Navbar() {
             </button>
           </div>
 
-          {/* Links */}
           {courseTitle ? (
             <h1 className="text-lg font-semibold">{courseTitle}</h1>
           ) : (
@@ -167,11 +194,8 @@ export default function Navbar() {
                 <li key={href}>
                   <Link
                     href={href}
-                    className={`block ${
-                      isActive(href)
-                        ? "text-[#3399CC] font-semibold"
-                        : "hover:text-[#9191c4]"
-                    }`}
+                    className={`block ${isActive(href) ? "text-[#3399CC] font-semibold" : "hover:text-[#9191c4]"
+                      }`}
                     onClick={() => setIsOpen(false)}
                   >
                     {label}
@@ -193,36 +217,35 @@ export default function Navbar() {
               )}
             </button>
             <Image
-              src={profile_dp}
+              src={userData?.profileImage || profile_dp}
               alt="Profile"
               width={40}
               height={40}
               className="rounded-full border border-gray-200 cursor-pointer"
+              onClick={() => setIsMenuOpen((prev) => !prev)}
             />
           </div>
         </Dialog.Panel>
       </Dialog>
 
-      {/* Notification Modal Component */}
+      {/* Modals */}
       <NotificationModal
         isOpen={isNotifOpen}
         onClose={() => setIsNotifOpen(false)}
         notifications={notificationsData}
       />
-
-      <ReviewModal
-        isOpen={isReviewOpen}
-        onClose={() => setIsReviewOpen(false)}
-      />
-
+      <ReviewModal isOpen={isReviewOpen} onClose={() => setIsReviewOpen(false)} />
       <CourseProgressModal
         isOpen={isProgressOpen}
         onClose={() => setIsProgressOpen(false)}
         current={12}
         total={18}
       />
-
-      <MenuModal isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+      <MenuModal
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        user={userData}
+      />
     </header>
   );
 }

@@ -11,20 +11,20 @@ import CourseDocs from "./CourseDocs";
 
 interface CourseDetailsProps {
   course: {
-    id?: number;
+    id?: string;
     title: string;
     type: string;
     description: string;
-    instructor: string;
     rating: number;
-    lessonsList: Lesson[];
-    isMicro?: boolean;
+    courseContexts: Lesson[];
+    isMicroLearning?: boolean;
   };
 }
 
 export default function CourseDetailsPage({ course }: CourseDetailsProps) {
+  console.log("Courses ---", course)
   const instructor = {
-    name: course.instructor,
+    name: "",
     avatar: instructorImage,
   };
 
@@ -32,7 +32,7 @@ export default function CourseDetailsPage({ course }: CourseDetailsProps) {
     (review) => review.courseId === course.id
   );
 
-  const lessonsList = course.lessonsList;
+  const courseContexts = course.courseContexts;
 
   return (
     <div className="container">
@@ -71,10 +71,10 @@ export default function CourseDetailsPage({ course }: CourseDetailsProps) {
                   <div>
                     <div
                       className={
-                        course.isMicro ? "bg-[#3399CC] text-white py-1 px-2 rounded-full text-[10px]" : ""
+                        course.isMicroLearning ? "bg-[#3399CC] text-white py-1 px-2 rounded-full text-[10px]" : ""
                       }
                     >
-                      {course.isMicro ? "Microlearning" : ""}
+                      {course.isMicroLearning ? "Microlearning" : ""}
                     </div>
                   </div>
                 </div>
@@ -88,7 +88,7 @@ export default function CourseDetailsPage({ course }: CourseDetailsProps) {
             />
           </div>
           <div className="lg:col-span-1">
-            <CourseContext lessonsList={lessonsList} />
+            <CourseContext courseContexts={courseContexts} />
           </div>
         </div>
       </section>

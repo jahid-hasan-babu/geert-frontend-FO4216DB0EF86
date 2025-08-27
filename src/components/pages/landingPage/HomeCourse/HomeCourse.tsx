@@ -1,9 +1,35 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import PrimaryButton from "@/components/ui/buttons/PrimaryButton/PrimaryButton";
 import CourseCard from "@/components/ui/card/CourseCard";
-import { courseData } from "@/utils/dummyData";
 import Link from "next/link";
+import axios from "axios";
 
 export default function HomeCourse() {
+  const [courses, setCourses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchCourses = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/courses/all-course`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setCourses(res.data.data.data);
+    } catch (err) {
+      console.error("Failed to fetch courses:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCourses();
+  }, []);
+
   return (
     <section className="pb-16 lg:pb-24">
       <div className="container mx-auto px-6">
@@ -21,11 +47,33 @@ export default function HomeCourse() {
 
         {/* Course Cards */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {courseData.map((course) => (
-            <Link href={`/courses/${course.slug}`} key={course.id}>
-              <CourseCard course={course} />
-            </Link>
-          ))}
+          {loading ? (
+            <div className="col-span-full text-center text-gray-500">
+              Loading courses...
+            </div>
+          ) : courses.length > 0 ? (
+            courses.slice(0, 6).map((course) => (
+              <Link href={`/courses/${course.id}`} key={course.id}>
+                <CourseCard
+                  course={{
+                    title: course.title,
+                    slug: course.id,
+                    coverImage: course.coverImage,
+                    duration: course.duration,
+                    price: course.price,
+                    totalRaters: course.totalRaters,
+                    avgRating: course.avgRating,
+                    totalLessons: course.totalLessons,
+                    isFavorite: course.isFavorite,
+                  }}
+                />
+              </Link>
+            ))
+          ) : (
+            <div className="col-span-full text-center text-gray-500">
+              No courses found
+            </div>
+          )}
         </div>
 
         {/* Mobile Button */}

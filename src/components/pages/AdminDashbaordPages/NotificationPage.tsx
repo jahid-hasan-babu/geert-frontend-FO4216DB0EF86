@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +18,13 @@ export default function NotificationPage() {
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
 
+  // recipients list for mapping
+  const recipients = [
+    { value: "all", label: "All" },
+    { value: "students", label: "Students" },
+    { value: "micro", label: "Microlearning Students" },
+  ];
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Notification:", { sendTo, title, message });
@@ -33,24 +39,26 @@ export default function NotificationPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
-            <div className="">
+            <div>
               <label className="text-sm font-medium text-gray-600">
                 Send To
               </label>
               <Select value={sendTo} onValueChange={setSendTo}>
-                <SelectTrigger className="w-full h-12 border-gray-200 rounded-lg">
+                <SelectTrigger className="w-full h-12 border-gray-200 rounded-lg cursor-pointer">
                   <SelectValue placeholder="Select recipients" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="students">Students</SelectItem>
-                  <SelectItem value="instructors">Instructors</SelectItem>
-                  <SelectItem value="admins">Admins</SelectItem>
+                  {recipients.map((r) => (
+                    <SelectItem key={r.value} value={r.value}>
+                      {r.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
+
             {/* Title Input */}
-            <div className="">
+            <div>
               <label className="text-sm font-medium text-gray-600">Title</label>
               <Input
                 placeholder="Write title..."
@@ -60,6 +68,8 @@ export default function NotificationPage() {
               />
             </div>
           </div>
+
+          {/* Message */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-600">
               Send Message

@@ -1,14 +1,23 @@
-// InstructorCourses.tsx
 import React from "react";
-import { courseData } from "@/utils/dummyData";
-import { Lesson } from "@/components/ui/context/CourseContext";
 import CourseCard from "@/components/ui/card/CourseCard";
+import { Lesson } from "@/components/ui/context/CourseContext";
+
+interface Instructor {
+  id: string;
+  name: string;
+  designation?: string | null;
+  profileImage?: string;
+  totalCourses: number;
+  totalStudents: number;
+  totalReviews: number;
+  phone: string;
+}
 
 interface Course {
   id: string;
   title: string;
   slug: string;
-  lessonsList: Lesson[];
+  courseContexts: Lesson[];
   lessons: number;
   duration: string;
   rating: number;
@@ -16,58 +25,52 @@ interface Course {
   type: string;
   completed: number;
   isBestseller?: boolean;
-  isMicro?: boolean;
+  isMicroLearning?: boolean;
   description: string;
-}
-
-interface Instructor {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  expertise: string;
-  status: string;
-  assignedCoursesId: string[];
 }
 
 interface Props {
   instructor: Instructor;
+  courses: Course[];
 }
 
-const InstructorCourses = ({ instructor }: Props) => {
-  const assignedCourses: Course[] = courseData.filter((course) =>
-    instructor.assignedCoursesId.includes(course.id.toString())
-  );
-
+const InstructorCourses = ({ instructor, courses }: Props) => {
   return (
-    <>
+    <div className="space-y-4">
+      {/* Breadcrumb */}
+      <div className="bg-white py-[10px] px-[12px] flex space-x-[4px] text-[14px]">
+        <div className="text-[#3399CC]">Instructor</div>
+        <div>/</div>
+        <div>{instructor.name}</div>
+      </div>
+
+      {/* Instructor Info */}
       <div className="bg-white p-6">
         <div className="text-xl flex justify-between font-medium">
           <div className="space-y-2">
             <p>{instructor.name}</p>
-            <p>Phone: {instructor.phone}</p>
-            <p>Email: {instructor.email}</p>
+            <p>{instructor.phone}</p>
+            <p>Total Students: {instructor.totalStudents}</p>
           </div>
-          <div className="space-y-2">
-            <p>Total Course: {assignedCourses.length}</p>
-            <p>Total Review: </p>
+          <div className="space-y-2 text-right">
+            <p>Total Courses: {instructor.totalCourses}</p>
+            <p>Total Reviews: {instructor.totalReviews}</p>
           </div>
           <div></div>
         </div>
 
-        {assignedCourses.length === 0 ? (
-          <p>No courses assigned.</p>
+        {/* Courses */}
+        {courses.length === 0 ? (
+          <p className="mt-6">No courses assigned.</p>
         ) : (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6 h-1/4">
-              {assignedCourses.map((course) => (
-                <CourseCard key={course.id} course={course} />
-              ))}
-            </div>
-          </>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+            {courses.map((course) => (
+              <CourseCard key={course.id} course={course} />
+            ))}
+          </div>
         )}
       </div>
-    </>
+    </div>
   );
 };
 

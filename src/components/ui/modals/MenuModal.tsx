@@ -13,9 +13,21 @@ import { logoutHandler } from "@/utils/handleLogout";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 
+interface User {
+  username: string | null;
+  email: string;
+  profileImage: string | null;
+  role: string;
+  phone?: string | null;
+  address?: string | null;
+  gender?: string | null;
+  dateOfBirth?: string | null;
+}
+
 interface ProfileMenuProps {
   isOpen: boolean;
   onClose: () => void;
+  user: User | null;
 }
 
 interface MenuItem {
@@ -24,12 +36,11 @@ interface MenuItem {
   closeOnClick?: boolean;
 }
 
-export function MenuModal({ isOpen, onClose }: ProfileMenuProps) {
+export function MenuModal({ isOpen, onClose, user }: ProfileMenuProps) {
   const dispatch = useDispatch();
   const router = useRouter();
 
   const handleLogout = () => {
-    console.log("Logging out...");
     logoutHandler(dispatch, router);
     window.dispatchEvent(new Event("logout"));
   };
@@ -39,28 +50,17 @@ export function MenuModal({ isOpen, onClose }: ProfileMenuProps) {
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
 
   const menuItems: MenuItem[] = [
-    {
-      label: "My Learning",
-      onClick: () => router.push("/learning"),
-    },
+    { label: "My Learning", onClick: () => router.push("/learning") },
     { label: "Password", onClick: () => setIsPasswordOpen(true) },
     { label: "Language", onClick: () => setIsLanguageOpen(true) },
-    {
-      label: "Help & Support",
-      onClick: () => console.log("Help & Support clicked"),
-    },
-    {
-      label: "Sign Out",
-      onClick: handleLogout,
-      closeOnClick: false,
-    },
+    { label: "Help & Support", onClick: () => console.log("Help & Support clicked") },
+    { label: "Sign Out", onClick: handleLogout, closeOnClick: false },
   ];
 
   return (
     <>
       <Transition appear show={isOpen} as={Fragment}>
         <Dialog as="div" className="relative z-50" onClose={onClose}>
-          {/* Overlay */}
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -86,7 +86,7 @@ export function MenuModal({ isOpen, onClose }: ProfileMenuProps) {
               <Dialog.Panel className="w-64 transform overflow-hidden rounded-xl bg-white shadow-xl transition-all">
                 <Card className="shadow-none">
                   <CardContent className="p-0">
-                    {/* Profile section */}
+                    {/* Profile Section */}
                     <div
                       className="p-4 space-y-3 cursor-pointer hover:bg-gray-50"
                       onClick={() => setIsProfileInfo(true)}
@@ -94,17 +94,19 @@ export function MenuModal({ isOpen, onClose }: ProfileMenuProps) {
                       <div className="flex items-center space-x-3">
                         <Avatar className="h-12 w-12">
                           <AvatarImage
-                            src="/placeholder.svg?height=48&width=48"
-                            alt="Jonathon Dickson"
+                            src={user?.profileImage || "/placeholder.svg"}
+                            alt={user?.username || "User"}
                           />
-                          <AvatarFallback>JD</AvatarFallback>
+                          <AvatarFallback>
+                            {user?.username ? user.username[0].toUpperCase() : "U"}
+                          </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-foreground truncate">
-                            Jonathon Dickson
+                            {user?.username || "No Name"}
                           </p>
                           <p className="text-xs text-muted-foreground truncate">
-                            jonathondick@gmail.com
+                            {user?.email || "No Email"}
                           </p>
                         </div>
                       </div>
@@ -112,18 +114,16 @@ export function MenuModal({ isOpen, onClose }: ProfileMenuProps) {
 
                     <Separator />
 
-                    {/* Menu items */}
+                    {/* Menu Items */}
                     <div className="py-2">
                       {menuItems.map((item, index) => (
                         <Button
                           key={index}
                           variant="ghost"
-                          className="w-full justify-start px-4 py-3 text-sm font-normal text-foreground hover:bg-muted"
+                          className="w-full justify-start px-4 py-3 text-sm font-normal text-foreground hover:bg-muted cursor-pointer"
                           onClick={() => {
                             item.onClick();
-                            if (item.closeOnClick !== false) {
-                              onClose();
-                            }
+                            if (item.closeOnClick !== false) onClose();
                           }}
                         >
                           {item.label}
@@ -138,11 +138,15 @@ export function MenuModal({ isOpen, onClose }: ProfileMenuProps) {
         </Dialog>
       </Transition>
 
-      {/* Sub-modals */}
-      <PersonalInfoModal
-        isOpen={isProfileInfo}
-        onClose={() => setIsProfileInfo(false)}
-      />
+      {/* Pass the user correctly */}
+      {user && (
+        <PersonalInfoModal
+          isOpen={isProfileInfo}
+          onClose={() => setIsProfileInfo(false)}
+          user={user}
+        />
+      )}
+
       <PasswordModal
         isOpen={isPasswordOpen}
         onClose={() => setIsPasswordOpen(false)}

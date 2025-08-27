@@ -8,20 +8,28 @@ import { usePathname } from "next/navigation";
 export default function TopNav() {
   const pathname = usePathname();
 
-  // Map your routes to titles
+  // Map your base routes to titles
   const routeTitles: Record<string, string> = {
     "/dashboard": "Dashboard",
     "/dashboard/course": "Courses",
-    "/dashboard/microLearning": "MicroLearning",
+    "/dashboard/micro-learning": "MicroLearning",
     "/dashboard/students": "Students",
     "/dashboard/instructor": "Instructors",
     "/dashboard/notifications": "Notifications",
     "/settings": "Settings",
   };
 
-  // fallback: show last part of pathname capitalized
   const getPageTitle = () => {
+    // Handle "startsWith" cases for parent routes
+    if (pathname.startsWith("/dashboard/instructor")) return "Instructors";
+    if (pathname.startsWith("/dashboard/course")) return "Courses";
+    if (pathname.startsWith("/dashboard/students")) return "Students";
+    if (pathname.startsWith("/dashboard/micro-learning")) return "MicroLearning";
+
+    // Exact matches
     if (routeTitles[pathname]) return routeTitles[pathname];
+
+    // Fallback: format last segment
     const parts = pathname.split("/").filter(Boolean);
     return parts.length > 0
       ? parts[parts.length - 1]

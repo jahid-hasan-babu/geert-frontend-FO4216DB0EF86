@@ -38,7 +38,6 @@ export const logoutHandler = async (dispatch: Dispatch, router: any) => {
 
     if (result.isConfirmed) {
       await dispatch(logout());
-      localStorage.setItem("isLoggedIn", "false");
       await Swal.fire({
         title: "Logged Out Successfully!",
         icon: "success",
