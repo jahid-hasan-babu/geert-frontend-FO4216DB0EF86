@@ -5,12 +5,12 @@ const authApi = baseApi.injectEndpoints({
     login: builder.mutation({
       query: (userInfo) => {
         return {
-          url: "login",
+          url: "/auth/login",
           method: "POST",
           body: userInfo,
         };
       },
-      invalidatesTags: ["user"],
+      // invalidatesTags: ["user"],
     }),
     loginWithGoogle: builder.mutation({
       query: (userInfo) => {

@@ -1,57 +1,41 @@
-"use client";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+"use client"
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Video, Trash2 } from "lucide-react";
-import { Textarea } from "@headlessui/react";
-import CourseQuiz from "./CourseQuiz";
-import MicroLearningQuiz from "./MicroLearningQuiz";
+import type React from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Plus, Trash2, Video, FileText } from "lucide-react"
 
 type Lesson = {
-  lessonType: "video" | "docs" | "";
-  lessonTitle: string;
-  lessonDuration: string;
-  lessonVideoName: string;
-};
+  lessonType: "video" | "DOCS" | "QUIZ"
+  lessonTitle: string
+  lessonDuration: string
+  lessonVideoName: string
+  lessonVideoFile?: File
+}
 
 type Quiz = {
-  question: string;
-  answer: string;
-  options: string[];
-};
+  question: string
+  answer: string
+  options: string[]
+}
 
 type Module = {
-  moduleTitle: string;
-  lessons: Lesson[];
-  quizzes?: Quiz[];
-};
+  moduleTitle: string
+  lessons: Lesson[]
+  quizzes?: Quiz[]
+}
 
-type Props = {
-  modules: Module[];
-  setModules: React.Dispatch<React.SetStateAction<Module[]>>;
-  isMicroLearning: boolean;
-};
+interface CourseModuleAddProps {
+  modules: Module[]
+  setModules: React.Dispatch<React.SetStateAction<Module[]>>
+  isMicroLearning: boolean
+}
 
-export default function CourseModuleAdd({
-  modules,
-  setModules,
-  isMicroLearning,
-}: Props) {
-  const handleModuleChange = (index: number, value: string) => {
-    setModules((prev) =>
-      prev.map((m, i) => (i === index ? { ...m, moduleTitle: value } : m))
-    );
-  };
-
-  const addModule = () => {
+export default function CourseModuleAdd({ modules, setModules, isMicroLearning }: CourseModuleAddProps) {
+  const addNewModule = () => {
     setModules((prev) => [
       ...prev,
       {
@@ -66,52 +50,23 @@ export default function CourseModuleAdd({
         ],
         quizzes: [],
       },
-    ]);
-  };
+    ])
+  }
 
-  const removeModule = (index: number) => {
-    setModules((prev) => prev.filter((_, i) => i !== index));
-  };
+  const removeModule = (moduleIndex: number) => {
+    if (modules.length > 1) {
+      setModules((prev) => prev.filter((_, idx) => idx !== moduleIndex))
+    }
+  }
 
-  // --- Lesson handlers ---
-  const handleLessonChange = (
-    moduleIndex: number,
-    lessonIndex: number,
-    field: keyof Lesson,
-    value: string
-  ) => {
+  const addNewLesson = (moduleIndex: number) => {
     setModules((prev) =>
-      prev.map((m, i) =>
-        i === moduleIndex
+      prev.map((module, idx) =>
+        idx === moduleIndex
           ? {
-              ...m,
-              lessons: m.lessons.map((l, li) =>
-                li === lessonIndex ? { ...l, [field]: value } : l
-              ),
-            }
-          : m
-      )
-    );
-  };
-
-  const handleVideoChange = (
-    moduleIndex: number,
-    lessonIndex: number,
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    if (!e.target.files || !e.target.files[0]) return;
-    const fileName = e.target.files[0].name;
-    handleLessonChange(moduleIndex, lessonIndex, "lessonVideoName", fileName);
-  };
-
-  const addLesson = (moduleIndex: number) => {
-    setModules((prev) =>
-      prev.map((m, i) =>
-        i === moduleIndex
-          ? {
-              ...m,
+              ...module,
               lessons: [
-                ...m.lessons,
+                ...module.lessons,
                 {
                   lessonType: "video",
                   lessonTitle: "",
@@ -120,357 +75,176 @@ export default function CourseModuleAdd({
                 },
               ],
             }
-          : m
-      )
-    );
-  };
+          : module,
+      ),
+    )
+  }
 
   const removeLesson = (moduleIndex: number, lessonIndex: number) => {
     setModules((prev) =>
-      prev.map((m, i) =>
-        i === moduleIndex
-          ? { ...m, lessons: m.lessons.filter((_, li) => li !== lessonIndex) }
-          : m
-      )
-    );
-  };
-
-  // --- Quiz handlers ---
-  const addQuiz = (moduleIndex: number) => {
-    setModules((prev) =>
-      prev.map((m, i) =>
-        i === moduleIndex
+      prev.map((module, idx) =>
+        idx === moduleIndex
           ? {
-              ...m,
-              quizzes: [
-                ...(m.quizzes || []),
-                { question: "", answer: "", options: [""] },
-              ],
+              ...module,
+              lessons: module.lessons.filter((_, lIdx) => lIdx !== lessonIndex),
             }
-          : m
-      )
-    );
-  };
+          : module,
+      ),
+    )
+  }
 
-  const removeQuiz = (moduleIndex: number, quizIndex: number) => {
-    setModules((prev) =>
-      prev.map((m, i) =>
-        i === moduleIndex
-          ? {
-              ...m,
-              quizzes: m.quizzes?.filter((_, qi) => qi !== quizIndex),
-            }
-          : m
-      )
-    );
-  };
+  const updateModule = (moduleIndex: number, field: string, value: string) => {
+    setModules((prev) => prev.map((module, idx) => (idx === moduleIndex ? { ...module, [field]: value } : module)))
+  }
 
-  const handleQuizChange = (
-    moduleIndex: number,
-    quizIndex: number,
-    field: keyof Quiz,
-    value: string
-  ) => {
+  const updateLesson = (moduleIndex: number, lessonIndex: number, field: string, value: string | File) => {
     setModules((prev) =>
-      prev.map((m, i) =>
-        i === moduleIndex
+      prev.map((module, mIdx) =>
+        mIdx === moduleIndex
           ? {
-              ...m,
-              quizzes: m.quizzes?.map((q, qi) =>
-                qi === quizIndex ? { ...q, [field]: value } : q
+              ...module,
+              lessons: module.lessons.map((lesson, lIdx) =>
+                lIdx === lessonIndex ? { ...lesson, [field]: value } : lesson,
               ),
             }
-          : m
-      )
-    );
-  };
+          : module,
+      ),
+    )
+  }
 
-  const handleOptionChange = (
-    moduleIndex: number,
-    quizIndex: number,
-    optionIndex: number,
-    value: string
-  ) => {
-    setModules((prev) =>
-      prev.map((m, i) =>
-        i === moduleIndex
-          ? {
-              ...m,
-              quizzes: m.quizzes?.map((q, qi) =>
-                qi === quizIndex
-                  ? {
-                      ...q,
-                      options: q.options.map((o, oi) =>
-                        oi === optionIndex ? value : o
-                      ),
-                    }
-                  : q
-              ),
-            }
-          : m
-      )
-    );
-  };
-
-  const addOption = (moduleIndex: number, quizIndex: number) => {
-    setModules((prev) =>
-      prev.map((m, i) =>
-        i === moduleIndex
-          ? {
-              ...m,
-              quizzes: m.quizzes?.map((q, qi) =>
-                qi === quizIndex ? { ...q, options: [...q.options, ""] } : q
-              ),
-            }
-          : m
-      )
-    );
-  };
-
-  const removeOption = (
-    moduleIndex: number,
-    quizIndex: number,
-    optionIndex: number
-  ) => {
-    setModules((prev) =>
-      prev.map((m, i) =>
-        i === moduleIndex
-          ? {
-              ...m,
-              quizzes: m.quizzes?.map((q, qi) =>
-                qi === quizIndex
-                  ? {
-                      ...q,
-                      options: q.options.filter((_, oi) => oi !== optionIndex),
-                    }
-                  : q
-              ),
-            }
-          : m
-      )
-    );
-  };
+  const handleVideoUpload = (moduleIndex: number, lessonIndex: number) => {
+    const input = document.createElement("input")
+    input.type = "file"
+    input.accept = "video/*"
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (file) {
+        updateLesson(moduleIndex, lessonIndex, "lessonVideoFile", file)
+        updateLesson(moduleIndex, lessonIndex, "lessonVideoName", file.name)
+        console.log("[v0] Video uploaded:", file.name)
+      }
+    }
+    input.click()
+  }
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold text-gray-900">Modules</h2>
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-semibold text-gray-900">Course Modules</h2>
+        <Button onClick={addNewModule} variant="outline">
+          <Plus className="w-4 h-4 mr-2" />
+          Add Module
+        </Button>
+      </div>
 
       {modules.map((module, moduleIndex) => (
-        <div
-          key={moduleIndex}
-          className="space-y-4 border-2 border-gray-100 p-4 rounded-lg relative"
-        >
-          {/* Remove Module */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-2 right-2 text-red-500 hover:bg-red-100 cursor-pointer"
-            onClick={() => removeModule(moduleIndex)}
-          >
-            <Trash2 className="w-5 h-5" />
-          </Button>
-
-          {/* Module Title */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Module Title
-            </label>
-            <Input
-              placeholder="Write title"
-              value={module.moduleTitle}
-              onChange={(e) => handleModuleChange(moduleIndex, e.target.value)}
-            />
-          </div>
-
-          {/* Lessons */}
-          {module.lessons.map((lesson, lessonIndex) => (
-            <div
-              key={lessonIndex}
-              className="space-y-4 border border-gray-200 p-4 rounded-lg relative"
-            >
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute top-2 right-2 text-red-500 hover:bg-red-100 cursor-pointer"
-                onClick={() => removeLesson(moduleIndex, lessonIndex)}
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Lesson Type */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Lesson Type
-                  </label>
-                  <Select
-                    value={lesson.lessonType}
-                    onValueChange={(value) =>
-                      handleLessonChange(
-                        moduleIndex,
-                        lessonIndex,
-                        "lessonType",
-                        value
-                      )
-                    }
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="video">Video</SelectItem>
-                      <SelectItem value="docs">Docs</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Lesson Title */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Lesson Title
-                  </label>
-                  <Input
-                    placeholder="Write lesson title"
-                    value={lesson.lessonTitle}
-                    onChange={(e) =>
-                      handleLessonChange(
-                        moduleIndex,
-                        lessonIndex,
-                        "lessonTitle",
-                        e.target.value
-                      )
-                    }
-                    className="w-full"
-                  />
-                </div>
-
-                {/* Lesson Duration */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Lesson Duration
-                  </label>
-                  <Input
-                    placeholder="e.g., 5min, 10min, 1hr"
-                    value={lesson.lessonDuration}
-                    onChange={(e) =>
-                      handleLessonChange(
-                        moduleIndex,
-                        lessonIndex,
-                        "lessonDuration",
-                        e.target.value
-                      )
-                    }
-                    className="w-full"
-                  />
-                </div>
+        <Card key={moduleIndex} className="border-2 border-gray-100">
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              {/* Module Header */}
+              <div className="flex items-center gap-3">
+                <Input
+                  placeholder="Module Title *"
+                  value={module.moduleTitle}
+                  onChange={(e) => updateModule(moduleIndex, "moduleTitle", e.target.value)}
+                  className="flex-1"
+                  required
+                />
+                {modules.length > 1 && (
+                  <Button variant="outline" size="sm" onClick={() => removeModule(moduleIndex)}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
 
-              {/* Video / Docs */}
-              {lesson.lessonType === "video" && (
-                <Card>
-                  <CardContent className="">
-                    <div
-                      onClick={() =>
-                        document
-                          .getElementById(`video-${moduleIndex}-${lessonIndex}`)
-                          ?.click()
-                      }
-                      className="cursor-pointer border-2 border-dashed border-blue-300 rounded-lg p-12 text-center bg-blue-50/30 hover:bg-blue-100 transition"
-                    >
-                      <Video className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                      <p className="text-gray-600 font-medium">
-                        {lesson.lessonVideoName || "Upload Lesson Video"}
-                      </p>
+              {/* Lessons */}
+              <div className="space-y-3">
+                <h4 className="font-medium text-gray-700">Lessons</h4>
+                {module.lessons.map((lesson, lessonIndex) => (
+                  <div key={lessonIndex} className="border rounded-lg p-4 space-y-3 bg-gray-50">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <Input
+                        placeholder="Lesson Title *"
+                        value={lesson.lessonTitle}
+                        onChange={(e) => updateLesson(moduleIndex, lessonIndex, "lessonTitle", e.target.value)}
+                        required
+                      />
+                      <Input
+                        placeholder="Duration (e.g., 5m) *"
+                        value={lesson.lessonDuration}
+                        onChange={(e) => updateLesson(moduleIndex, lessonIndex, "lessonDuration", e.target.value)}
+                        required
+                      />
+                      <Select
+                        value={lesson.lessonType}
+                        onValueChange={(value: "video" | "DOCS" ) =>
+                          updateLesson(moduleIndex, lessonIndex, "lessonType", value)
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Lesson Type *" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="video">Video</SelectItem>
+                          <SelectItem value="DOCS">Document</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
-                    <input
-                      type="file"
-                      id={`video-${moduleIndex}-${lessonIndex}`}
-                      onChange={(e) =>
-                        handleVideoChange(moduleIndex, lessonIndex, e)
-                      }
-                      className="hidden"
-                      accept="video/*"
-                    />
-                  </CardContent>
-                </Card>
-              )}
 
-              {lesson.lessonType === "docs" && (
-                <Card className="py-2">
-                  <CardContent className="space-y-4 px-2">
-                    <Textarea
-                      placeholder="Write here"
-                      value={lesson.lessonVideoName}
-                      onChange={(e) =>
-                        handleLessonChange(
-                          moduleIndex,
-                          lessonIndex,
-                          "lessonVideoName",
-                          e.target.value
-                        )
-                      }
-                      className="w-full min-h-[100px] resize-none"
-                    />
-                  </CardContent>
-                </Card>
-              )}
+                    {/* Video Upload */}
+                    {lesson.lessonType === "video" && (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-3">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => handleVideoUpload(moduleIndex, lessonIndex)}
+                          >
+                            <Video className="w-4 h-4 mr-2" />
+                            Upload Video
+                          </Button>
+                          {lesson.lessonVideoName && (
+                            <span className="text-sm text-gray-600 bg-white px-2 py-1 rounded border">
+                              {lesson.lessonVideoName}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Document Upload */}
+                    {lesson.lessonType === "DOCS" && (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-3">
+                          <Button type="button" variant="outline">
+                            <FileText className="w-4 h-4 mr-2" />
+                            Upload Document
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Remove Lesson */}
+                    <div className="flex justify-end">
+                      {module.lessons.length > 1 && (
+                        <Button variant="outline" size="sm" onClick={() => removeLesson(moduleIndex, lessonIndex)}>
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Remove Lesson
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                <Button onClick={() => addNewLesson(moduleIndex)} variant="outline" size="sm">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Lesson
+                </Button>
+              </div>
             </div>
-          ))}
-
-          {/* Add Lesson Button */}
-          <Button
-            onClick={() => addLesson(moduleIndex)}
-            className="w-full bg-[#3399CC] hover:bg-[#52b9ec] rounded-full cursor-pointer"
-          >
-            Add New Lesson
-          </Button>
-
-          {/* Quizzes */}
-          {module.quizzes?.map((quiz, quizIndex) =>
-            isMicroLearning ? (
-              <MicroLearningQuiz
-                key={quizIndex}
-                moduleIndex={moduleIndex}
-                quizIndex={quizIndex}
-                quiz={quiz}
-                handleQuizChange={handleQuizChange}
-                handleOptionChange={handleOptionChange}
-                addOption={addOption}
-                removeOption={removeOption}
-                removeQuiz={removeQuiz}
-              />
-            ) : (
-              <CourseQuiz
-                key={quizIndex}
-                moduleIndex={moduleIndex}
-                quizIndex={quizIndex}
-                quiz={quiz}
-                handleQuizChange={handleQuizChange}
-                handleOptionChange={handleOptionChange}
-                addOption={addOption}
-                removeOption={removeOption}
-                removeQuiz={removeQuiz}
-              />
-            )
-          )}
-
-          {/* Add Quiz Button */}
-          <Button
-            onClick={() => addQuiz(moduleIndex)}
-            className="w-full bg-[#C0DFEF] text-black hover:bg-blue-200 rounded-full cursor-pointer mt-2"
-          >
-            Add Quiz
-          </Button>
-        </div>
+          </CardContent>
+        </Card>
       ))}
-
-      {/* Add Module Button */}
-      <Button
-        onClick={addModule}
-        className="w-full bg-[#3399CC] hover:bg-[#52b9ec] cursor-pointer rounded-full"
-      >
-        Add New Module
-      </Button>
     </div>
-  );
+  )
 }
