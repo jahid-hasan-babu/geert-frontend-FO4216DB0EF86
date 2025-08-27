@@ -91,7 +91,7 @@ export default function CourseAddPage() {
 
     axios
       .get(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/category/all-category`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/category/all-category`,
         config
       )
       .then((res) => {
@@ -102,7 +102,7 @@ export default function CourseAddPage() {
 
     axios
       .get(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/users/all-users?filter=INSTRUCTOR`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/users/all-users?filter=INSTRUCTOR`,
         config
       )
       .then((res) => {
@@ -161,7 +161,7 @@ export default function CourseAddPage() {
       formData.append("bodyData", JSON.stringify(bodyData));
 
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/courses/create-course`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/courses/create-course`,
         formData,
         {
           headers: {

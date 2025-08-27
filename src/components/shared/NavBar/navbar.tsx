@@ -47,7 +47,7 @@ export default function Navbar() {
         const token = localStorage.getItem("token");
         if (!token) return;
 
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/users/me`, {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/users/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 

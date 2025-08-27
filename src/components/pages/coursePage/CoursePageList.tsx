@@ -47,7 +47,7 @@ export default function CoursesPageList() {
     const fetchCategories = async () => {
       try {
         const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/category/all-category`,
+          `${process.env.NEXT_PUBLIC_BASE_URL}/category/all-category`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -76,7 +76,7 @@ export default function CoursesPageList() {
           searchParam = activeFilter;
         }
 
-        let url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/courses/all-course`;
+        let url = `${process.env.NEXT_PUBLIC_BASE_URL}/courses/all-course`;
         const queryParams: string[] = [];
 
         if (searchParam)

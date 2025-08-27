@@ -37,7 +37,7 @@ export default function AddMemberModal({ courseId, onAddSuccess }: AddInstructor
     try {
       const token = localStorage.getItem("token");
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/courses/add-student`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/courses/add-student`,
         {
           email,
           courseId,

@@ -51,7 +51,7 @@ export function PasswordModal({ isOpen, onClose }: PasswordModalProps) {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.patch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/users/update-password`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/users/update-password`,
         {
           currentPass: passwords.oldPassword,
           newPass: passwords.newPassword,
