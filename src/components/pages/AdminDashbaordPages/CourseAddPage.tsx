@@ -71,6 +71,8 @@ export default function CourseAddPage() {
   const categories = categoriesResponse?.data?.data || []
   const instructors = instructorsResponse?.data?.data || []
 
+  console.log(categories,instructors ,"this category and instrtorss")
+
   const [courseData, setCourseData] = useState({
     title: "",
     description: "",
