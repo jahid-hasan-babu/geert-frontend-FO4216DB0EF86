@@ -1,19 +1,17 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import course_details_image from "@/assets/images/course_details_image.png";
 import instructorImage from "@/assets/images/about_dp.png";
 import CourseReviewAbout from "@/components/ui/review/CourseReviewAbout";
 import Promotion from "@/components/shared/Promotion/Promotion";
 import CourseVideoPlayer from "@/components/ui/videoPlayer/CourseVideoPlayer";
 import {
   CourseProvider,
-  useCourse,
   CourseSidebar,
   Module,
 } from "@/components/ui/context/CourseContext";
 import { reviewData } from "@/utils/dummyData";
-import { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
 
 interface Instructor {
   name: string;
@@ -59,19 +57,18 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
         const token = localStorage.getItem("token");
         if (!token) throw new Error("No access token found");
 
-        const res = await fetch(
+        const { data } = await axios.get(
           `${process.env.NEXT_PUBLIC_BASE_URL}/courses/single-course/${slug}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        if (!res.ok) throw new Error("Failed to fetch course");
+        console.log("Data >>> ", data?.data);
 
-        const data = await res.json();
         setCourse(data?.data);
       } catch (err) {
         const error = err as AxiosError<{ message: string }>;
         console.error(error);
-        setError(error.message || "Something went wrong");
+        setError(error.response?.data?.message || "Something went wrong");
       } finally {
         setLoading(false);
       }
@@ -80,12 +77,10 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
     fetchCourse();
   }, [slug]);
 
-  if (loading)
-    return <p className="text-center py-10">Loading course...</p>;
-  if (error)
-    return (
-      <p className="text-center py-10 text-red-500">{error}</p>
-    );
+  console.log("Courses >>>", course);
+
+  if (loading) return <p className="text-center py-10">Loading course...</p>;
+  if (error) return <p className="text-center py-10 text-red-500">{error}</p>;
   if (!course) return <p className="text-center py-10">Course not found</p>;
 
   const instructor: Instructor = {
@@ -98,18 +93,37 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
   );
 
   const modules: Module[] =
-    course.modules?.map((m) => ({
-      id: m.id,
-      title: m.title,
-      lessons: m.lessons.map((l) => ({
+    course.modules?.map((m) => {
+      // map lessons first
+      const lessons = m.lessons.map((l) => ({
         id: l.id,
         title: l.title,
         type: l.type,
         duration: l.duration,
         completed: l.completed,
         videoUrl: l.videoUrl,
-      })),
-    })) || [];
+      }));
+
+      // append quizzes if any
+      if (m.Quiz?.length) {
+        m.Quiz.forEach((q) => {
+          lessons.push({
+            id: q.id,
+            title: q.title,
+            type: "quiz",
+            quiz: q,
+          });
+        });
+      }
+
+      return {
+        id: m.id,
+        title: m.title,
+        lessons,
+      };
+    }) || [];
+
+  console.log("Modules", modules);
 
   return (
     <CourseProvider modules={modules}>
@@ -162,7 +176,6 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
               />
             </div>
 
-            {/* Right Sidebar: Lessons + Quiz + Certification */}
             <div className="lg:col-span-1">
               <CourseSidebar modules={modules} />
             </div>

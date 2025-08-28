@@ -1,19 +1,19 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
-import { ChevronDown, CheckCircle, Play, Circle } from "lucide-react";
+import { ChevronDown, CheckCircle, Play } from "lucide-react";
 import CourseCertification from "@/components/certification/CourseCertification";
 import { QuizModal, Quiz } from "../modals/QuizModal";
 
-export type LessonsItem = {
+export interface LessonsItem {
   id: string;
   title: string;
-  type?: "video" | "doc" | "quiz";
+  type: "video" | "doc" | "quiz";
   duration?: string;
   completed?: boolean;
   videoUrl?: string;
-  quiz?: Quiz | null;
-};
+  quiz?: Quiz;
+}
 
 export interface Module {
   id: string;
@@ -35,11 +35,10 @@ export const useCourse = () => {
   return context;
 };
 
-export const CourseProvider: React.FC<{ modules: Module[]; children: ReactNode }> = ({
-  modules,
-  children,
-}) => {
-  // Map quizzes into lessons as type: "quiz"
+export const CourseProvider: React.FC<{
+  modules: Module[];
+  children: ReactNode;
+}> = ({ modules, children }) => {
   const mappedModules: Module[] = modules.map((module) => {
     const lessonsWithQuiz: LessonsItem[] = [];
 
@@ -64,13 +63,13 @@ export const CourseProvider: React.FC<{ modules: Module[]; children: ReactNode }
   );
 
   return (
-    <CourseContext.Provider value={{ modules: mappedModules, currentLesson, setCurrentLesson }}>
+    <CourseContext.Provider
+      value={{ modules: mappedModules, currentLesson, setCurrentLesson }}
+    >
       {children}
     </CourseContext.Provider>
   );
 };
-
-// ----------------- Sidebar -----------------
 
 interface CourseSidebarProps {
   modules: Module[];
@@ -126,7 +125,9 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({ modules }) => {
 
           <div
             className={`transition-all duration-300 ease-in-out overflow-hidden ${
-              openModuleId === module.id ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
+              openModuleId === module.id
+                ? "max-h-[2000px] opacity-100"
+                : "max-h-0 opacity-0"
             }`}
           >
             <div className="bg-white">
@@ -143,7 +144,9 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({ modules }) => {
                           : "border-gray-300 bg-white"
                       }`}
                     >
-                      {lesson.completed && <CheckCircle className="w-4 h-4 text-white" />}
+                      {lesson.completed && (
+                        <CheckCircle className="w-4 h-4 text-white" />
+                      )}
                     </div>
                     {idx < module.lessons.length - 1 && (
                       <div className="w-px h-8 bg-gray-200 mt-2" />
@@ -152,7 +155,9 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({ modules }) => {
 
                   <div className="flex-1 flex justify-between items-center">
                     <div>
-                      <h4 className="font-medium text-gray-900">{lesson.title}</h4>
+                      <h4 className="font-medium text-gray-900">
+                        {lesson.title}
+                      </h4>
                       <p className="text-sm text-gray-600">
                         {lesson.type === "video"
                           ? `Video: ${lesson.duration}`
@@ -196,7 +201,9 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({ modules }) => {
             isCertOpen ? "border-b border-[#E7E7E7]" : ""
           }`}
         >
-          <h3 className="text-[16px] font-semibold text-gray-900">Certification</h3>
+          <h3 className="text-[16px] font-semibold text-gray-900">
+            Certification
+          </h3>
           <ChevronDown
             className={`w-5 h-5 text-gray-600 transition-transform duration-300 transform ${
               isCertOpen ? "rotate-180" : "rotate-0"
