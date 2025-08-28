@@ -15,8 +15,7 @@ import { useAddMicroLearningMutation } from "@/redux/features/courses/coursesApi
 import { z } from "zod"
 import { useGetCoursesCategoryQuery, useGetUserQuery } from "@/redux/features/users&category/usersCategoryApi"
 import { toast } from "sonner"
-import SunEditor from "suneditor-react"
-import "suneditor/dist/css/suneditor.min.css"
+import Editor from "../../ui/Editor/Editor"
 import CourseModuleAdd from "./CourseModuleAdd"
 
 type QuizOption = {
@@ -30,6 +29,8 @@ type QuizQuestion = {
   text: string
   type: "SINGLE_CHOICE" | "MULTI_CHOICE" | "ORDERING" | "SCALE" | "TEXT"
   options: QuizOption[]
+  scaleMin?: number
+  scaleMax?: number
 }
 
 type Quiz = {
@@ -228,6 +229,8 @@ export default function CourseAddPage() {
                 files: option.files,
                 fileNames: option.fileNames,
               })),
+              scaleMin: question.scaleMin,
+              scaleMax: question.scaleMax,
             })),
           })),
         })),
@@ -386,20 +389,7 @@ export default function CourseAddPage() {
 
           <div>
             <label className="block text-sm font-medium text-[#585858] mb-2">Description *</label>
-            <SunEditor
-              setContents={courseData.description}
-              onChange={handleDescriptionChange}
-              height="300px"
-              setOptions={{
-                buttonList: [
-                  ["undo", "redo"],
-                  ["bold", "underline", "italic"],
-                  ["fontColor", "hiliteColor"],
-                  ["align", "list", "link"],
-                  ["fullScreen"],
-                ],
-              }}
-            />
+            <Editor contents={courseData.description} onSave={handleDescriptionChange} onBlur={() => {}} />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

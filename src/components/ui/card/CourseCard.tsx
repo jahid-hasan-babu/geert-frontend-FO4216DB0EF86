@@ -7,13 +7,12 @@ import axios, { AxiosError } from "axios";
 import course_image from "@/assets/images/course_image.png";
 import { reviewData } from "@/utils/dummyData";
 import { toast } from "sonner";
-import { Lesson } from "../context/CourseContext";
+import { useAddToFavoritesMutation } from "@/redux/features/favorites/favoritesApi";
 
 interface Course {
   id: string;
   title: string;
   slug?: string;
-  courseContexts?: Lesson[];
   totalLessons?: number;
   duration: string;
   rating?: number;
@@ -25,11 +24,12 @@ interface Course {
   description?: string;
   coverImage?: string;
   isFavorite?: boolean; // ✅ comes directly from API
-}
+} 
 
 export default function CourseCard({ course }: { course: Course }) {
   const [isFavorite, setIsFavorite] = useState<boolean>(course.isFavorite ?? false);
-  const [loading, setLoading] = useState(false);
+
+  const [addToFavorites] = useAddToFavoritesMutation();
 
   const filteredReviews = reviewData.filter(
     (review) => review.courseId === course.id
@@ -41,47 +41,12 @@ export default function CourseCard({ course }: { course: Course }) {
   }, [course.isFavorite]);
 
   const toggleFavorite = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      toast.error("You must be logged in to add favorites.");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/favorites`,
-        { courseId: course.id },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (res.data.success) {
-        setIsFavorite((prev) => !prev);
-        toast.success(
-          !isFavorite ? "Added to favorites" : "Removed from favorites"
-        );
-      } else {
-        toast.error(res.data.message || "Failed to update favorite");
-      }
-    } catch (error) {
-      const err = error as AxiosError<{ message?: string }>;
-      console.error(err);
-      toast.error(
-        err.response?.data?.message ||
-          "Something went wrong while updating favorites"
-      );
-    } finally {
-      setLoading(false);
-    }
+   
   };
 
   return (
     <div className="bg-white h-full rounded-2xl overflow-hidden transition-shadow duration-300 relative">
-      {/* ❤️ Favorite button */}
+
       <button
         onClick={toggleFavorite}
         disabled={loading}
@@ -127,7 +92,7 @@ export default function CourseCard({ course }: { course: Course }) {
           <div className="flex items-center space-x-1">
             <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
             <span className="font-medium text-[#404040]">
-              {course.rating ?? course.avgRating ?? 0} ({filteredReviews.length})
+              {course.rating ?? 0} ({filteredReviews.length})
             </span>
           </div>
         </div>

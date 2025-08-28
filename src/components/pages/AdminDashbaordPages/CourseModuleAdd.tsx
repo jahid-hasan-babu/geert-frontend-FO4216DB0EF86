@@ -7,11 +7,11 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Trash2, Video, FileText } from "lucide-react"
-import SunEditor from "suneditor-react"
-import "suneditor/dist/css/suneditor.min.css"
+import Editor from "../../ui/Editor/Editor"
+import { usePathname } from "next/navigation"
 
 type Lesson = {
-  lessonType: "video" | "doc" 
+  lessonType: "video" | "doc"
   lessonTitle: string
   lessonDescription: string
   lessonDuration: string
@@ -55,6 +55,7 @@ interface CourseModuleAddProps {
 }
 
 export default function CourseModuleAdd({ modules, setModules, isMicroLearning }: CourseModuleAddProps) {
+  const pathname = usePathname()
   const addNewModule = () => {
     setModules((prev) => [
       ...prev,
@@ -538,7 +539,7 @@ export default function CourseModuleAdd({ modules, setModules, isMicroLearning }
                       />
                       <Select
                         value={lesson.lessonType}
-                        onValueChange={(value: "video" | "doc") =>
+                        onValueChange={(value: "video" | "doc" ) =>
                           updateLesson(moduleIndex, lessonIndex, "lessonType", value)
                         }
                       >
@@ -555,19 +556,10 @@ export default function CourseModuleAdd({ modules, setModules, isMicroLearning }
                     {lesson.lessonType === "doc" && (
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Lesson Description</label>
-                        <SunEditor
-                          setContents={lesson.lessonDescription}
-                          onChange={(content: string) => handleLessonDescriptionChange(moduleIndex, lessonIndex, content)}
-                          height="300px"
-                          setOptions={{
-                            buttonList: [
-                              ["undo", "redo"],
-                              ["bold", "underline", "italic"],
-                              ["fontColor", "hiliteColor"],
-                              ["align", "list", "link"],
-                              ["fullScreen"],
-                            ],
-                          }}
+                        <Editor
+                          contents={lesson.lessonDescription}
+                          onSave={(content) => handleLessonDescriptionChange(moduleIndex, lessonIndex, content)}
+                          onBlur={() => {}}
                         />
                       </div>
                     )}
@@ -721,10 +713,16 @@ export default function CourseModuleAdd({ modules, setModules, isMicroLearning }
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="SINGLE_CHOICE">Single Choice</SelectItem>
+                            {
+                              pathname === "/dashboard/micro-learning/add-microLearning" && (
+                                <>
                               <SelectItem value="MULTI_CHOICE">Multi Choice</SelectItem>
                               <SelectItem value="ORDERING">Ordering</SelectItem>
                               <SelectItem value="SCALE">Scale</SelectItem>
                               <SelectItem value="TEXT">Text Answer</SelectItem>
+                                </>
+                              )
+                            }
                             </SelectContent>
                           </Select>
                           {/* Remove Question Button */}

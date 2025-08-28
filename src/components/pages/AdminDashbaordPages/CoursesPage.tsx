@@ -7,13 +7,11 @@ import CourseCard from "@/components/ui/card/CourseCard";
 import Pagination from "@/components/ui/pagination/Pagination";
 import Link from "next/link";
 import axios from "axios";
-import { Lesson } from "@/components/ui/context/CourseContext";
 
 interface Course {
   id: string;
   title: string;
   slug: string;
-  courseContexts: Lesson[];
   lessons: number;
   duration: string;
   rating: number;
@@ -99,9 +97,9 @@ const CoursesPage = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {currentCourses.map((course) => (
-              <Link href={`/dashboard/course/${course.id}`} key={course.id}>
-                <CourseCard course={course} />
-              </Link>
+
+                <CourseCard key={course.id} course={course} />
+
             ))}
           </div>
         )}
