@@ -6,7 +6,7 @@ import { FcGoogle } from "react-icons/fc";
 
 const LoginWithGoogle = () => {
   const { data: session } = useSession();
-  console.log(session);
+ 
   return (
     <div>
        {session ? (

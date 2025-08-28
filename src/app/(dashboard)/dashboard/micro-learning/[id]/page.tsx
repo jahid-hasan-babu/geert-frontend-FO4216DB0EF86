@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // import CourseDetails from "@/components/pages/AdminDashbaordPages/CourseDetailsPage";
 import { courseData } from "@/utils/dummyData";
 import { instructorsData } from "@/utils/dummyData";
@@ -14,7 +15,7 @@ const Page = async ({ params }: PageProps) => {
   const instructor = instructorsData.find((i) =>
     i.assignedCoursesId.includes(id)
   );
-  console.log("Instructor", instructor)
+
 
   if (!course) {
     return <div>Course not found</div>;
