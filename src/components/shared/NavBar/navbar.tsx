@@ -9,15 +9,15 @@ import { Bell, ChevronDown, Star, X } from "lucide-react";
 import axios from "axios";
 import logo from "@/assets/images/logo.png";
 import profile_dp from "@/assets/images/profile_dp.png";
-import { notificationsData } from "@/utils/dummyData";
 import NotificationModal from "@/components/ui/modals/NotificationModal";
 import { ReviewModal } from "@/components/ui/modals/ReviewModal";
 import { CourseProgressModal } from "@/components/ui/modals/CourseProgressModal";
 import { MenuModal } from "@/components/ui/modals/MenuModal";
+import { useGetNotificationsQuery } from "@/redux/features/notification/notificationsApi";
+import { useGetMeQuery } from "@/redux/features/auth/authApi";
 
 const navLinks = [
   { href: "/", label: "Home" },
-  { href: "/features", label: "Features" },
   { href: "/courses", label: "Courses" },
   { href: "/contact", label: "Contact" },
   { href: "/help-support", label: "Support" },
@@ -44,32 +44,17 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [userData, setUserData] = useState<User | null>(null);
   const [courseData, setCourseData] = useState<Course | null>(null);
-
   const pathname = usePathname();
 
-  // Fetch user data
+  const { data, isLoading } = useGetNotificationsQuery({});
+  const { data: use, isLoading: isLoadingUser } = useGetMeQuery({});
+
+  // Set user data when the query data changes
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-
-        const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/users/me`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        if (res.data.success) {
-          setUserData(res.data.data);
-        }
-      } catch (err) {
-        console.error("Failed to fetch user:", err);
-      }
-    };
-    fetchUser();
-  }, []);
+    if (use?.data) {
+      setUserData(use.data);
+    }
+  }, [use?.data]);
 
   // Fetch course data if on a course page
   useEffect(() => {
@@ -100,12 +85,21 @@ export default function Navbar() {
     fetchCourse();
   }, [pathname]);
 
+  if (isLoading || isLoadingUser) {
+    return <div>Loading...</div>;
+  }
+
+  const notificationsData = data?.data?.data || [];
+
   const isActive = (href: string) => pathname === href;
 
   return (
     <header className="bg-white sticky top-0 z-50">
       <nav className="container mx-auto px-4 py-3 flex items-center justify-between">
-        <Link href="/" className="cursor-pointer flex items-center justify-center">
+        <Link
+          href="/"
+          className="cursor-pointer flex items-center justify-center"
+        >
           <Image src={logo} alt="Logo" />
         </Link>
 
@@ -191,7 +185,11 @@ export default function Navbar() {
             strokeWidth={2}
             viewBox="0 0 24 24"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
           </svg>
         </button>
       </nav>
@@ -220,7 +218,9 @@ export default function Navbar() {
                   <Link
                     href={href}
                     className={`block ${
-                      isActive(href) ? "text-[#3399CC] font-semibold" : "hover:text-[#9191c4]"
+                      isActive(href)
+                        ? "text-[#3399CC] font-semibold"
+                        : "hover:text-[#9191c4]"
                     }`}
                     onClick={() => setIsOpen(false)}
                   >
@@ -259,7 +259,10 @@ export default function Navbar() {
         onClose={() => setIsNotifOpen(false)}
         notifications={notificationsData}
       />
-      <ReviewModal isOpen={isReviewOpen} onClose={() => setIsReviewOpen(false)} />
+      <ReviewModal
+        isOpen={isReviewOpen}
+        onClose={() => setIsReviewOpen(false)}
+      />
       <CourseProgressModal
         isOpen={isProgressOpen}
         onClose={() => setIsProgressOpen(false)}
