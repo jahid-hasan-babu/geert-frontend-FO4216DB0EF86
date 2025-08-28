@@ -71,7 +71,6 @@ export default function CourseAddPage() {
   const categories = categoriesResponse?.data?.data || []
   const instructors = instructorsResponse?.data?.data || []
 
-  console.log(categories,instructors ,"this category and instrtorss")
 
   const [courseData, setCourseData] = useState({
     title: "",
@@ -108,7 +107,6 @@ export default function CourseAddPage() {
     if (e.target.files && e.target.files[0]) {
       setCoverImageFile(e.target.files[0])
       setCoverImageName(e.target.files[0].name)
-      console.log("Selected cover image:", e.target.files[0])
     }
   }
 
@@ -167,7 +165,6 @@ export default function CourseAddPage() {
   }
 
   const handleSave = async () => {
-    console.log("[v0] Starting form submission...")
 
     if (!validateForm()) {
       toast("Please fix the form errors before submitting.")
@@ -212,11 +209,9 @@ export default function CourseAddPage() {
         })),
       }
 
-      console.log("[v0] BodyData structure:", bodyData)
       formData.append("bodyData", JSON.stringify(bodyData))
 
       if (coverImageFile) {
-        console.log("[v0] Adding cover image:", coverImageFile.name)
         formData.append("coverImage", coverImageFile)
       }
 

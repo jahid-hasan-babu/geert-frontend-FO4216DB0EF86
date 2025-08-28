@@ -23,7 +23,6 @@ export default function LearningCard({
   course: Course;
   isLoading: boolean;
 }) {
-  console.log(course, "course data");
   const progress =
     course?.totalLessons > 0 ? Math.round((course?.completedLessons / course?.totalLessons) * 100) : 0;
   return (

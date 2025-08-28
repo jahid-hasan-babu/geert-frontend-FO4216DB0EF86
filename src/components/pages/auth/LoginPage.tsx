@@ -51,7 +51,6 @@ export default function LoginPage() {
         }),
       )
 
-      console.log(responseData, "this is login response")
       const { accessToken: token, ...user } = responseData.data
       localStorage.setItem("token", token)
       localStorage.setItem("user", JSON.stringify(user))

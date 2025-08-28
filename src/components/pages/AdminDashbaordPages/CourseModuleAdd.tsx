@@ -121,7 +121,7 @@ export default function CourseModuleAdd({ modules, setModules, isMicroLearning }
       if (file) {
         updateLesson(moduleIndex, lessonIndex, "lessonVideoFile", file)
         updateLesson(moduleIndex, lessonIndex, "lessonVideoName", file.name)
-        console.log("[v0] Video uploaded:", file.name)
+       
       }
     }
     input.click()

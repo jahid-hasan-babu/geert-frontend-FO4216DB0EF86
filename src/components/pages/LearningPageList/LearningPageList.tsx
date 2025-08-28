@@ -51,6 +51,7 @@ export default function LearningPageList() {
       </div>
     )
   }
+  
 
   return (
     <div className="container mx-auto px-6 lg:pb-[80px]">
