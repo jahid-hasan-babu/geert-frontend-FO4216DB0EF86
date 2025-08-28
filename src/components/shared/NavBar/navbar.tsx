@@ -61,7 +61,6 @@ export default function Navbar() {
     fetchUser();
   }, []);
 
-  console.log("User Data >>>", userData)
 
   let courseTitle: string | null = null;
   if (pathname.startsWith("/courses/")) {

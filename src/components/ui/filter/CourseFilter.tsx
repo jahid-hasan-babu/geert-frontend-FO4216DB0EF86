@@ -1,3 +1,5 @@
+"use client"
+
 interface CourseFilterProps {
   filters: string[]
   activeFilter: string
