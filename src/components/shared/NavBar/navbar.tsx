@@ -54,9 +54,12 @@ export default function Navbar() {
         const token = localStorage.getItem("token");
         if (!token) return;
 
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/users/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/users/me`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
         if (res.data.success) {
           setUserData(res.data.data);
@@ -74,13 +77,18 @@ export default function Navbar() {
       if (!pathname.startsWith("/courses/")) return;
 
       const courseId = pathname.split("/")[2];
+      if (!courseId) return;
+
       try {
         const token = localStorage.getItem("token");
         if (!token) return;
 
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/courses/single-course/${courseId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/courses/single-course/${courseId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
         if (res.data.success) {
           setCourseData(res.data.data);
