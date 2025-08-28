@@ -9,7 +9,7 @@ import { Bell, ChevronDown, Star, X } from "lucide-react";
 import axios from "axios";
 import logo from "@/assets/images/logo.png";
 import profile_dp from "@/assets/images/profile_dp.png";
-import { courseData, notificationsData } from "@/utils/dummyData";
+import { notificationsData } from "@/utils/dummyData";
 import NotificationModal from "@/components/ui/modals/NotificationModal";
 import { ReviewModal } from "@/components/ui/modals/ReviewModal";
 import { CourseProgressModal } from "@/components/ui/modals/CourseProgressModal";
@@ -31,6 +31,11 @@ interface User {
   role: string;
 }
 
+interface Course {
+  id: string;
+  title: string;
+}
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
@@ -38,18 +43,23 @@ export default function Navbar() {
   const [isProgressOpen, setIsProgressOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [userData, setUserData] = useState<User | null>(null);
+  const [courseData, setCourseData] = useState<Course | null>(null);
 
   const pathname = usePathname();
 
+  // Fetch user data
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) return;
 
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/users/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/users/me`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
         if (res.data.success) {
           setUserData(res.data.data);
@@ -61,13 +71,34 @@ export default function Navbar() {
     fetchUser();
   }, []);
 
+  // Fetch course data if on a course page
+  useEffect(() => {
+    const fetchCourse = async () => {
+      if (!pathname.startsWith("/courses/")) return;
 
-  let courseTitle: string | null = null;
-  if (pathname.startsWith("/courses/")) {
-    const slug = pathname.split("/")[2];
-    const course = courseData.find((c) => c.slug === slug);
-    courseTitle = course?.title || null;
-  }
+      const courseId = pathname.split("/")[2];
+      if (!courseId) return;
+
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/courses/single-course/${courseId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (res.data.success) {
+          setCourseData(res.data.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch course:", err);
+      }
+    };
+    fetchCourse();
+  }, [pathname]);
 
   const isActive = (href: string) => pathname === href;
 
@@ -78,10 +109,11 @@ export default function Navbar() {
           <Image src={logo} alt="Logo" />
         </Link>
 
-        {courseTitle ? (
+        {/* Course Page Header */}
+        {courseData ? (
           <div className="w-full px-4 flex justify-between items-center">
             <div className="text-[24px] font-medium font-playfairDisplay text-[#101010]">
-              {courseTitle}
+              {courseData.title}
             </div>
             <div className="flex items-center space-x-[12px]">
               <button
@@ -136,7 +168,6 @@ export default function Navbar() {
             )}
           </button>
 
-          {/* Profile */}
           <Image
             src={userData?.profileImage || profile_dp}
             alt="Profile"
@@ -160,11 +191,7 @@ export default function Navbar() {
             strokeWidth={2}
             viewBox="0 0 24 24"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M4 6h16M4 12h16M4 18h16"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
       </nav>
@@ -177,7 +204,6 @@ export default function Navbar() {
       >
         <div className="fixed inset-0 bg-black/20" aria-hidden="true" />
         <Dialog.Panel className="fixed inset-y-0 right-0 w-64 bg-white p-6 space-y-6 shadow-lg">
-          {/* Logo + Close */}
           <div className="flex justify-between items-center">
             <Image src={logo} alt="Logo" width={120} height={36} />
             <button onClick={() => setIsOpen(false)} aria-label="Close menu">
@@ -185,16 +211,17 @@ export default function Navbar() {
             </button>
           </div>
 
-          {courseTitle ? (
-            <h1 className="text-lg font-semibold">{courseTitle}</h1>
+          {courseData ? (
+            <h1 className="text-lg font-semibold">{courseData.title}</h1>
           ) : (
             <ul className="flex flex-col space-y-4 text-gray-800 font-medium">
               {navLinks.map(({ href, label }) => (
                 <li key={href}>
                   <Link
                     href={href}
-                    className={`block ${isActive(href) ? "text-[#3399CC] font-semibold" : "hover:text-[#9191c4]"
-                      }`}
+                    className={`block ${
+                      isActive(href) ? "text-[#3399CC] font-semibold" : "hover:text-[#9191c4]"
+                    }`}
                     onClick={() => setIsOpen(false)}
                   >
                     {label}
@@ -204,7 +231,6 @@ export default function Navbar() {
             </ul>
           )}
 
-          {/* Mobile Profile + Notification */}
           <div className="flex items-center space-x-4 pt-4 border-t">
             <button
               className="relative p-2 rounded-full hover:bg-gray-100 transition"

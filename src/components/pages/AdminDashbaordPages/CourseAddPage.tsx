@@ -71,6 +71,8 @@ export default function CourseAddPage() {
   const categories = categoriesResponse?.data?.data || []
   const instructors = instructorsResponse?.data?.data || []
 
+  console.log(categories,instructors ,"this category and instrtorss")
+
   const [courseData, setCourseData] = useState({
     title: "",
     description: "",
@@ -359,7 +361,7 @@ export default function CourseAddPage() {
               <label className="block text-sm font-medium text-gray-700 mb-2">Course Category *</label>
               <Select value={courseData.categoryId} onValueChange={(value) => handleInputChange("categoryId", value)}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Write category" />
+                  <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((cat: Category) => (
@@ -404,7 +406,7 @@ export default function CourseAddPage() {
             <label className="block text-sm font-medium text-gray-700 mb-2">Instructor Name *</label>
             <Select value={courseData.instructorId} onValueChange={(value) => handleInputChange("instructorId", value)}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Write here" />
+                <SelectValue placeholder="Select instructor" />
               </SelectTrigger>
               <SelectContent>
                 {instructors.map((ins: Instructor) => (

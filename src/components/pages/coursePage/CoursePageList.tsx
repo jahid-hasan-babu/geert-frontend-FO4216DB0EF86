@@ -63,7 +63,6 @@ export default function CoursesPageList() {
     if (token) fetchCategories();
   }, [token]);
 
-  // ✅ Fetch courses (merged search + category)
   useEffect(() => {
     const fetchCourses = async () => {
       setLoading(true);
@@ -76,7 +75,7 @@ export default function CoursesPageList() {
           searchParam = activeFilter;
         }
 
-        let url = `${process.env.NEXT_PUBLIC_BASE_URL}/courses/all-course`;
+        let url = `${process.env.NEXT_PUBLIC_BASE_URL}/courses/my-course`;
         const queryParams: string[] = [];
 
         if (searchParam)

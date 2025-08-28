@@ -73,7 +73,6 @@ const CoursesPage = () => {
   return (
     <div className="min-h-screen bg-white p-6">
       <div className="mx-auto mb-6">
-        {/* Search + Add Course */}
         <div className="flex items-center justify-between mb-6">
           <div className="relative flex-1 max-w-5xl">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -95,7 +94,6 @@ const CoursesPage = () => {
           </Link>
         </div>
 
-        {/* Courses Grid */}
         {loading ? (
           <p>Loading courses...</p>
         ) : (

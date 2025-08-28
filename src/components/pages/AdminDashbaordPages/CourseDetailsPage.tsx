@@ -63,7 +63,6 @@ const CourseDetailsPage = () => {
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Make fetchCourse callable anywhere
   const fetchCourse = useCallback(async () => {
     setLoading(true);
     try {

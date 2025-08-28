@@ -1190,18 +1190,21 @@ export const testimonialsData = [
     text: "I had no background in this subject, but the instructor explained everything step by step. I didn't feel overwhelmed at all.",
     name: "Rafiq Ajgar",
     role: "Content Strategist",
+    rating: 4
   },
   {
     id: "2",
     text: "The hands-on projects and real-world examples made learning fun and effective. I now feel confident applying for higher roles.",
     name: "Sarah Roots",
     role: "User Experience Designer",
+    rating: 5
   },
   {
     id: "3",
     text: "Course quality was top-notch, and getting lifetime access means I can always come back and review. Highly recommended!",
     name: "Nabila Harsh",
     role: "Marketing Specialist",
+    rating: 3
   },
 ];
 

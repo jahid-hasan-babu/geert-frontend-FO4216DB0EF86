@@ -1,143 +1,185 @@
 "use client";
 
-import CourseCertification from "@/components/certification/CourseCertification";
+import React, { createContext, useContext, useState, ReactNode } from "react";
 import { ChevronDown, CheckCircle, Play, Circle } from "lucide-react";
-import { useState } from "react";
-import { QuizModal } from "../modals/QuizModal";
+import CourseCertification from "@/components/certification/CourseCertification";
+import { QuizModal, Quiz } from "../modals/QuizModal";
 
 export type LessonsItem = {
   id: string;
   title: string;
-  type?: string;
+  type?: "video" | "doc" | "quiz";
   duration?: string;
   completed?: boolean;
+  videoUrl?: string;
+  quiz?: Quiz | null;
 };
 
-export interface Lesson {
+export interface Module {
   id: string;
   title: string;
-  isOpen?: boolean;
-  items: LessonsItem[];
+  lessons: LessonsItem[];
 }
 
-interface CourseContextProps {
-  courseContexts: Lesson[];
+interface CourseContextType {
+  modules: Module[];
+  currentLesson: LessonsItem | null;
+  setCurrentLesson: (lesson: LessonsItem) => void;
 }
 
-const CourseContext: React.FC<CourseContextProps> = ({ courseContexts }) => {
-  const [lessons, setLessons] = useState<Lesson[]>(() =>
-    courseContexts.map((lesson, idx) => ({
-      ...lesson,
-      isOpen: idx === 0,
-    }))
+const CourseContext = createContext<CourseContextType | undefined>(undefined);
+
+export const useCourse = () => {
+  const context = useContext(CourseContext);
+  if (!context) throw new Error("useCourse must be used within CourseProvider");
+  return context;
+};
+
+export const CourseProvider: React.FC<{ modules: Module[]; children: ReactNode }> = ({
+  modules,
+  children,
+}) => {
+  // Map quizzes into lessons as type: "quiz"
+  const mappedModules: Module[] = modules.map((module) => {
+    const lessonsWithQuiz: LessonsItem[] = [];
+
+    module.lessons.forEach((lesson) => {
+      lessonsWithQuiz.push(lesson);
+      if (lesson.quiz) {
+        lessonsWithQuiz.push({ ...lesson.quiz, type: "quiz" });
+      }
+    });
+
+    return {
+      ...module,
+      lessons: lessonsWithQuiz,
+    };
+  });
+
+  const firstVideoLesson =
+    mappedModules?.[0]?.lessons?.find((l) => l.type === "video") || null;
+
+  const [currentLesson, setCurrentLesson] = useState<LessonsItem | null>(
+    firstVideoLesson
   );
 
+  return (
+    <CourseContext.Provider value={{ modules: mappedModules, currentLesson, setCurrentLesson }}>
+      {children}
+    </CourseContext.Provider>
+  );
+};
+
+// ----------------- Sidebar -----------------
+
+interface CourseSidebarProps {
+  modules: Module[];
+}
+
+export const CourseSidebar: React.FC<CourseSidebarProps> = ({ modules }) => {
+  const { currentLesson, setCurrentLesson } = useCourse();
+  const [openModuleId, setOpenModuleId] = useState<string | null>(
+    modules?.[0]?.id || null
+  );
   const [isCertOpen, setIsCertOpen] = useState(false);
-
-  // Quiz modal state
   const [quizModalOpen, setQuizModalOpen] = useState(false);
+  const [currentQuiz, setCurrentQuiz] = useState<Quiz | null>(null);
 
-  const toggleLesson = (lessonId: string) => {
-    setLessons((prevLessons) =>
-      prevLessons.map((lesson) => ({
-        ...lesson,
-        isOpen: lesson.id === lessonId ? !lesson.isOpen : false,
-      }))
-    );
+  const toggleModule = (id: string) => {
+    setOpenModuleId((prev) => (prev === id ? null : id));
     setIsCertOpen(false);
   };
 
   const toggleCertification = () => {
     const willOpen = !isCertOpen;
-    if (willOpen) {
-      setLessons((prevLessons) =>
-        prevLessons.map((lesson) => ({ ...lesson, isOpen: false }))
-      );
-    }
+    if (willOpen) setOpenModuleId(null);
     setIsCertOpen(willOpen);
   };
 
-  const openQuiz = () => {
+  const openQuiz = (quiz: Quiz | null) => {
+    setCurrentQuiz(quiz);
     setQuizModalOpen(true);
   };
 
   return (
     <div className="space-y-4">
-      {/* Lessons List */}
-      {lessons.map((lesson, index) => (
+      {modules.map((module, idx) => (
         <div
-          key={lesson.id}
+          key={module.id}
           className="border border-gray-200 rounded-lg overflow-hidden transition-all duration-300"
         >
           <button
-            onClick={() => toggleLesson(lesson.id)}
+            onClick={() => toggleModule(module.id)}
             className={`w-full flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 ${
-              lesson.isOpen ? "border-b border-[#E7E7E7]" : ""
+              openModuleId === module.id ? "border-b border-[#E7E7E7]" : ""
             }`}
           >
             <h3 className="text-[16px] font-semibold text-gray-900 text-left">
-              Lesson {index + 1}: {lesson.title}
+              Module {idx + 1}: {module.title}
             </h3>
             <ChevronDown
               className={`w-5 h-5 text-gray-600 transition-transform duration-300 transform ${
-                lesson.isOpen ? "rotate-180" : "rotate-0"
+                openModuleId === module.id ? "rotate-180" : "rotate-0"
               }`}
             />
           </button>
 
           <div
             className={`transition-all duration-300 ease-in-out overflow-hidden ${
-              lesson.isOpen ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"
+              openModuleId === module.id ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
             }`}
           >
             <div className="bg-white">
-              {lesson.items.map((item, idx) => (
+              {module.lessons.map((lesson, idx) => (
                 <div
-                  key={item.id}
+                  key={lesson.id}
                   className="flex items-center p-4 border-b border-gray-100 last:border-b-0 hover:bg-gray-50"
                 >
                   <div className="flex flex-col items-center mr-4">
                     <div
                       className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                        item.completed
+                        lesson.completed
                           ? "bg-green-500 border-green-500"
                           : "border-gray-300 bg-white"
                       }`}
                     >
-                      {item.completed && (
-                        <CheckCircle className="w-4 h-4 text-white" />
-                      )}
+                      {lesson.completed && <CheckCircle className="w-4 h-4 text-white" />}
                     </div>
-                    {idx < lesson.items.length - 1 && (
+                    {idx < module.lessons.length - 1 && (
                       <div className="w-px h-8 bg-gray-200 mt-2" />
                     )}
                   </div>
 
-                  <div className="flex-1 flex justify-between">
+                  <div className="flex-1 flex justify-between items-center">
                     <div>
-                      <h4 className="font-medium text-gray-900">
-                        {item.title}
-                      </h4>
+                      <h4 className="font-medium text-gray-900">{lesson.title}</h4>
                       <p className="text-sm text-gray-600">
-                        {item.type === "video"
-                          ? `Video: ${item.duration}`
-                          : item.duration}
+                        {lesson.type === "video"
+                          ? `Video: ${lesson.duration}`
+                          : lesson.type === "quiz"
+                          ? "Quiz"
+                          : lesson.duration}
                       </p>
                     </div>
 
-                    {/* Action button */}
-                    <button
-                      onClick={() => (item.type === "video" ? null : openQuiz())}
-                      className="ml-4 p-2 rounded-full hover:bg-gray-200 cursor-pointer"
-                    >
-                      {item.type === "video" ? (
-                        <Play className="w-5 h-5 text-gray-600" />
-                      ) : item.completed ? (
-                        <CheckCircle className="w-5 h-5 text-green-500" />
-                      ) : (
-                        <Circle className="w-5 h-5" />
+                    <div className="flex items-center space-x-2">
+                      {lesson.type === "quiz" && lesson.quiz && (
+                        <button
+                          onClick={() => openQuiz(lesson.quiz)}
+                          className="p-2 rounded-full hover:bg-gray-200 cursor-pointer"
+                        >
+                          <CheckCircle className="w-5 h-5 text-blue-500" />
+                        </button>
                       )}
-                    </button>
+                      {lesson.type === "video" && (
+                        <button
+                          onClick={() => setCurrentLesson(lesson)}
+                          className="p-2 rounded-full hover:bg-gray-200 cursor-pointer"
+                        >
+                          <Play className="w-5 h-5 text-gray-600" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -147,19 +189,14 @@ const CourseContext: React.FC<CourseContextProps> = ({ courseContexts }) => {
       ))}
 
       {/* Certification */}
-      <div
-        className="border border-gray-200 rounded-lg overflow-hidden transition-all duration-300"
-        key="certification"
-      >
+      <div className="border border-gray-200 rounded-lg overflow-hidden transition-all duration-300">
         <button
           onClick={toggleCertification}
           className={`w-full flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 ${
             isCertOpen ? "border-b border-[#E7E7E7]" : ""
           }`}
         >
-          <h3 className="text-[16px] font-semibold text-gray-900 ">
-            Certification
-          </h3>
+          <h3 className="text-[16px] font-semibold text-gray-900">Certification</h3>
           <ChevronDown
             className={`w-5 h-5 text-gray-600 transition-transform duration-300 transform ${
               isCertOpen ? "rotate-180" : "rotate-0"
@@ -178,6 +215,7 @@ const CourseContext: React.FC<CourseContextProps> = ({ courseContexts }) => {
 
       {/* Quiz Modal */}
       <QuizModal
+        quiz={currentQuiz}
         isOpen={quizModalOpen}
         onClose={() => setQuizModalOpen(false)}
       />

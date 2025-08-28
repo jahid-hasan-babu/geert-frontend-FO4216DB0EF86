@@ -22,17 +22,31 @@ const chartConfig = {
   students: { label: "Students", color: "hsl(var(--chart-2))" },
 } satisfies ChartConfig;
 
+interface PerformanceItem {
+  month: string | number;
+  count: number;
+}
+
 export default function DashboardHome() {
   const [selectedYear, setSelectedYear] = useState("2025");
-  const [totals, setTotals] = useState({ totalCourses: 0, totalStudents: 0, totalTutors: 0 });
-  const [performanceData, setPerformanceData] = useState<{ month: string; count: number }[]>([]);
+  const [totals, setTotals] = useState({
+    totalCourses: 0,
+    totalStudents: 0,
+    totalTutors: 0,
+  });
+  const [performanceData, setPerformanceData] = useState<
+    { month: string; count: number }[]
+  >([]);
 
   const fetchDashboardData = async () => {
     try {
       const token = localStorage.getItem("token");
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
-      const dashboardRes = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/users/dashboard`, config);
+      const dashboardRes = await axios.get(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/users/dashboard`,
+        config
+      );
       setTotals({
         totalCourses: dashboardRes.data.data.totalCourses,
         totalStudents: dashboardRes.data.data.totalStudents,
@@ -53,11 +67,24 @@ export default function DashboardHome() {
         config
       );
 
-      const monthsMap = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      const monthsMap = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
       setPerformanceData(
-        res.data.data.map((item: any) => ({
-          month: monthsMap[parseInt(item.month) - 1],
-          count: item.count,
+        (res.data.data as PerformanceItem[]).map((item) => ({
+          month: monthsMap[Number(item.month) - 1] || "Unknown",
+          count: Number(item.count) || 0,
         }))
       );
     } catch (err) {
@@ -77,28 +104,40 @@ export default function DashboardHome() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-x-[30]">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-[28px] font-medium text-[#4D5154]">Total Course</CardTitle>
+              <CardTitle className="text-[28px] font-medium text-[#4D5154]">
+                Total Course
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-[48px] font-medium text-gray-900">{totals.totalCourses}</div>
+              <div className="text-[48px] font-medium text-gray-900">
+                {totals.totalCourses}
+              </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-[28px] font-medium text-[#4D5154]">Total Students</CardTitle>
+              <CardTitle className="text-[28px] font-medium text-[#4D5154]">
+                Total Students
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-[48px] font-medium text-gray-900">{totals.totalStudents}</div>
+              <div className="text-[48px] font-medium text-gray-900">
+                {totals.totalStudents}
+              </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-[28px] font-medium text-[#4D5154]">Total Tutors</CardTitle>
+              <CardTitle className="text-[28px] font-medium text-[#4D5154]">
+                Total Tutors
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-[48px] font-medium text-gray-900">{totals.totalTutors}</div>
+              <div className="text-[48px] font-medium text-gray-900">
+                {totals.totalTutors}
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -107,7 +146,9 @@ export default function DashboardHome() {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-xl font-semibold text-gray-900">Performance</CardTitle>
+              <CardTitle className="text-xl font-semibold text-gray-900">
+                Performance
+              </CardTitle>
               <Select value={selectedYear} onValueChange={setSelectedYear}>
                 <SelectTrigger className="w-24">
                   <SelectValue />
@@ -129,7 +170,12 @@ export default function DashboardHome() {
                     <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0.1} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6b7280" }} />
+                <XAxis
+                  dataKey="month"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12, fill: "#6b7280" }}
+                />
                 <YAxis hide />
                 <ChartTooltip
                   content={
@@ -139,7 +185,13 @@ export default function DashboardHome() {
                     />
                   }
                 />
-                <Area type="monotone" dataKey="count" stroke="#0ea5e9" strokeWidth={2} fill="url(#fillArea)" />
+                <Area
+                  type="monotone"
+                  dataKey="count"
+                  stroke="#0ea5e9"
+                  strokeWidth={2}
+                  fill="url(#fillArea)"
+                />
               </AreaChart>
             </ChartContainer>
           </CardContent>
