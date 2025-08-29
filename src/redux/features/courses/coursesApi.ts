@@ -11,14 +11,15 @@ const coursesApi = baseApi.injectEndpoints({
 			invalidatesTags: ["courses"],
 		}),
 		getAllCourses: builder.query({
-			query: () => ({
+			query: (search: string) => ({
 				url: "/courses/all-course",
 				method: "GET",
+				params: { search },
 			}),
 			providesTags: ["courses"],
 		}),
 		getMicroLearning: builder.query({
-			query: (search) => ({
+			query: (search: string) => ({
 				url: "/courses/all-micro-courses",
 				method: "GET",
 				params: { search },
@@ -63,11 +64,14 @@ const coursesApi = baseApi.injectEndpoints({
 			}),
 			invalidatesTags: (result, error, { id }) => [{ type: "courses", id }],
 		}),
-		addCourseLesson: builder.mutation({
-			query: (data) => ({
-				url: `/courses/add-lesson/${data.id}`,
+		addCourseLesson: builder.mutation<
+			{ success: boolean; message?: string },
+			{ id: string; formData: FormData }
+		>({
+			query: ({ id, formData }) => ({
+				url: `/courses/add-lesson/${id}`,
 				method: "POST",
-				body: data.formData,
+				body: formData,
 			}),
 			invalidatesTags: (result, error, { id }) => [{ type: "courses", id }],
 		}),

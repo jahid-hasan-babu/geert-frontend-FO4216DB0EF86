@@ -9,7 +9,7 @@ import course_image from "@/assets/images/course_image.png";
 import { reviewData } from "@/utils/dummyData";
 import { toast } from "sonner";
 import { useAddToFavoritesMutation } from "@/redux/features/favorites/favoritesApi";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 interface Course {
 	id: string;
@@ -19,13 +19,15 @@ interface Course {
 	duration: string;
 	rating?: number;
 	category?: string;
+	lessons?: number;
 	type?: string;
 	completed?: number;
 	isBestseller?: boolean;
 	isMicroLearning?: boolean;
 	description?: string;
 	coverImage?: string;
-	isFavorite?: boolean; // ✅ comes directly from API
+	isFavorite?: boolean;
+	courseContexts?: string[];
 }
 
 export default function CourseCard({ course }: { course: Course }) {
@@ -34,6 +36,7 @@ export default function CourseCard({ course }: { course: Course }) {
 	);
 
 	const router = useRouter();
+	const pathname = usePathname();
 
 	const [addToFavorites, { isLoading: loading }] = useAddToFavoritesMutation();
 
@@ -41,7 +44,6 @@ export default function CourseCard({ course }: { course: Course }) {
 		(review) => review.courseId === course.id
 	);
 
-	// ✅ Keep local state in sync if parent passes updated course object
 	useEffect(() => {
 		setIsFavorite(course.isFavorite ?? false);
 	}, [course.isFavorite]);
@@ -76,7 +78,11 @@ export default function CourseCard({ course }: { course: Course }) {
 		<div
 			className="bg-white h-full rounded-2xl overflow-hidden duration-300 transition-shadow  relative hover:shadow-lg cursor-pointer border-[1px] border-gray-200"
 			onClick={() => {
-				router.push(`/dashboard/course/${course.id}`);
+				if (pathname === `/dashboard/micro-learning/${course.id}`) {
+					router.push(`/dashboard/micro-learning/${course.id}`);
+				} else {
+					router.push(`/dashboard/micro-learning/${course.id}`);
+				}
 			}}
 		>
 			<button

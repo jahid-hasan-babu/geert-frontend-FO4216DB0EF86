@@ -614,25 +614,7 @@ export default function CourseModuleAdd({ modules, setModules, isMicroLearning }
                       </div>
                     )}
 
-                    {lesson.lessonType === "doc" && (
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-3">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => handleDocumentUpload(moduleIndex, lessonIndex)}
-                          >
-                            <FileText className="w-4 h-4 mr-2" />
-                            Upload Document
-                          </Button>
-                          {lesson.lessonVideoName && (
-                            <span className="text-sm text-gray-700 bg-white px-3 py-1 rounded border font-medium">
-                              📄 {lesson.lessonVideoName}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    )}
+ 
 
                     {/* Remove Lesson */}
                     <div className="flex justify-end">
