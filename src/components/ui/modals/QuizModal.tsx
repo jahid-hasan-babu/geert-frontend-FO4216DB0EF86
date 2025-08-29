@@ -46,6 +46,7 @@ export const QuizModal: React.FC<QuizModalProps> = ({
   const [answers, setAnswers] = useState<{ [questionId: string]: AnswerValue }>({});
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  console.log("Quiz", quiz)
 
   useEffect(() => {
     if (!quiz) return;

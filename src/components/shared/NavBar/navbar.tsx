@@ -31,9 +31,11 @@ interface User {
   role: string;
 }
 
-interface Course {
+interface MyCourse {
   id: string;
   title: string;
+  totalLessons: number;
+  completedLessons: number;
 }
 
 export default function Navbar() {
@@ -43,7 +45,7 @@ export default function Navbar() {
   const [isProgressOpen, setIsProgressOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [userData, setUserData] = useState<User | null>(null);
-  const [courseData, setCourseData] = useState<Course | null>(null);
+  const [courseData, setCourseData] = useState<MyCourse | null>(null);
 
   const pathname = usePathname();
 
@@ -61,9 +63,7 @@ export default function Navbar() {
           }
         );
 
-        if (res.data.success) {
-          setUserData(res.data.data);
-        }
+        if (res.data.success) setUserData(res.data.data);
       } catch (err) {
         console.error("Failed to fetch user:", err);
       }
@@ -71,10 +71,13 @@ export default function Navbar() {
     fetchUser();
   }, []);
 
-  // Fetch course data if on a course page
+  // Fetch "My Courses" and get the matching course based on pathname
   useEffect(() => {
     const fetchCourse = async () => {
-      if (!pathname.startsWith("/courses/")) return;
+      if (!pathname.startsWith("/courses/")) {
+        setCourseData(null);
+        return;
+      }
 
       const courseId = pathname.split("/")[2];
       if (!courseId) return;
@@ -84,14 +87,16 @@ export default function Navbar() {
         if (!token) return;
 
         const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/courses/single-course/${courseId}`,
+          `${process.env.NEXT_PUBLIC_BASE_URL}/courses/my-course`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
 
         if (res.data.success) {
-          setCourseData(res.data.data);
+          const courses: MyCourse[] = res.data.data.data;
+          const course = courses.find((c) => c.id === courseId);
+          setCourseData(course || null);
         }
       } catch (err) {
         console.error("Failed to fetch course:", err);
@@ -105,7 +110,10 @@ export default function Navbar() {
   return (
     <header className="bg-white sticky top-0 z-50">
       <nav className="container mx-auto px-4 py-3 flex items-center justify-between">
-        <Link href="/" className="cursor-pointer flex items-center justify-center">
+        <Link
+          href="/"
+          className="cursor-pointer flex items-center justify-center"
+        >
           <Image src={logo} alt="Logo" />
         </Link>
 
@@ -191,7 +199,11 @@ export default function Navbar() {
             strokeWidth={2}
             viewBox="0 0 24 24"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
           </svg>
         </button>
       </nav>
@@ -220,7 +232,9 @@ export default function Navbar() {
                   <Link
                     href={href}
                     className={`block ${
-                      isActive(href) ? "text-[#3399CC] font-semibold" : "hover:text-[#9191c4]"
+                      isActive(href)
+                        ? "text-[#3399CC] font-semibold"
+                        : "hover:text-[#9191c4]"
                     }`}
                     onClick={() => setIsOpen(false)}
                   >
@@ -259,12 +273,21 @@ export default function Navbar() {
         onClose={() => setIsNotifOpen(false)}
         notifications={notificationsData}
       />
-      <ReviewModal isOpen={isReviewOpen} onClose={() => setIsReviewOpen(false)} />
+      <ReviewModal
+        isOpen={isReviewOpen}
+        onClose={() => setIsReviewOpen(false)}
+        courseId={courseData?.id || ""}
+        canReview={
+          !!courseData &&
+          courseData.completedLessons === courseData.totalLessons
+        }
+      />
+
       <CourseProgressModal
         isOpen={isProgressOpen}
         onClose={() => setIsProgressOpen(false)}
-        current={12}
-        total={18}
+        current={courseData?.completedLessons || 0}
+        total={courseData?.totalLessons || 0}
       />
       <MenuModal
         isOpen={isMenuOpen}

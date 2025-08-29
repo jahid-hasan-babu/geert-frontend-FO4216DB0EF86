@@ -33,11 +33,28 @@ interface LessonFromAPI {
   durationSecs?: number;
   completed?: boolean;
   videoUrl?: string;
+  quiz?: QuizFromAPI;
 }
+
+export type QuizQuestion = {
+  id: string;
+  text: string;
+  type: "SINGLE_CHOICE" | "MULTI_CHOICE" | "ORDERING" | "SCALE" | "TEXT";
+  options: QuizOption[];
+};
+
+export type QuizOption = {
+  id: string;
+  text: string;
+  questionId: string;
+  value?: string;
+};
 
 interface QuizFromAPI {
   id: string;
   title: string;
+  questions?: QuizQuestion[];
+  locked?: boolean;
 }
 
 interface ModuleFromAPI {
@@ -61,7 +78,6 @@ interface CourseFromAPI {
 interface CourseDetailsPageProps {
   slug: string;
 }
-
 
 export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
   const [course, setCourse] = useState<CourseFromAPI | null>(null);
@@ -106,40 +122,46 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
   );
 
   // ---------------- Modules Mapping ----------------
+  console.log("Course <><><>", course);
   const modules: Module[] =
     course.modules?.map((m) => {
-      const lessons: LessonsItem[] = [
-        ...m.lessons.map((l) => ({
-          id: l.id,
-          title: l.title,
-          type: l.type || "doc",
-          duration: l.duration,
-          durationSecs: l.durationSecs,
-          completed: l.completed ?? false,
-          videoUrl: l.videoUrl,
-          isLocked: false,
-        })),
-        ...(m.Quiz?.map((q) => ({
+      // 1️⃣ Map normal lessons
+      const lessons: LessonsItem[] = m.lessons.map((l) => ({
+        id: l.id,
+        title: l.title,
+        type: l.type || "doc",
+        duration: l.duration,
+        durationSecs: l.durationSecs,
+        completed: l.completed ?? false,
+        videoUrl: l.videoUrl,
+        isLocked: false,
+        quiz: undefined,
+      }));
+
+      // 2️⃣ Map quizzes (if any) — define quizLessons here
+      const quizLessons: LessonsItem[] = (m.Quiz ?? []).map((q) => ({
+        id: q.id,
+        title: q.title,
+        type: "quiz",
+        completed: false,
+        isLocked: false,
+        quiz: {
           id: q.id,
           title: q.title,
-          type: "quiz" as const,
-          quiz: {
-            id: q.id,
-            title: q.title,
-            questions: [],
-            locked: false,
-          },
-          completed: false,
-          isLocked: false,
-        })) || []),
-      ];
+          questions: q.questions ?? [], // default empty array
+          locked: q.locked ?? false,
+        },
+      }));
 
+      // 3️⃣ Combine normal lessons + quizzes
       return {
         id: m.id,
         title: m.title,
-        lessons,
+        lessons: [...lessons, ...quizLessons],
       };
     }) || [];
+
+  console.log("Modules <><><>", modules);
 
   return (
     <CourseProvider modules={modules}>
@@ -187,7 +209,6 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
                 </div>
               </div>
 
-              {/* Reviews + About */}
               <CourseReviewAbout
                 description={course.description}
                 instructor={course.instructor}
@@ -195,14 +216,12 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
               />
             </div>
 
-            {/* ---------- Right Side (Sidebar) ---------- */}
             <div className="lg:col-span-1">
               <CourseSidebar modules={modules} />
             </div>
           </div>
         </section>
 
-        {/* ---------- Promotion Section ---------- */}
         <section className="pt-[80px]">
           <Promotion />
         </section>

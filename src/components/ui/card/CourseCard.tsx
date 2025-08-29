@@ -26,6 +26,7 @@ interface Course {
 export default function CourseCard({ course }: { course: Course }) {
   const pathname = usePathname();
   const showHeart = !pathname.includes("/dashboard");
+  console.log("course <><><><>", course)
 
   const [isFavorite, setIsFavorite] = useState<boolean>(course.isFavorite ?? false);
   const [loading, setLoading] = useState(false);
@@ -62,7 +63,6 @@ export default function CourseCard({ course }: { course: Course }) {
 
   return (
     <div className="bg-white h-full rounded-2xl overflow-hidden transition-shadow duration-300 relative">
-      {/* ❤️ Favorite button */}
       {showHeart && (
         <button
           onClick={toggleFavorite}
@@ -79,17 +79,16 @@ export default function CourseCard({ course }: { course: Course }) {
       <div className="relative flex items-center justify-center h-40 w-full">
         <Image
           className="w-full h-full object-cover"
-          src={course.coverImage || course_image}
-          alt={course.title || "Course Image"}
+          src={course?.coverImage || course_image}
+          alt={course?.title || "Course Image"}
           fill
         />
       </div>
 
-      {/* 📄 Course details */}
       <div className="flex flex-col p-4 h-full space-y-4">
         <div className="flex text-2xl font-bold text-gray-900 font-playfairDisplay justify-between items-start">
           <div className="flex-1 truncate">{course.title}</div>
-          {course.isMicroLearning && (
+          {course?.isMicroLearning && (
             <div className="ml-2 mt-1 bg-[#3399CC] text-white py-1 px-2 rounded-full text-[10px] font-sans whitespace-nowrap self-start">
               Microlearning
             </div>

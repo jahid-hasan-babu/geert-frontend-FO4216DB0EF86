@@ -182,6 +182,8 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
     else if (lesson.type === "quiz" && lesson.quiz) openQuiz(lesson.quiz);
   };
 
+  console.log("Lesson >>>", modules)
+
   return (
     <div className="space-y-4">
       {modules.map((module, idx) => (
@@ -332,7 +334,7 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
             isCertOpen ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"
           }`}
         >
-          <CourseCertification />
+          <CourseCertification courseId="" />
         </div>
       </div>
 
