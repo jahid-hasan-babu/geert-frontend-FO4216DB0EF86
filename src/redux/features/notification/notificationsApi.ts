@@ -13,7 +13,14 @@ const notificationsApi = baseApi.injectEndpoints({
            },
            invalidatesTags: ["notification"],   
        }),
+       getNotifications: builder.query({
+              query: () => ({
+                url: "/notifications",
+                method: "GET",
+              }),
+              providesTags: ["notification"],
+       }),
     }),
 })
 
-export const { useCreateNotificationMutation } = notificationsApi;
+export const { useCreateNotificationMutation, useGetNotificationsQuery } = notificationsApi;

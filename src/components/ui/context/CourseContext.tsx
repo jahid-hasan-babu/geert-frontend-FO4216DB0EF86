@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
-import { ChevronDown, CheckCircle, Play, Circle } from "lucide-react";
+import { ChevronDown, CheckCircle, Play } from "lucide-react";
 import CourseCertification from "@/components/certification/CourseCertification";
 import { QuizModal, Quiz } from "../modals/QuizModal";
 
@@ -165,7 +166,7 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({ modules }) => {
                     <div className="flex items-center space-x-2">
                       {lesson.type === "quiz" && lesson.quiz && (
                         <button
-                          onClick={() => openQuiz(lesson.quiz)}
+                          onClick={() => openQuiz(lesson.quiz ?? null)}
                           className="p-2 rounded-full hover:bg-gray-200 cursor-pointer"
                         >
                           <CheckCircle className="w-5 h-5 text-blue-500" />

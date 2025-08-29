@@ -10,7 +10,7 @@ const authApi = baseApi.injectEndpoints({
           body: userInfo,
         };
       },
-      // invalidatesTags: ["user"],
+      invalidatesTags: ["user"],
     }),
     loginWithGoogle: builder.mutation({
       query: (userInfo) => {
@@ -75,7 +75,7 @@ const authApi = baseApi.injectEndpoints({
     }),
     getMe: builder.query({
       query: () => ({
-        url: "user/me",
+        url: "/users/me",
         method: "GET",
       }),
       providesTags: ["user"],

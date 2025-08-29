@@ -3,51 +3,55 @@
 "use client"
 
 import type React from "react"
-
 import { useRef, useState } from "react"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Upload, Info, AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import CourseModuleAdd from "./CourseModuleAdd"
-import {
-  useAddMicroLearningMutation,
-} from "@/redux/features/courses/coursesApi"
+import { useAddMicroLearningMutation } from "@/redux/features/courses/coursesApi"
 import { z } from "zod"
 import { useGetCoursesCategoryQuery, useGetUserQuery } from "@/redux/features/users&category/usersCategoryApi"
 import { toast } from "sonner"
+import Editor from "../../ui/Editor/Editor"
+import CourseModuleAdd from "./CourseModuleAdd"
 
-const courseValidationSchema = z.object({
-  title: z.string().min(1, "Course title is required"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
-  categoryId: z.string().min(1, "Category is required"),
-  duration: z.string().min(1, "Duration is required"),
-  instructorId: z.string().min(1, "Instructor is required"),
-  instructorEmail: z.string().email("Valid email is required"),
-})
+type QuizOption = {
+  text: string
+  isCorrect: boolean
+  files?: File[]
+  fileNames?: string[]
+}
 
-type Lesson = {
-  lessonType: "video" | "DOCS" | "QUIZ"
-  lessonTitle: string
-  lessonDuration: string
-  lessonVideoName: string
-  lessonVideoFile?: File
+type QuizQuestion = {
+  text: string
+  type: "SINGLE_CHOICE" | "MULTI_CHOICE" | "ORDERING" | "SCALE" | "TEXT"
+  options: QuizOption[]
+  scaleMin?: number
+  scaleMax?: number
 }
 
 type Quiz = {
-  question: string
-  answer: string
-  options: string[]
+  title: string
+  questions: QuizQuestion[]
+}
+
+type Lesson = {
+  lessonType: "video" | "doc" 
+  lessonTitle: string
+  lessonDescription: string
+  lessonDuration: string
+  lessonVideoName: string
+  lessonVideoFile?: File
+  lessonDocumentFile?: File
 }
 
 type Module = {
   moduleTitle: string
   lessons: Lesson[]
-  quizzes?: Quiz[]
+  quizzes: Quiz[]
 }
 
 type Category = {
@@ -71,12 +75,12 @@ export default function CourseAddPage() {
   const categories = categoriesResponse?.data?.data || []
   const instructors = instructorsResponse?.data?.data || []
 
-
   const [courseData, setCourseData] = useState({
     title: "",
     description: "",
     categoryId: "",
     duration: "",
+    price: 59,
     instructorId: "",
     instructorEmail: "",
   })
@@ -93,6 +97,7 @@ export default function CourseAddPage() {
         {
           lessonType: "video",
           lessonTitle: "",
+          lessonDescription: "",
           lessonDuration: "",
           lessonVideoName: "",
         },
@@ -105,12 +110,13 @@ export default function CourseAddPage() {
 
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setCoverImageFile(e.target.files[0])
-      setCoverImageName(e.target.files[0].name)
+      const file = e.target.files[0]
+      setCoverImageFile(file)
+      setCoverImageName(file.name)
     }
   }
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | number) => {
     setCourseData((prev) => ({ ...prev, [field]: value }))
     // Clear validation errors when user starts typing
     if (validationErrors.length > 0) {
@@ -118,8 +124,24 @@ export default function CourseAddPage() {
     }
   }
 
+  const handleDescriptionChange = (content: string) => {
+    setCourseData((prev) => ({ ...prev, description: content }))
+    if (validationErrors.length > 0) {
+      setValidationErrors([])
+    }
+  }
+
   const validateForm = (): boolean => {
     try {
+      const courseValidationSchema = z.object({
+        title: z.string().min(1, "Course title is required"),
+        description: z.string().min(10, "Description must be at least 10 characters"),
+        categoryId: z.string().min(1, "Category is required"),
+        duration: z.string().min(1, "Duration is required"),
+        instructorId: z.string().min(1, "Instructor is required"),
+        instructorEmail: z.string().email("Valid email is required"),
+      })
+
       courseValidationSchema.parse(courseData)
 
       // Additional validation for modules
@@ -165,7 +187,6 @@ export default function CourseAddPage() {
   }
 
   const handleSave = async () => {
-
     if (!validateForm()) {
       toast("Please fix the form errors before submitting.")
       return
@@ -174,12 +195,18 @@ export default function CourseAddPage() {
     try {
       const formData = new FormData()
 
+      // Convert duration to seconds helper function
+      const convertDurationToSeconds = (duration: string): number => {
+        const minutes = Number.parseInt(duration.replace(/\D/g, "")) || 2
+        return minutes * 60
+      }
+
       const bodyData = {
         title: courseData.title,
         description: courseData.description,
         categoryId: courseData.categoryId,
         duration: courseData.duration,
-        price: 59, // Default price as shown in declarations
+        price: courseData.price,
         isMicroLearning: isMicroLearning,
         instructorId: courseData.instructorId,
         modules: modules.map((mod) => ({
@@ -187,34 +214,38 @@ export default function CourseAddPage() {
           lessons: mod.lessons.map((lesson) => ({
             type: lesson.lessonType,
             title: lesson.lessonTitle,
-            description: lesson.lessonTitle, // Using title as description
+            description: lesson.lessonDescription || lesson.lessonTitle,
             duration: lesson.lessonDuration,
-            durationSecs: Number.parseInt(lesson.lessonDuration.replace(/\D/g, "")) * 60 || 120,
+            durationSecs: convertDurationToSeconds(lesson.lessonDuration),
           })),
-          quizzes:
-            mod.quizzes?.map((quiz) => ({
-              title: quiz.question,
-              questions: [
-                {
-                  text: quiz.question,
-                  type: "SINGLE_CHOICE",
-                  options:
-                    quiz.options?.map((opt, index) => ({
-                      text: opt,
-                      isCorrect: index === 0, // First option as correct by default
-                    })) || [],
-                },
-              ],
-            })) || [],
+          quizzes: mod.quizzes.map((quiz) => ({
+            title: quiz.title,
+            questions: quiz.questions.map((question) => ({
+              text: question.text,
+              type: question.type,
+              options: question.options.map((option) => ({
+                text: option.text,
+                isCorrect: option.isCorrect,
+                files: option.files,
+                fileNames: option.fileNames,
+              })),
+              scaleMin: question.scaleMin,
+              scaleMax: question.scaleMax,
+            })),
+          })),
         })),
       }
 
+      console.log("[v0] Course data structure:", JSON.stringify(bodyData, null, 2))
       formData.append("bodyData", JSON.stringify(bodyData))
 
+      // Add cover image
       if (coverImageFile) {
         formData.append("coverImage", coverImageFile)
+        console.log("[v0] Cover image added:", coverImageFile.name)
       }
 
+      // Collect all video files with metadata
       const videoFiles: File[] = []
       const videoMetadata: any[] = []
 
@@ -231,38 +262,40 @@ export default function CourseAddPage() {
               moduleTitle: module.moduleTitle,
               duration: lesson.lessonDuration,
             })
-            console.log("[v0] Adding video file:", lesson.lessonVideoFile.name, "to videoFiles array")
+            console.log("[v0] Adding video file:", lesson.lessonVideoFile.name)
           }
         })
       })
 
-      videoFiles.forEach((file) => {
+      // Add all video files
+      videoFiles.forEach((file, index) => {
         formData.append("videoUrl", file)
+        console.log("[v0] Video file", index + 1, ":", file.name, "size:", file.size)
       })
 
-      // Append video metadata as JSON string
+      // Add video metadata
       if (videoMetadata.length > 0) {
         formData.append("videoMetadata", JSON.stringify(videoMetadata))
+        console.log("[v0] Video metadata:", videoMetadata)
       }
 
-      console.log("[v0] Total video files:", videoFiles.length)
-      console.log("[v0] FormData entries:")
-      for (const [key, value] of formData.entries()) {
-        console.log(`[v0] ${key}:`, value instanceof File ? `File: ${value.name}` : value)
-      }
-
-      console.log("[v0] Submitting to RTK mutation...")
+      console.log("[v0] Total files in FormData:")
+      console.log("[v0] - Cover image:", coverImageFile ? "Yes" : "No")
+      console.log("[v0] - Video files:", videoFiles.length)
+      console.log("[v0] - Total FormData entries:", Array.from(formData.entries()).length)
 
       const result = await addMicroLearning({ formData }).unwrap()
       console.log("[v0] Course creation successful:", result)
 
       toast("Success! Course created successfully!")
-     
+
+      // Reset form
       setCourseData({
         title: "",
         description: "",
         categoryId: "",
         duration: "",
+        price: 59,
         instructorId: "",
         instructorEmail: "",
       })
@@ -273,6 +306,7 @@ export default function CourseAddPage() {
             {
               lessonType: "video",
               lessonTitle: "",
+              lessonDescription: "",
               lessonDuration: "",
               lessonVideoName: "",
             },
@@ -318,8 +352,21 @@ export default function CourseAddPage() {
             onClick={handleCoverClick}
             className="cursor-pointer border-2 border-dashed border-blue-300 rounded-lg p-12 text-center bg-blue-50/30 hover:bg-blue-100 transition"
           >
-            <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-            <p className="text-gray-600 font-medium">{coverImageName ? coverImageName : "Upload Cover Image"}</p>
+            {coverImageName ? (
+              <div className="space-y-4">
+                <Upload className="w-12 h-12 mx-auto text-blue-500" />
+                <div className="space-y-1">
+                  <p className="text-gray-700 font-medium text-sm">{coverImageName}</p>
+                  <p className="text-xs text-gray-500">Click to change cover image</p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                <p className="text-gray-600 font-medium">Upload Cover Image *</p>
+                <p className="text-sm text-gray-500 mt-2">Recommended: 1200x600px, JPG or PNG</p>
+              </>
+            )}
           </div>
           <input type="file" ref={coverInputRef} onChange={handleCoverChange} className="hidden" accept="image/*" />
         </CardContent>
@@ -342,16 +389,10 @@ export default function CourseAddPage() {
 
           <div>
             <label className="block text-sm font-medium text-[#585858] mb-2">Description *</label>
-            <Textarea
-              placeholder="Write course description..."
-              value={courseData.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
-              className="w-full min-h-[100px] resize-none"
-              required
-            />
+            <Editor contents={courseData.description} onSave={handleDescriptionChange} onBlur={() => {}} />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Course Category *</label>
               <Select value={courseData.categoryId} onValueChange={(value) => handleInputChange("categoryId", value)}>
@@ -368,7 +409,6 @@ export default function CourseAddPage() {
               </Select>
             </div>
 
-            {/* Duration */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Course Duration *</label>
               <div className="relative">
@@ -377,6 +417,7 @@ export default function CourseAddPage() {
                     <SelectValue placeholder="Select time" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value=".5h">30 minutes</SelectItem>
                     <SelectItem value="1hr">1 hour</SelectItem>
                     <SelectItem value="2hr">2 hours</SelectItem>
                     <SelectItem value="3hr">3 hours</SelectItem>
@@ -386,6 +427,19 @@ export default function CourseAddPage() {
                 </Select>
                 <Info className="absolute right-10 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Price ($) *</label>
+              <Input
+                type="number"
+                placeholder="59"
+                value={courseData.price}
+                onChange={(e) => handleInputChange("price", Number(e.target.value))}
+                className="w-full"
+                min="0"
+                required
+              />
             </div>
           </div>
         </div>
@@ -432,7 +486,7 @@ export default function CourseAddPage() {
         disabled={isSubmitting}
         className="w-full bg-[#3399CC] hover:bg-[#52b9ec] cursor-pointer py-3 text-lg font-medium"
       >
-        {isSubmitting ? "Creating Course..." : "Save"}
+        {isSubmitting ? "Creating Course..." : "Save Course"}
       </Button>
     </div>
   )

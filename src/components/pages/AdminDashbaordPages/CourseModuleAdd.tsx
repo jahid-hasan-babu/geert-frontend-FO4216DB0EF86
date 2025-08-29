@@ -7,25 +7,45 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Trash2, Video, FileText } from "lucide-react"
+import Editor from "../../ui/Editor/Editor"
+import { usePathname } from "next/navigation"
 
 type Lesson = {
-  lessonType: "video" | "DOCS" | "QUIZ"
+  lessonType: "video" | "doc"
   lessonTitle: string
+  lessonDescription: string
   lessonDuration: string
   lessonVideoName: string
+  lessonDocumentFile?: File
   lessonVideoFile?: File
+  uploadProgress?: number
+  isUploading?: boolean
+}
+
+type QuizOption = {
+  text: string
+  isCorrect: boolean
+  files?: File[]
+  fileNames?: string[]
+}
+
+type QuizQuestion = {
+  text: string
+  type: "SINGLE_CHOICE" | "MULTI_CHOICE" | "ORDERING" | "SCALE" | "TEXT"
+  options: QuizOption[]
+  scaleMin?: number
+  scaleMax?: number
 }
 
 type Quiz = {
-  question: string
-  answer: string
-  options: string[]
+  title: string
+  questions: QuizQuestion[]
 }
 
 type Module = {
   moduleTitle: string
   lessons: Lesson[]
-  quizzes?: Quiz[]
+  quizzes: Quiz[]
 }
 
 interface CourseModuleAddProps {
@@ -35,6 +55,7 @@ interface CourseModuleAddProps {
 }
 
 export default function CourseModuleAdd({ modules, setModules, isMicroLearning }: CourseModuleAddProps) {
+  const pathname = usePathname()
   const addNewModule = () => {
     setModules((prev) => [
       ...prev,
@@ -44,6 +65,7 @@ export default function CourseModuleAdd({ modules, setModules, isMicroLearning }
           {
             lessonType: "video",
             lessonTitle: "",
+            lessonDescription: "",
             lessonDuration: "",
             lessonVideoName: "",
           },
@@ -70,6 +92,7 @@ export default function CourseModuleAdd({ modules, setModules, isMicroLearning }
                 {
                   lessonType: "video",
                   lessonTitle: "",
+                  lessonDescription: "",
                   lessonDuration: "",
                   lessonVideoName: "",
                 },
@@ -93,11 +116,58 @@ export default function CourseModuleAdd({ modules, setModules, isMicroLearning }
     )
   }
 
+  const addNewQuiz = (moduleIndex: number) => {
+    setModules((prev) =>
+      prev.map((module, idx) =>
+        idx === moduleIndex
+          ? {
+              ...module,
+              quizzes: [
+                ...module.quizzes,
+                {
+                  title: "",
+                  questions: [
+                    {
+                      text: "",
+                      type: "SINGLE_CHOICE",
+                      options: [
+                        { text: "", isCorrect: true },
+                        { text: "", isCorrect: false },
+                        { text: "", isCorrect: false },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            }
+          : module,
+      ),
+    )
+  }
+
+  const removeQuiz = (moduleIndex: number, quizIndex: number) => {
+    setModules((prev) =>
+      prev.map((module, idx) =>
+        idx === moduleIndex
+          ? {
+              ...module,
+              quizzes: module.quizzes.filter((_, qIdx) => qIdx !== quizIndex),
+            }
+          : module,
+      ),
+    )
+  }
+
   const updateModule = (moduleIndex: number, field: string, value: string) => {
     setModules((prev) => prev.map((module, idx) => (idx === moduleIndex ? { ...module, [field]: value } : module)))
   }
 
-  const updateLesson = (moduleIndex: number, lessonIndex: number, field: string, value: string | File) => {
+  const updateLesson = (
+    moduleIndex: number,
+    lessonIndex: number,
+    field: string,
+    value: string | File | boolean | number,
+  ) => {
     setModules((prev) =>
       prev.map((module, mIdx) =>
         mIdx === moduleIndex
@@ -105,6 +175,83 @@ export default function CourseModuleAdd({ modules, setModules, isMicroLearning }
               ...module,
               lessons: module.lessons.map((lesson, lIdx) =>
                 lIdx === lessonIndex ? { ...lesson, [field]: value } : lesson,
+              ),
+            }
+          : module,
+      ),
+    )
+  }
+
+  const updateQuiz = (moduleIndex: number, quizIndex: number, field: string, value: string) => {
+    setModules((prev) =>
+      prev.map((module, mIdx) =>
+        mIdx === moduleIndex
+          ? {
+              ...module,
+              quizzes: module.quizzes.map((quiz, qIdx) => (qIdx === quizIndex ? { ...quiz, [field]: value } : quiz)),
+            }
+          : module,
+      ),
+    )
+  }
+
+  const updateQuizQuestion = (
+    moduleIndex: number,
+    quizIndex: number,
+    questionIndex: number,
+    field: string,
+    value: string,
+  ) => {
+    setModules((prev) =>
+      prev.map((module, mIdx) =>
+        mIdx === moduleIndex
+          ? {
+              ...module,
+              quizzes: module.quizzes.map((quiz, qIdx) =>
+                qIdx === quizIndex
+                  ? {
+                      ...quiz,
+                      questions: quiz.questions.map((question, questionIdx) =>
+                        questionIdx === questionIndex ? { ...question, [field]: value } : question,
+                      ),
+                    }
+                  : quiz,
+              ),
+            }
+          : module,
+      ),
+    )
+  }
+
+  const updateQuizOption = (
+    moduleIndex: number,
+    quizIndex: number,
+    questionIndex: number,
+    optionIndex: number,
+    field: string,
+    value: string | boolean | File[] | string[],
+  ) => {
+    setModules((prev) =>
+      prev.map((module, mIdx) =>
+        mIdx === moduleIndex
+          ? {
+              ...module,
+              quizzes: module.quizzes.map((quiz, qIdx) =>
+                qIdx === quizIndex
+                  ? {
+                      ...quiz,
+                      questions: quiz.questions.map((question, questionIdx) =>
+                        questionIdx === questionIndex
+                          ? {
+                              ...question,
+                              options: question.options.map((option, optIdx) =>
+                                optIdx === optionIndex ? { ...option, [field]: value } : option,
+                              ),
+                            }
+                          : question,
+                      ),
+                    }
+                  : quiz,
               ),
             }
           : module,
@@ -121,10 +268,225 @@ export default function CourseModuleAdd({ modules, setModules, isMicroLearning }
       if (file) {
         updateLesson(moduleIndex, lessonIndex, "lessonVideoFile", file)
         updateLesson(moduleIndex, lessonIndex, "lessonVideoName", file.name)
-       
+        updateLesson(moduleIndex, lessonIndex, "isUploading", true)
+        updateLesson(moduleIndex, lessonIndex, "uploadProgress", 0)
+
+        let progress = 0
+        const interval = setInterval(
+          () => {
+            progress += Math.random() * 15 + 5
+            if (progress >= 100) {
+              progress = 100
+              clearInterval(interval)
+              updateLesson(moduleIndex, lessonIndex, "isUploading", false)
+              updateLesson(moduleIndex, lessonIndex, "uploadProgress", 100)
+              console.log("[v0] Video upload completed:", file.name)
+            }
+            updateLesson(moduleIndex, lessonIndex, "uploadProgress", Math.min(progress, 100))
+          },
+          200 + Math.random() * 300,
+        )
       }
     }
     input.click()
+  }
+
+  const handleDocumentUpload = (moduleIndex: number, lessonIndex: number) => {
+    const input = document.createElement("input")
+    input.type = "file"
+    input.accept = ".pdf,.doc,.docx,.txt"
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (file) {
+        updateLesson(moduleIndex, lessonIndex, "lessonDocumentFile", file)
+        updateLesson(moduleIndex, lessonIndex, "lessonVideoName", file.name)
+      }
+    }
+    input.click()
+  }
+
+  const handleQuizOptionFileUpload = (
+    moduleIndex: number,
+    quizIndex: number,
+    questionIndex: number,
+    optionIndex: number,
+  ) => {
+    const input = document.createElement("input")
+    input.type = "file"
+    input.multiple = true
+    input.accept = "image/*,video/*,.pdf,.doc,.docx,.txt"
+    input.onchange = (e) => {
+      const files = Array.from((e.target as HTMLInputElement).files || [])
+      if (files.length > 0) {
+        const fileNames = files.map((file) => file.name)
+        updateQuizOption(moduleIndex, quizIndex, questionIndex, optionIndex, "files", files)
+        updateQuizOption(moduleIndex, quizIndex, questionIndex, optionIndex, "fileNames", fileNames)
+      }
+    }
+    input.click()
+  }
+
+  const addQuizOption = (moduleIndex: number, quizIndex: number, questionIndex: number) => {
+    setModules((prev) =>
+      prev.map((module, mIdx) =>
+        mIdx === moduleIndex
+          ? {
+              ...module,
+              quizzes: module.quizzes.map((quiz, qIdx) =>
+                qIdx === quizIndex
+                  ? {
+                      ...quiz,
+                      questions: quiz.questions.map((question, questionIdx) =>
+                        questionIdx === questionIndex
+                          ? {
+                              ...question,
+                              options: [...question.options, { text: "", isCorrect: false }],
+                            }
+                          : question,
+                      ),
+                    }
+                  : quiz,
+              ),
+            }
+          : module,
+      ),
+    )
+  }
+
+  const removeQuizOption = (moduleIndex: number, quizIndex: number, questionIndex: number, optionIndex: number) => {
+    setModules((prev) =>
+      prev.map((module, mIdx) =>
+        mIdx === moduleIndex
+          ? {
+              ...module,
+              quizzes: module.quizzes.map((quiz, qIdx) =>
+                qIdx === quizIndex
+                  ? {
+                      ...quiz,
+                      questions: quiz.questions.map((question, questionIdx) =>
+                        questionIdx === questionIndex
+                          ? {
+                              ...question,
+                              options: question.options.filter((_, optIdx) => optIdx !== optionIndex),
+                            }
+                          : question,
+                      ),
+                    }
+                  : quiz,
+              ),
+            }
+          : module,
+      ),
+    )
+  }
+
+  const addQuizQuestion = (moduleIndex: number, quizIndex: number) => {
+    setModules((prev) =>
+      prev.map((module, mIdx) =>
+        mIdx === moduleIndex
+          ? {
+              ...module,
+              quizzes: module.quizzes.map((quiz, qIdx) =>
+                qIdx === quizIndex
+                  ? {
+                      ...quiz,
+                      questions: [
+                        ...quiz.questions,
+                        {
+                          text: "",
+                          type: "SINGLE_CHOICE",
+                          options: [
+                            { text: "", isCorrect: true },
+                            { text: "", isCorrect: false },
+                          ],
+                        },
+                      ],
+                    }
+                  : quiz,
+              ),
+            }
+          : module,
+      ),
+    )
+  }
+
+  const removeQuizQuestion = (moduleIndex: number, quizIndex: number, questionIndex: number) => {
+    setModules((prev) =>
+      prev.map((module, mIdx) =>
+        mIdx === moduleIndex
+          ? {
+              ...module,
+              quizzes: module.quizzes.map((quiz, qIdx) =>
+                qIdx === quizIndex
+                  ? {
+                      ...quiz,
+                      questions: quiz.questions.filter((_, questionIdx) => questionIdx !== questionIndex),
+                    }
+                  : quiz,
+              ),
+            }
+          : module,
+      ),
+    )
+  }
+
+  const handleQuestionTypeChange = (
+    moduleIndex: number,
+    quizIndex: number,
+    questionIndex: number,
+    newType: "SINGLE_CHOICE" | "MULTI_CHOICE" | "ORDERING" | "SCALE" | "TEXT",
+  ) => {
+    setModules((prev) =>
+      prev.map((module, mIdx) =>
+        mIdx === moduleIndex
+          ? {
+              ...module,
+              quizzes: module.quizzes.map((quiz, qIdx) =>
+                qIdx === quizIndex
+                  ? {
+                      ...quiz,
+                      questions: quiz.questions.map((question, questionIdx) => {
+                        if (questionIdx === questionIndex) {
+                          let newOptions: QuizOption[] = []
+
+                          if (newType === "SINGLE_CHOICE" || newType === "MULTI_CHOICE") {
+                            newOptions = [
+                              { text: "", isCorrect: true },
+                              { text: "", isCorrect: false },
+                            ]
+                          } else if (newType === "ORDERING") {
+                            newOptions = [
+                              { text: "", isCorrect: true },
+                              { text: "", isCorrect: true },
+                              { text: "", isCorrect: true },
+                            ]
+                          } else if (newType === "SCALE") {
+                            newOptions = [{ text: "1-5 scale", isCorrect: true }]
+                          } else if (newType === "TEXT") {
+                            newOptions = []
+                          }
+
+                          return {
+                            ...question,
+                            type: newType,
+                            options: newOptions,
+                            scaleMin: newType === "SCALE" ? 1 : undefined,
+                            scaleMax: newType === "SCALE" ? 5 : undefined,
+                          }
+                        }
+                        return question
+                      }),
+                    }
+                  : quiz,
+              ),
+            }
+          : module,
+      ),
+    )
+  }
+
+  const handleLessonDescriptionChange = (moduleIndex: number, lessonIndex: number, content: string) => {
+    updateLesson(moduleIndex, lessonIndex, "lessonDescription", content)
   }
 
   return (
@@ -177,7 +539,7 @@ export default function CourseModuleAdd({ modules, setModules, isMicroLearning }
                       />
                       <Select
                         value={lesson.lessonType}
-                        onValueChange={(value: "video" | "DOCS" ) =>
+                        onValueChange={(value: "video" | "doc" ) =>
                           updateLesson(moduleIndex, lessonIndex, "lessonType", value)
                         }
                       >
@@ -186,40 +548,88 @@ export default function CourseModuleAdd({ modules, setModules, isMicroLearning }
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="video">Video</SelectItem>
-                          <SelectItem value="DOCS">Document</SelectItem>
+                          <SelectItem value="doc">Document</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
+                    {lesson.lessonType === "doc" && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Lesson Description</label>
+                        <Editor
+                          contents={lesson.lessonDescription}
+                          onSave={(content) => handleLessonDescriptionChange(moduleIndex, lessonIndex, content)}
+                          onBlur={() => {}}
+                        />
+                      </div>
+                    )}
+
                     {/* Video Upload */}
                     {lesson.lessonType === "video" && (
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         <div className="flex items-center gap-3">
                           <Button
                             type="button"
                             variant="outline"
                             onClick={() => handleVideoUpload(moduleIndex, lessonIndex)}
+                            disabled={lesson.isUploading}
                           >
                             <Video className="w-4 h-4 mr-2" />
-                            Upload Video
+                            {lesson.isUploading ? "Uploading..." : "Upload Video"}
                           </Button>
                           {lesson.lessonVideoName && (
-                            <span className="text-sm text-gray-600 bg-white px-2 py-1 rounded border">
-                              {lesson.lessonVideoName}
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-gray-700 bg-white px-3 py-1 rounded border font-medium">
+                                📹 {lesson.lessonVideoName}
+                              </span>
+                              {lesson.isUploading && (
+                                <span className="text-xs text-blue-600 font-medium">
+                                  {Math.round(lesson.uploadProgress || 0)}%
+                                </span>
+                              )}
+                            </div>
                           )}
                         </div>
+
+                        {lesson.isUploading && lesson.uploadProgress !== undefined && (
+                          <div className="space-y-1">
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div
+                                className="bg-blue-500 h-2 rounded-full transition-all duration-300 ease-out"
+                                style={{ width: `${lesson.uploadProgress}%` }}
+                              />
+                            </div>
+                            <p className="text-xs text-gray-600">
+                              Uploading video... {Math.round(lesson.uploadProgress)}% complete
+                            </p>
+                          </div>
+                        )}
+
+                        {lesson.uploadProgress === 100 && !lesson.isUploading && (
+                          <div className="flex items-center gap-2 text-green-600 text-sm">
+                            <div className="w-4 h-4 rounded-full bg-green-100 flex items-center justify-center">✓</div>
+                            Video uploaded successfully
+                          </div>
+                        )}
                       </div>
                     )}
 
-                    {/* Document Upload */}
-                    {lesson.lessonType === "DOCS" && (
+                    {lesson.lessonType === "doc" && (
                       <div className="space-y-2">
                         <div className="flex items-center gap-3">
-                          <Button type="button" variant="outline">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => handleDocumentUpload(moduleIndex, lessonIndex)}
+                          >
                             <FileText className="w-4 h-4 mr-2" />
                             Upload Document
                           </Button>
+                          {lesson.lessonVideoName && (
+                            <span className="text-sm text-gray-700 bg-white px-3 py-1 rounded border font-medium">
+                              📄 {lesson.lessonVideoName}
+                            </span>
+                          )}
                         </div>
                       </div>
                     )}
@@ -240,6 +650,311 @@ export default function CourseModuleAdd({ modules, setModules, isMicroLearning }
                   <Plus className="w-4 h-4 mr-2" />
                   Add Lesson
                 </Button>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <h4 className="font-medium text-gray-700">Quizzes</h4>
+                  <Button onClick={() => addNewQuiz(moduleIndex)} variant="outline" size="sm">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Quiz
+                  </Button>
+                </div>
+
+                {module.quizzes.map((quiz, quizIndex) => (
+                  <div key={quizIndex} className="border rounded-lg p-4 space-y-3 bg-blue-50">
+                    <div className="flex items-center gap-3">
+                      <Input
+                        placeholder="Quiz Title *"
+                        value={quiz.title}
+                        onChange={(e) => updateQuiz(moduleIndex, quizIndex, "title", e.target.value)}
+                        className="flex-1"
+                        required
+                      />
+                      <Button variant="outline" size="sm" onClick={() => removeQuiz(moduleIndex, quizIndex)}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+
+                    {/* Add Question Button */}
+                    <div className="flex justify-end">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => addQuizQuestion(moduleIndex, quizIndex)}
+                      >
+                        <Plus className="w-3 h-3 mr-1" />
+                        Add Question
+                      </Button>
+                    </div>
+
+                    {quiz.questions.map((question, questionIndex) => (
+                      <div key={questionIndex} className="space-y-3 p-4 bg-white rounded border">
+                        <div className="flex items-center gap-3">
+                          <Input
+                            placeholder="Question Text *"
+                            value={question.text}
+                            onChange={(e) =>
+                              updateQuizQuestion(moduleIndex, quizIndex, questionIndex, "text", e.target.value)
+                            }
+                            className="flex-1"
+                            required
+                          />
+                          {/* Question Type Selector */}
+                          <Select
+                            value={question.type}
+                            onValueChange={(value: "SINGLE_CHOICE" | "MULTI_CHOICE" | "ORDERING" | "SCALE" | "TEXT") =>
+                              handleQuestionTypeChange(moduleIndex, quizIndex, questionIndex, value)
+                            }
+                          >
+                            <SelectTrigger className="w-48">
+                              <SelectValue placeholder="Question Type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="SINGLE_CHOICE">Single Choice</SelectItem>
+                            {
+                              pathname === "/dashboard/micro-learning/add-microLearning" && (
+                                <>
+                              <SelectItem value="MULTI_CHOICE">Multi Choice</SelectItem>
+                              <SelectItem value="ORDERING">Ordering</SelectItem>
+                              <SelectItem value="SCALE">Scale</SelectItem>
+                              <SelectItem value="TEXT">Text Answer</SelectItem>
+                                </>
+                              )
+                            }
+                            </SelectContent>
+                          </Select>
+                          {/* Remove Question Button */}
+                          {quiz.questions.length > 1 && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => removeQuizQuestion(moduleIndex, quizIndex, questionIndex)}
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          )}
+                        </div>
+
+                        {/* Conditional Rendering for Different Question Types */}
+                        {question.type === "SINGLE_CHOICE" && (
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                              <label className="text-sm font-medium text-gray-700">Answer Options:</label>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => addQuizOption(moduleIndex, quizIndex, questionIndex)}
+                              >
+                                <Plus className="w-3 h-3 mr-1" />
+                                Add Option
+                              </Button>
+                            </div>
+                            {question.options.map((option, optionIndex) => (
+                              <div key={optionIndex} className="flex items-center gap-2 p-2 border rounded bg-gray-50">
+                                <input
+                                  type="radio"
+                                  name={`quiz-${moduleIndex}-${quizIndex}-${questionIndex}`}
+                                  checked={option.isCorrect}
+                                  onChange={() => {
+                                    question.options.forEach((_, idx) => {
+                                      updateQuizOption(
+                                        moduleIndex,
+                                        quizIndex,
+                                        questionIndex,
+                                        idx,
+                                        "isCorrect",
+                                        idx === optionIndex,
+                                      )
+                                    })
+                                  }}
+                                  className="w-4 h-4"
+                                />
+                                <Input
+                                  placeholder={`Option ${optionIndex + 1}`}
+                                  value={option.text}
+                                  onChange={(e) =>
+                                    updateQuizOption(
+                                      moduleIndex,
+                                      quizIndex,
+                                      questionIndex,
+                                      optionIndex,
+                                      "text",
+                                      e.target.value,
+                                    )
+                                  }
+                                  className="flex-1"
+                                />
+                                {question.options.length > 2 && (
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => removeQuizOption(moduleIndex, quizIndex, questionIndex, optionIndex)}
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </Button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {question.type === "MULTI_CHOICE" && (
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                              <label className="text-sm font-medium text-gray-700">
+                                Answer Options (Multiple can be correct):
+                              </label>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => addQuizOption(moduleIndex, quizIndex, questionIndex)}
+                              >
+                                <Plus className="w-3 h-3 mr-1" />
+                                Add Option
+                              </Button>
+                            </div>
+                            {question.options.map((option, optionIndex) => (
+                              <div key={optionIndex} className="flex items-center gap-2 p-2 border rounded bg-gray-50">
+                                <input
+                                  type="checkbox"
+                                  checked={option.isCorrect}
+                                  onChange={(e) =>
+                                    updateQuizOption(
+                                      moduleIndex,
+                                      quizIndex,
+                                      questionIndex,
+                                      optionIndex,
+                                      "isCorrect",
+                                      e.target.checked,
+                                    )
+                                  }
+                                  className="w-4 h-4"
+                                />
+                                <Input
+                                  placeholder={`Option ${optionIndex + 1}`}
+                                  value={option.text}
+                                  onChange={(e) =>
+                                    updateQuizOption(
+                                      moduleIndex,
+                                      quizIndex,
+                                      questionIndex,
+                                      optionIndex,
+                                      "text",
+                                      e.target.value,
+                                    )
+                                  }
+                                  className="flex-1"
+                                />
+                                {question.options.length > 2 && (
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => removeQuizOption(moduleIndex, quizIndex, questionIndex, optionIndex)}
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </Button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {question.type === "ORDERING" && (
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                              <label className="text-sm font-medium text-gray-700">Items to Order:</label>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => addQuizOption(moduleIndex, quizIndex, questionIndex)}
+                              >
+                                <Plus className="w-3 h-3 mr-1" />
+                                Add Item
+                              </Button>
+                            </div>
+                            {question.options.map((option, optionIndex) => (
+                              <div key={optionIndex} className="flex items-center gap-2 p-2 border rounded bg-gray-50">
+                                <span className="text-sm font-medium text-gray-600 w-8">#{optionIndex + 1}</span>
+                                <Input
+                                  placeholder={`Item ${optionIndex + 1}`}
+                                  value={option.text}
+                                  onChange={(e) =>
+                                    updateQuizOption(
+                                      moduleIndex,
+                                      quizIndex,
+                                      questionIndex,
+                                      optionIndex,
+                                      "text",
+                                      e.target.value,
+                                    )
+                                  }
+                                  className="flex-1"
+                                />
+                                {question.options.length > 2 && (
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => removeQuizOption(moduleIndex, quizIndex, questionIndex, optionIndex)}
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </Button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {question.type === "SCALE" && (
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-700">Scale Range:</label>
+                            <div className="flex items-center gap-3 p-3 border rounded bg-gray-50">
+                              <span className="text-sm">Min:</span>
+                              <Input
+                                type="number"
+                                value={question.scaleMin || 1}
+                                onChange={(e) =>
+                                  updateQuizQuestion(moduleIndex, quizIndex, questionIndex, "scaleMin", e.target.value)
+                                }
+                                className="w-20"
+                                min="1"
+                              />
+                              <span className="text-sm">Max:</span>
+                              <Input
+                                type="number"
+                                value={question.scaleMax || 5}
+                                onChange={(e) =>
+                                  updateQuizQuestion(moduleIndex, quizIndex, questionIndex, "scaleMax", e.target.value)
+                                }
+                                className="w-20"
+                                min="2"
+                              />
+                              <span className="text-sm text-gray-600">
+                                (Students will rate from {question.scaleMin || 1} to {question.scaleMax || 5})
+                              </span>
+                            </div>
+                          </div>
+                        )}
+
+                        {question.type === "TEXT" && (
+                          <div className="p-3 border rounded bg-gray-50">
+                            <p className="text-sm text-gray-600">
+                              📝 Students will provide a text answer for this question.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ))}
               </div>
             </div>
           </CardContent>
