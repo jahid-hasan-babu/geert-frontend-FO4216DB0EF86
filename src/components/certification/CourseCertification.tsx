@@ -13,8 +13,24 @@ export default function CourseCertification() {
   const strokeDasharray = circumference;
   const strokeDashoffset = circumference - (score / 100) * circumference;
 
+  const handleDownload = () => {
+    const link = document.createElement("a");
+    link.href = certificate.src;
+    link.download = "certificate.png";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6 space-y-6">
+
+      {/* Certificate Image at the Top */}
+      <div className="flex justify-center">
+        <Image src={certificate} alt="Certificate" className="rounded-xl" />
+      </div>
+
+      {/* Score Circle */}
       <div className="flex flex-col items-center">
         <div className="relative w-32 h-32">
           <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 100 100">
@@ -79,11 +95,11 @@ export default function CourseCertification() {
         </div>
       </div>
 
-      <div>
-        <Image src={certificate} alt=""></Image>
-      </div>
-
-      <button className="w-full bg-sky-500 hover:bg-sky-600 text-white font-semibold py-4 px-6 rounded-xl transition-colors duration-200 flex items-center justify-center space-x-2 cursor-pointer">
+      {/* Download Button */}
+      <button
+        onClick={handleDownload}
+        className="w-full bg-sky-500 hover:bg-sky-600 text-white font-semibold py-4 px-6 rounded-xl transition-colors duration-200 flex items-center justify-center space-x-2 cursor-pointer"
+      >
         <Download className="w-5 h-5" />
         <span>Download</span>
       </button>

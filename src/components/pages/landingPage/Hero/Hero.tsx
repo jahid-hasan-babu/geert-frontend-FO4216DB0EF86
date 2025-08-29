@@ -7,6 +7,7 @@ import hero_learners_4 from "@/assets/images/hero_learners_4.png";
 import heroBanner from "@/assets/images/hero_banner.png";
 import PrimaryButton from "@/components/ui/buttons/PrimaryButton/PrimaryButton";
 import Partners from "@/components/common/Partners";
+import Link from "next/link";
 
 export default function Hero() {
   return (
@@ -27,7 +28,9 @@ export default function Hero() {
             </div>
 
             {/* Updated Button */}
-            <PrimaryButton label="Get Start" />
+            <Link href="/courses">
+              <PrimaryButton label="Get Start" />
+            </Link>
 
             {/* Social Proof */}
             <div className="flex items-center space-x-4">

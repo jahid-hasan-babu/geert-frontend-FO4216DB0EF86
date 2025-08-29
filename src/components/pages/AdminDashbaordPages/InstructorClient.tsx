@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import InstructorCourses from "@/components/pages/AdminDashbaordPages/InstructorCourses";
-import { Lesson } from "@/components/ui/context/CourseContext";
+import { LessonsItem } from "@/components/ui/context/CourseContext";
 import axios from "axios";
 
 interface Instructor {
@@ -20,7 +20,7 @@ interface Course {
   id: string;
   title: string;
   slug: string;
-  courseContexts: Lesson[];
+  courseContexts: LessonsItem[];
   lessons: number;
   duration: string;
   rating: number;

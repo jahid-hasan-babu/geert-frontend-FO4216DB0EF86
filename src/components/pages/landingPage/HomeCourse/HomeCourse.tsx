@@ -34,7 +34,10 @@ export default function HomeCourse() {
         `${process.env.NEXT_PUBLIC_BASE_URL}/courses/all-course`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setCourses(res.data.data.data);
+
+      // Ensure res.data.data.data exists
+      const data: APICourse[] = res.data?.data?.data || [];
+      setCourses(data);
     } catch (err) {
       console.error("Failed to fetch courses:", err);
     } finally {
@@ -74,18 +77,14 @@ export default function HomeCourse() {
                   course={{
                     id: course.id,
                     title: course.title,
-                    slug: course.slug || course.id, // fallback to id if slug not available
+                    slug: course.slug || course.id,
                     coverImage: course.coverImage || "",
                     duration: course.duration || "",
-                    lessons: course.totalLessons || 0,
+                    totalLessons: course.totalLessons || 0,
                     rating: course.avgRating || 0,
-                    category: course.category || "",
-                    type: course.type || "video",
-                    completed: course.completed || 0,
-                    isBestseller: course.isBestseller,
                     isMicroLearning: course.isMicroLearning,
                     description: course.description || "",
-                    courseContexts: [], // required by CourseCard
+                    isFavorite: false,
                   }}
                 />
               </Link>

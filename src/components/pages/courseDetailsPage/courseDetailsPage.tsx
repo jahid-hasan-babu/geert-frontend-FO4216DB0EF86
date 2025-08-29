@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import instructorImage from "@/assets/images/about_dp.png";
 import CourseReviewAbout from "@/components/ui/review/CourseReviewAbout";
 import Promotion from "@/components/shared/Promotion/Promotion";
 import CourseVideoPlayer from "@/components/ui/videoPlayer/CourseVideoPlayer";
@@ -9,26 +8,43 @@ import {
   CourseProvider,
   CourseSidebar,
   Module,
+  LessonsItem,
 } from "@/components/ui/context/CourseContext";
 import { reviewData } from "@/utils/dummyData";
 import axios, { AxiosError } from "axios";
 
-interface Instructor {
-  name: string;
-  avatar: string;
+// ---------------- Types ----------------
+
+export interface Instructor {
+  id: string;
+  username: string;
+  email: string;
+  profileImage: string;
+  role: "INSTRUCTOR" | "STUDENT" | "ADMIN";
+  phone: string | null;
+  status: "ACTIVE" | "INACTIVE" | "BANNED";
+}
+
+interface LessonFromAPI {
+  id: string;
+  title: string;
+  type?: "video" | "doc" | "quiz";
+  duration?: string;
+  durationSecs?: number;
+  completed?: boolean;
+  videoUrl?: string;
+}
+
+interface QuizFromAPI {
+  id: string;
+  title: string;
 }
 
 interface ModuleFromAPI {
   id: string;
   title: string;
-  lessons: {
-    id: string;
-    title: string;
-    type?: "video" | "doc" | "quiz";
-    duration?: string;
-    completed?: boolean;
-    videoUrl?: string;
-  }[];
+  lessons: LessonFromAPI[];
+  Quiz?: QuizFromAPI[];
 }
 
 interface CourseFromAPI {
@@ -38,13 +54,14 @@ interface CourseFromAPI {
   description: string;
   rating: number;
   isMicroLearning?: boolean;
-  instructorName?: string;
+  instructor?: Instructor;
   modules?: ModuleFromAPI[];
 }
 
 interface CourseDetailsPageProps {
   slug: string;
 }
+
 
 export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
   const [course, setCourse] = useState<CourseFromAPI | null>(null);
@@ -54,17 +71,17 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
   useEffect(() => {
     const fetchCourse = async () => {
       try {
+        if (typeof window === "undefined") return;
+
         const token = localStorage.getItem("token");
         if (!token) throw new Error("No access token found");
 
-        const { data } = await axios.get(
+        const { data } = await axios.get<{ data: CourseFromAPI }>(
           `${process.env.NEXT_PUBLIC_BASE_URL}/courses/single-course/${slug}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        console.log("Data >>> ", data?.data);
-
-        setCourse(data?.data);
+        setCourse(data.data);
       } catch (err) {
         const error = err as AxiosError<{ message: string }>;
         console.error(error);
@@ -77,44 +94,45 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
     fetchCourse();
   }, [slug]);
 
-  console.log("Courses >>>", course);
-
   if (loading) return <p className="text-center py-10">Loading course...</p>;
   if (error) return <p className="text-center py-10 text-red-500">{error}</p>;
   if (!course) return <p className="text-center py-10">Course not found</p>;
+  if (!course.instructor)
+    return <p className="text-center py-10">Instructor not found</p>;
 
-  const instructor: Instructor = {
-    name: course.instructorName || "Instructor",
-    avatar: instructorImage.src,
-  };
-
+  const courseId = course._id || course.id || "";
   const filteredReviews = reviewData.filter(
-    (review) => review.courseId === (course._id || course.id)
+    (review) => review.courseId === courseId
   );
 
+  // ---------------- Modules Mapping ----------------
   const modules: Module[] =
     course.modules?.map((m) => {
-      // map lessons first
-      const lessons = m.lessons.map((l) => ({
-        id: l.id,
-        title: l.title,
-        type: l.type,
-        duration: l.duration,
-        completed: l.completed,
-        videoUrl: l.videoUrl,
-      }));
-
-      // append quizzes if any
-      if (m.Quiz?.length) {
-        m.Quiz.forEach((q) => {
-          lessons.push({
+      const lessons: LessonsItem[] = [
+        ...m.lessons.map((l) => ({
+          id: l.id,
+          title: l.title,
+          type: l.type || "doc",
+          duration: l.duration,
+          durationSecs: l.durationSecs,
+          completed: l.completed ?? false,
+          videoUrl: l.videoUrl,
+          isLocked: false,
+        })),
+        ...(m.Quiz?.map((q) => ({
+          id: q.id,
+          title: q.title,
+          type: "quiz" as const,
+          quiz: {
             id: q.id,
             title: q.title,
-            type: "quiz",
-            quiz: q,
-          });
-        });
-      }
+            questions: [],
+            locked: false,
+          },
+          completed: false,
+          isLocked: false,
+        })) || []),
+      ];
 
       return {
         id: m.id,
@@ -123,26 +141,25 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
       };
     }) || [];
 
-  console.log("Modules", modules);
-
   return (
     <CourseProvider modules={modules}>
       <div className="container">
         <section className="py-8 lg:py-12 mx-auto">
           <div className="grid lg:grid-cols-4 gap-12 items-start">
-            {/* Left: Video + Course Info */}
+            {/* ---------- Left Side ---------- */}
             <div className="lg:col-span-3 space-y-6">
               <CourseVideoPlayer />
 
               <div className="flex justify-between items-start">
                 <div>
+                  {/* Rating */}
                   <div className="flex items-center space-x-2">
                     <div className="flex space-x-1">
                       {[...Array(5)].map((_, i) => (
                         <span
                           key={i}
                           className={`text-lg ${
-                            i < Math.round(course.rating)
+                            i < Math.floor(course.rating)
                               ? "text-yellow-400"
                               : "text-gray-300"
                           }`}
@@ -156,6 +173,7 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
                     </span>
                   </div>
 
+                  {/* Title + Micro tag */}
                   <div className="flex items-center space-x-4 mb-6">
                     <h1 className="text-3xl md:text-4xl lg:text-[24px] font-bold text-gray-900 font-playfairDisplay">
                       {course.title}
@@ -169,19 +187,22 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
                 </div>
               </div>
 
+              {/* Reviews + About */}
               <CourseReviewAbout
                 description={course.description}
-                instructor={instructor}
+                instructor={course.instructor}
                 reviews={filteredReviews}
               />
             </div>
 
+            {/* ---------- Right Side (Sidebar) ---------- */}
             <div className="lg:col-span-1">
               <CourseSidebar modules={modules} />
             </div>
           </div>
         </section>
 
+        {/* ---------- Promotion Section ---------- */}
         <section className="pt-[80px]">
           <Promotion />
         </section>

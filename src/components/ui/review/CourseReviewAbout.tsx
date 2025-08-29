@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Image, { type StaticImageData } from "next/image";
-// import InstructorModal from "../modals/InstructorModal";
-import { InstructorModalTwo } from "../modals/InstructorModalTwo";
+import Image from "next/image";
+import { InstructorModal } from "../modals/InstructorModal";
 
 interface Review {
   id: string;
@@ -13,10 +12,14 @@ interface Review {
   author: string;
 }
 
-interface Instructor {
-  name: string;
-  avatar: string | StaticImageData;
-  bio?: string;
+export interface Instructor {
+  id: string;
+  username: string;
+  email: string;
+  profileImage: string;
+  role: "INSTRUCTOR" | "STUDENT" | "ADMIN";
+  phone: string | null;
+  status: "ACTIVE" | "INACTIVE" | "BANNED";
 }
 
 interface Props {
@@ -85,17 +88,17 @@ export default function CourseReviewAbout({
             className="bg-white rounded-lg p-4 flex items-center space-x-4 cursor-pointer hover:bg-gray-50 transition"
             onClick={() => setIsInstructorOpen(true)}
           >
-            <div className="w-14 h-14 rounded-full overflow-hidden">
+            <div className="w-14 h-14 rounded-full overflow-hidden relative">
               <Image
-                src={instructor.avatar || "/placeholder.svg"}
-                alt={instructor.name}
-                width={56}
-                height={56}
+                src={instructor?.profileImage || "/default-avatar.png"}
+                alt={instructor?.username || "Instructor"}
+                fill
+                className="object-cover"
               />
             </div>
             <div>
               <p className="text-sm text-gray-600">Instructor</p>
-              <p className="font-semibold text-gray-900">{instructor.name}</p>
+              <p className="font-semibold text-gray-900">{instructor?.username}</p>
             </div>
           </div>
         </div>
@@ -115,9 +118,7 @@ export default function CourseReviewAbout({
                       <span
                         key={i}
                         className={`text-sm ${
-                          i < review.rating
-                            ? "text-yellow-400"
-                            : "text-gray-300"
+                          i < review?.rating ? "text-yellow-400" : "text-gray-300"
                         }`}
                       >
                         ★
@@ -143,14 +144,10 @@ export default function CourseReviewAbout({
       )}
 
       {/* Instructor Modal */}
-      {/* <InstructorModal
+      <InstructorModal
         isOpen={isInstructorOpen}
         onClose={() => setIsInstructorOpen(false)}
-        instructor={instructor}
-      /> */}
-      <InstructorModalTwo
-        isOpen={isInstructorOpen}
-        onClose={() => setIsInstructorOpen(false)}
+        instructorId={instructor.id}
       />
     </div>
   );

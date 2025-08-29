@@ -1,6 +1,6 @@
 import React from "react";
 import CourseCard from "@/components/ui/card/CourseCard";
-import { Lesson } from "@/components/ui/context/CourseContext";
+import { LessonsItem } from "@/components/ui/context/CourseContext";
 
 interface Instructor {
   id: string;
@@ -17,7 +17,7 @@ interface Course {
   id: string;
   title: string;
   slug: string;
-  courseContexts: Lesson[];
+  courseContexts: LessonsItem[];
   lessons: number;
   duration: string;
   rating: number;
