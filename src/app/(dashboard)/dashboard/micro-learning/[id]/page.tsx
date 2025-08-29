@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 // import CourseDetails from "@/components/pages/AdminDashbaordPages/CourseDetailsPage";
 import { courseData } from "@/utils/dummyData";
 import React from "react";

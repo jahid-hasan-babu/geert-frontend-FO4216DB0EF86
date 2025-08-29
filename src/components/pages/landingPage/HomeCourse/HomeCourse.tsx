@@ -77,7 +77,7 @@ export default function HomeCourse() {
                     slug: course.slug || course.id, // fallback to id if slug not available
                     coverImage: course.coverImage || "",
                     duration: course.duration || "",
-                    lessons: course.totalLessons || 0,
+                    // lessons: course.totalLessons || 0,
                     rating: course.avgRating || 0,
                     category: course.category || "",
                     type: course.type || "video",
@@ -85,7 +85,7 @@ export default function HomeCourse() {
                     isBestseller: course.isBestseller,
                     isMicroLearning: course.isMicroLearning,
                     description: course.description || "",
-                    courseContexts: [], // required by CourseCard
+                    // courseContexts: [], // required by CourseCard
                   }}
                 />
               </Link>
