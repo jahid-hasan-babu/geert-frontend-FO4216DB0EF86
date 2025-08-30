@@ -42,10 +42,11 @@ interface Quiz {
 
 interface Lesson {
 	lessonType: "video" | "doc";
-	lessonTitle: string;
+	title: string;
 	lessonDescription: string;
 	lessonDuration: string;
-	lessonVideoName: string;
+	durationSecs?: number;
+	lessonVideoName?: string;
 	lessonDocumentFile?: File;
 	lessonVideoFile?: File;
 	videoUrl?: string;
@@ -79,15 +80,26 @@ export default function AddModuleModal({
 		lessons: [
 			{
 				lessonType: "video",
-				lessonTitle: "",
+				title: "",
 				lessonDescription: "",
 				lessonDuration: "",
-				lessonVideoName: "",
+				durationSecs: 0,
 				videoUrl: "",
 			},
 		],
 		quizzes: [],
 	});
+
+	// Helper function to convert duration string to seconds
+	const convertDurationToSeconds = (duration: string): number => {
+		const match = duration.match(/(\d+)([ms]?)/);
+		if (!match) return 0;
+
+		const value = parseInt(match[1]);
+		const unit = match[2] || "m"; // default to minutes
+
+		return unit === "s" ? value : value * 60;
+	};
 
 	const handleSubmit = async () => {
 		try {
@@ -100,40 +112,110 @@ export default function AddModuleModal({
 			if (
 				moduleData.lessons.some(
 					(lesson) =>
-						!lesson.lessonTitle.trim() || !lesson.lessonDuration.trim()
+						!lesson.title?.trim() ||
+						!lesson.lessonDuration?.trim() ||
+						!lesson.lessonType ||
+						(lesson.lessonType === "video" &&
+							!lesson.videoUrl &&
+							!lesson.lessonVideoFile) ||
+						(lesson.lessonType === "doc" &&
+							!lesson.lessonDocumentFile &&
+							!lesson.lessonDescription)
 				)
 			) {
-				message.error("All lesson titles and durations are required");
+				message.error(
+					"All lesson titles, durations, types, and required files/URLs are required"
+				);
+				return;
+			}
+
+			if (
+				moduleData.quizzes.some(
+					(quiz) =>
+						!quiz.title?.trim() ||
+						quiz.questions.some(
+							(question) =>
+								!question.text?.trim() ||
+								!question.type ||
+								(["SINGLE_CHOICE", "MULTI_CHOICE", "ORDERING"].includes(
+									question.type
+								) &&
+									question.options.some((option) => !option.text?.trim())) ||
+								(question.type === "SCALE" &&
+									(question.scaleMin === undefined ||
+										question.scaleMax === undefined))
+						)
+				)
+			) {
+				message.error(
+					"All quiz titles, questions, and options must be filled correctly"
+				);
 				return;
 			}
 
 			// Create FormData for submission
 			const formData = new FormData();
 
-			// Add module data as JSON
-			const moduleInfo = {
-				moduleTitle: moduleData.moduleTitle,
-				lessons: moduleData.lessons.map((lesson) => ({
-					lessonType: lesson.lessonType,
-					lessonTitle: lesson.lessonTitle,
-					lessonDescription: lesson.lessonDescription,
-					lessonDuration: lesson.lessonDuration,
-					videoUrl: lesson.videoUrl || "",
-				})),
-				quizzes: moduleData.quizzes,
-			};
+			// Add module title
+			formData.append("title", moduleData.moduleTitle);
 
-			formData.append("moduleData", JSON.stringify(moduleInfo));
+			// Process lessons
+			const lessonsData = moduleData.lessons.map((lesson, index) => ({
+				title: lesson.title,
+				type: lesson.lessonType,
+				description: lesson.lessonDescription || "",
+				duration: lesson.lessonDuration,
+				durationSecs: convertDurationToSeconds(lesson.lessonDuration),
+				position: index,
+				...(lesson.lessonType === "video" &&
+					lesson.videoUrl && { videoUrl: lesson.videoUrl }),
+			}));
 
-			// Add video files if any
+			formData.append("lessons", JSON.stringify(lessonsData));
+
+			// Add lesson files
 			moduleData.lessons.forEach((lesson, index) => {
 				if (lesson.lessonVideoFile) {
-					formData.append(`lessonVideo_${index}`, lesson.lessonVideoFile);
+					formData.append(`videoUrl`, lesson.lessonVideoFile);
 				}
 				if (lesson.lessonDocumentFile) {
 					formData.append(`lessonDocument_${index}`, lesson.lessonDocumentFile);
 				}
 			});
+
+			// Process quizzes
+			if (moduleData.quizzes.length > 0) {
+				const quizzesData = moduleData.quizzes.map((quiz, index) => ({
+					title: quiz.title,
+					position: index,
+					questions: quiz.questions.map((question, qIndex) => ({
+						text: question.text,
+						type: question.type,
+						position: qIndex,
+						options: ["SINGLE_CHOICE", "MULTI_CHOICE", "ORDERING"].includes(
+							question.type
+						)
+							? question.options.map((option, oIndex) => ({
+									text: option.text,
+									isCorrect: option.isCorrect,
+									position: oIndex,
+							  }))
+							: [],
+						...(question.type === "SCALE" && {
+							scaleMin: question.scaleMin,
+							scaleMax: question.scaleMax,
+						}),
+					})),
+				}));
+
+				formData.append("quizzes", JSON.stringify(quizzesData));
+			}
+
+			// Debug: Log FormData contents
+			console.log("FormData contents:");
+			for (const [key, value] of formData.entries()) {
+				console.log(key, value instanceof File ? `File: ${value.name}` : value);
+			}
 
 			await addCourseModule({
 				id: courseId,
@@ -155,10 +237,10 @@ export default function AddModuleModal({
 			lessons: [
 				{
 					lessonType: "video",
-					lessonTitle: "",
+					title: "",
 					lessonDescription: "",
 					lessonDuration: "",
-					lessonVideoName: "",
+					durationSecs: 0,
 					videoUrl: "",
 				},
 			],
@@ -174,10 +256,10 @@ export default function AddModuleModal({
 				...prev.lessons,
 				{
 					lessonType: "video",
-					lessonTitle: "",
+					title: "",
 					lessonDescription: "",
 					lessonDuration: "",
-					lessonVideoName: "",
+					durationSecs: 0,
 					videoUrl: "",
 				},
 			],
@@ -224,13 +306,6 @@ export default function AddModuleModal({
 		return false; // Prevent default upload behavior
 	};
 
-	const handleDocumentUpload = (index: number, file: File) => {
-		updateLesson(index, "lessonDocumentFile", file);
-		updateLesson(index, "lessonVideoName", file.name);
-		message.success("Document uploaded successfully!");
-		return false;
-	};
-
 	const addQuiz = () => {
 		setModuleData((prev) => ({
 			...prev,
@@ -244,7 +319,6 @@ export default function AddModuleModal({
 							type: "SINGLE_CHOICE",
 							options: [
 								{ text: "", isCorrect: true },
-								{ text: "", isCorrect: false },
 								{ text: "", isCorrect: false },
 							],
 						},
@@ -463,9 +537,9 @@ export default function AddModuleModal({
 								<div className="grid grid-cols-1 md:grid-cols-3 gap-3">
 									<Input
 										placeholder="Lesson Title *"
-										value={lesson.lessonTitle}
+										value={lesson.title}
 										onChange={(e) =>
-											updateLesson(index, "lessonTitle", e.target.value)
+											updateLesson(index, "title", e.target.value)
 										}
 									/>
 									<Input
@@ -559,29 +633,6 @@ export default function AddModuleModal({
 									</div>
 								)}
 
-								{lesson.lessonType === "doc" && (
-									<div className="space-y-2">
-										<div className="flex items-center gap-3">
-											<Upload
-												beforeUpload={(file) =>
-													handleDocumentUpload(index, file)
-												}
-												accept=".pdf,.doc,.docx,.txt"
-												showUploadList={false}
-											>
-												<AntButton icon={<UploadOutlined />}>
-													Upload Document
-												</AntButton>
-											</Upload>
-											{lesson.lessonVideoName && (
-												<span className="text-sm text-gray-700 bg-white px-3 py-1 rounded border font-medium">
-													📄 {lesson.lessonVideoName}
-												</span>
-											)}
-										</div>
-									</div>
-								)}
-
 								{moduleData.lessons.length > 1 && (
 									<div className="flex justify-end">
 										<Button
@@ -599,6 +650,7 @@ export default function AddModuleModal({
 					))}
 				</div>
 
+				{/* Quizzes */}
 				<div className="space-y-4">
 					<div className="flex justify-between items-center">
 						<h4 className="font-medium text-gray-700">Quizzes (Optional)</h4>
@@ -700,8 +752,41 @@ export default function AddModuleModal({
 											)}
 										</div>
 
-										{/* Question Options */}
-										{question.type === "SINGLE_CHOICE" && (
+										{/* Scale Options */}
+										{question.type === "SCALE" && (
+											<div className="grid grid-cols-2 gap-3">
+												<Input
+													type="number"
+													placeholder="Min Scale Value"
+													value={question.scaleMin || ""}
+													onChange={(e) =>
+														updateQuizQuestion(
+															quizIndex,
+															questionIndex,
+															"scaleMin",
+															parseInt(e.target.value) || 1
+														)
+													}
+												/>
+												<Input
+													type="number"
+													placeholder="Max Scale Value"
+													value={question.scaleMax || ""}
+													onChange={(e) =>
+														updateQuizQuestion(
+															quizIndex,
+															questionIndex,
+															"scaleMax",
+															parseInt(e.target.value) || 10
+														)
+													}
+												/>
+											</div>
+										)}
+
+										{/* Question Options for choice-based questions */}
+										{(question.type === "SINGLE_CHOICE" ||
+											question.type === "MULTI_CHOICE") && (
 											<div className="space-y-2">
 												<div className="flex justify-between items-center">
 													<label className="text-sm font-medium text-gray-700">
@@ -724,24 +809,104 @@ export default function AddModuleModal({
 														className="flex items-center gap-2 p-2 border rounded bg-gray-50"
 													>
 														<input
-															type="radio"
-															name={`quiz-${quizIndex}-${questionIndex}`}
+															type={
+																question.type === "SINGLE_CHOICE"
+																	? "radio"
+																	: "checkbox"
+															}
+															name={
+																question.type === "SINGLE_CHOICE"
+																	? `quiz-${quizIndex}-${questionIndex}`
+																	: undefined
+															}
 															checked={option.isCorrect}
 															onChange={() => {
-																question.options.forEach((_, idx) => {
+																if (question.type === "SINGLE_CHOICE") {
+																	// Single choice: only one can be correct
+																	question.options.forEach((_, idx) => {
+																		updateQuizOption(
+																			quizIndex,
+																			questionIndex,
+																			idx,
+																			"isCorrect",
+																			idx === optionIndex
+																		);
+																	});
+																} else {
+																	// Multi choice: toggle this option
 																	updateQuizOption(
 																		quizIndex,
 																		questionIndex,
-																		idx,
+																		optionIndex,
 																		"isCorrect",
-																		idx === optionIndex
+																		!option.isCorrect
 																	);
-																});
+																}
 															}}
 															className="w-4 h-4"
 														/>
 														<Input
 															placeholder={`Option ${optionIndex + 1}`}
+															value={option.text}
+															onChange={(e) =>
+																updateQuizOption(
+																	quizIndex,
+																	questionIndex,
+																	optionIndex,
+																	"text",
+																	e.target.value
+																)
+															}
+															className="flex-1"
+														/>
+														{question.options.length > 2 && (
+															<Button
+																variant="outline"
+																size="sm"
+																onClick={() =>
+																	removeQuizOption(
+																		quizIndex,
+																		questionIndex,
+																		optionIndex
+																	)
+																}
+															>
+																<Trash2 className="w-3 h-3" />
+															</Button>
+														)}
+													</div>
+												))}
+											</div>
+										)}
+
+										{/* Ordering Options */}
+										{question.type === "ORDERING" && (
+											<div className="space-y-2">
+												<div className="flex justify-between items-center">
+													<label className="text-sm font-medium text-gray-700">
+														Items to Order:
+													</label>
+													<Button
+														variant="outline"
+														size="sm"
+														onClick={() =>
+															addQuizOption(quizIndex, questionIndex)
+														}
+													>
+														<Plus className="w-3 h-3 mr-1" />
+														Add Item
+													</Button>
+												</div>
+												{question.options.map((option, optionIndex) => (
+													<div
+														key={optionIndex}
+														className="flex items-center gap-2 p-2 border rounded bg-gray-50"
+													>
+														<span className="text-sm font-medium w-8">
+															{optionIndex + 1}.
+														</span>
+														<Input
+															placeholder={`Item ${optionIndex + 1}`}
 															value={option.text}
 															onChange={(e) =>
 																updateQuizOption(
