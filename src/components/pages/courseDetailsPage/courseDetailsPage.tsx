@@ -14,7 +14,6 @@ import { reviewData } from "@/utils/dummyData";
 import axios, { AxiosError } from "axios";
 
 // ---------------- Types ----------------
-
 export interface Instructor {
   id: string;
   username: string;
@@ -34,6 +33,7 @@ interface LessonFromAPI {
   completed?: boolean;
   videoUrl?: string;
   quiz?: QuizFromAPI;
+  locked?: boolean;
 }
 
 export type QuizQuestion = {
@@ -62,6 +62,7 @@ interface ModuleFromAPI {
   title: string;
   lessons: LessonFromAPI[];
   Quiz?: QuizFromAPI[];
+  locked?: boolean;
 }
 
 interface CourseFromAPI {
@@ -122,59 +123,51 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
   );
 
   // ---------------- Modules Mapping ----------------
-  console.log("Course <><><>", course);
   const modules: Module[] =
     course.modules?.map((m) => {
-      // 1️⃣ Map normal lessons
       const lessons: LessonsItem[] = m.lessons.map((l) => ({
         id: l.id,
         title: l.title,
         type: l.type || "doc",
         duration: l.duration,
         durationSecs: l.durationSecs,
-        completed: l.completed ?? false,
+        completed: l.completed,
         videoUrl: l.videoUrl,
-        isLocked: false,
+        locked: l.locked ?? false,
         quiz: undefined,
       }));
 
-      // 2️⃣ Map quizzes (if any) — define quizLessons here
       const quizLessons: LessonsItem[] = (m.Quiz ?? []).map((q) => ({
         id: q.id,
         title: q.title,
         type: "quiz",
-        completed: false,
-        isLocked: false,
+        locked: q?.locked ?? true,
         quiz: {
           id: q.id,
           title: q.title,
-          questions: q.questions ?? [], // default empty array
-          locked: q.locked ?? false,
+          questions: q.questions ?? [],
+          locked: q?.locked ?? true,
         },
       }));
 
-      // 3️⃣ Combine normal lessons + quizzes
       return {
         id: m.id,
         title: m.title,
+        locked: m.locked ?? false,
         lessons: [...lessons, ...quizLessons],
       };
     }) || [];
-
-  console.log("Modules <><><>", modules);
 
   return (
     <CourseProvider modules={modules}>
       <div className="container">
         <section className="py-8 lg:py-12 mx-auto">
           <div className="grid lg:grid-cols-4 gap-12 items-start">
-            {/* ---------- Left Side ---------- */}
             <div className="lg:col-span-3 space-y-6">
-              <CourseVideoPlayer />
+              <CourseVideoPlayer courseId={courseId} />
 
               <div className="flex justify-between items-start">
                 <div>
-                  {/* Rating */}
                   <div className="flex items-center space-x-2">
                     <div className="flex space-x-1">
                       {[...Array(5)].map((_, i) => (
@@ -195,7 +188,6 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
                     </span>
                   </div>
 
-                  {/* Title + Micro tag */}
                   <div className="flex items-center space-x-4 mb-6">
                     <h1 className="text-3xl md:text-4xl lg:text-[24px] font-bold text-gray-900 font-playfairDisplay">
                       {course.title}

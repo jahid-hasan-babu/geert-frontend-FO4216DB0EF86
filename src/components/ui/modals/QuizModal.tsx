@@ -28,7 +28,8 @@ export type Quiz = {
   locked: boolean;
 };
 
-type AnswerValue = string | string[] | number;
+// ✅ Updated type: include number[]
+type AnswerValue = string | string[] | number | number[];
 
 interface QuizModalProps {
   quiz: Quiz | null;
@@ -46,7 +47,6 @@ export const QuizModal: React.FC<QuizModalProps> = ({
   const [answers, setAnswers] = useState<{ [questionId: string]: AnswerValue }>({});
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  console.log("Quiz", quiz)
 
   useEffect(() => {
     if (!quiz) return;
@@ -85,9 +85,15 @@ export const QuizModal: React.FC<QuizModalProps> = ({
         case "SINGLE_CHOICE":
         case "MULTI_CHOICE":
         case "SCALE":
-          return { questionId: q.id, selectedOptionIds: Array.isArray(ans) ? ans : [ans] };
+          return {
+            questionId: q.id,
+            selectedOptionIds: Array.isArray(ans) ? ans : [ans],
+          };
         case "ORDERING":
-          return { questionId: q.id, orderedOptionIds: ans as string[] };
+          // map the numbers to the corresponding option IDs
+          const numbers = ans as number[];
+          const orderedOptionIds = numbers.map((num) => q.options[num - 1]?.id).filter(Boolean);
+          return { questionId: q.id, orderedOptionIds };
         case "TEXT":
           return { questionId: q.id, textAnswer: ans as string };
         default:
@@ -142,16 +148,13 @@ export const QuizModal: React.FC<QuizModalProps> = ({
                     <input
                       type="checkbox"
                       value={opt.id}
-                      checked={(answers[q.id] as string[] || []).includes(opt.id)}
+                      checked={((answers[q.id] as string[]) || []).includes(opt.id)}
                       onChange={(e) => {
                         const prev = (answers[q.id] as string[]) || [];
                         if (e.target.checked) {
                           handleAnswerChange(q.id, [...prev, opt.id]);
                         } else {
-                          handleAnswerChange(
-                            q.id,
-                            prev.filter((id) => id !== opt.id)
-                          );
+                          handleAnswerChange(q.id, prev.filter((id) => id !== opt.id));
                         }
                       }}
                     />
@@ -162,16 +165,31 @@ export const QuizModal: React.FC<QuizModalProps> = ({
             )}
 
             {q.type === "ORDERING" && (
-              <div>
-                <p className="text-sm text-gray-500 mb-2">Reorder the items:</p>
-                {q.options.map((opt) => (
-                  <div
-                    key={opt.id}
-                    className="mb-1 border p-2 rounded bg-gray-50 cursor-move"
-                  >
-                    {opt.text}
-                  </div>
-                ))}
+              <div className="mb-4">
+                <p className="text-sm text-gray-500 mb-2">Enter the order of the items:</p>
+                <ul className="mb-2 list-decimal list-inside">
+                  {q.options.map((opt) => (
+                    <li key={opt.id}>{opt.text}</li>
+                  ))}
+                </ul>
+                <div className="flex space-x-2">
+                  {q.options.map((opt, idx) => (
+                    <input
+                      key={opt.id}
+                      type="number"
+                      min={1}
+                      max={q.options.length}
+                      value={((answers[q.id] as number[]) || [])[idx] || ""}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        const prev = [...((answers[q.id] as number[]) || [])];
+                        prev[idx] = val;
+                        handleAnswerChange(q.id, prev);
+                      }}
+                      className="border w-12 p-1 rounded text-center"
+                    />
+                  ))}
+                </div>
               </div>
             )}
 
