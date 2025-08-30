@@ -61,9 +61,10 @@ export const CourseProvider: React.FC<{
 // ----------------- Sidebar -----------------
 interface CourseSidebarProps {
   modules: Module[];
+  courseId: string;
 }
 
-export const CourseSidebar: React.FC<CourseSidebarProps> = ({ modules }) => {
+export const CourseSidebar: React.FC<CourseSidebarProps> = ({ modules, courseId }) => {
   const { setCurrentLesson } = useCourse();
   const [openModuleId, setOpenModuleId] = useState<string | null>(
     modules[0]?.id || null
@@ -253,7 +254,7 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({ modules }) => {
             isCertOpen ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"
           }`}
         >
-          <CourseCertification courseId="" />
+          <CourseCertification courseId={courseId} />
         </div>
       </div>
 
