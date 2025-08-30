@@ -1,7 +1,8 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import {
 	Modal,
 	Button as AntButton,
@@ -9,6 +10,8 @@ import {
 	Upload,
 	Input,
 	Select,
+	Checkbox,
+	Radio,
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { useAddCourseModuleMutation } from "@/redux/features/courses/coursesApi";
@@ -20,11 +23,10 @@ import { usePathname } from "next/navigation";
 
 const { Option } = Select;
 
+// Types
 interface QuizOption {
 	text: string;
 	isCorrect: boolean;
-	files?: File[];
-	fileNames?: string[];
 }
 
 interface QuizQuestion {
@@ -41,23 +43,23 @@ interface Quiz {
 }
 
 interface Lesson {
-	lessonType: "video" | "doc";
 	title: string;
-	lessonDescription: string;
-	lessonDuration: string;
-	durationSecs?: number;
-	lessonVideoName?: string;
-	lessonDocumentFile?: File;
-	lessonVideoFile?: File;
+	type: "video" | "doc";
+	description: string;
+	duration: string;
+	durationSecs: number;
 	videoUrl?: string;
+	videoFile?: File;
+	documentFile?: File;
 	uploadProgress?: number;
 	isUploading?: boolean;
 }
 
 interface ModuleData {
-	moduleTitle: string;
-	lessons: Lesson[];
-	quizzes: Quiz[];
+	title: string;
+	lesson: Lesson;
+	quiz?: Quiz;
+	hasQuiz: boolean;
 }
 
 interface AddModuleModalProps {
@@ -67,6 +69,36 @@ interface AddModuleModalProps {
 	onSuccess?: () => void;
 }
 
+// Initial values
+const INITIAL_LESSON: Lesson = {
+	title: "",
+	type: "video",
+	description: "",
+	duration: "",
+	durationSecs: 0,
+	videoUrl: "",
+};
+
+const INITIAL_QUIZ_QUESTION: QuizQuestion = {
+	text: "",
+	type: "SINGLE_CHOICE",
+	options: [
+		{ text: "", isCorrect: true },
+		{ text: "", isCorrect: false },
+	],
+};
+
+const INITIAL_QUIZ: Quiz = {
+	title: "",
+	questions: [{ ...INITIAL_QUIZ_QUESTION }],
+};
+
+const INITIAL_MODULE_DATA: ModuleData = {
+	title: "",
+	lesson: { ...INITIAL_LESSON },
+	hasQuiz: false,
+};
+
 export default function AddModuleModal({
 	visible,
 	onCancel,
@@ -75,152 +107,164 @@ export default function AddModuleModal({
 }: AddModuleModalProps) {
 	const [addCourseModule, { isLoading }] = useAddCourseModuleMutation();
 	const pathname = usePathname();
-	const [moduleData, setModuleData] = useState<ModuleData>({
-		moduleTitle: "",
-		lessons: [
-			{
-				lessonType: "video",
-				title: "",
-				lessonDescription: "",
-				lessonDuration: "",
-				durationSecs: 0,
-				videoUrl: "",
-			},
-		],
-		quizzes: [],
-	});
+	const [moduleData, setModuleData] = useState<ModuleData>(INITIAL_MODULE_DATA);
 
-	// Helper function to convert duration string to seconds
-	const convertDurationToSeconds = (duration: string): number => {
+	// Convert duration string to seconds
+	const convertDurationToSeconds = useCallback((duration: string): number => {
 		const match = duration.match(/(\d+)([ms]?)/);
 		if (!match) return 0;
 
 		const value = parseInt(match[1]);
-		const unit = match[2] || "m"; // default to minutes
+		const unit = match[2] || "m";
 
 		return unit === "s" ? value : value * 60;
-	};
+	}, []);
 
-	const handleSubmit = async () => {
-		try {
-			// Validate required fields
-			if (!moduleData.moduleTitle.trim()) {
-				message.error("Module title is required");
-				return;
-			}
-
-			if (
-				moduleData.lessons.some(
-					(lesson) =>
-						!lesson.title?.trim() ||
-						!lesson.lessonDuration?.trim() ||
-						!lesson.lessonType ||
-						(lesson.lessonType === "video" &&
-							!lesson.videoUrl &&
-							!lesson.lessonVideoFile) ||
-						(lesson.lessonType === "doc" &&
-							!lesson.lessonDocumentFile &&
-							!lesson.lessonDescription)
-				)
-			) {
-				message.error(
-					"All lesson titles, durations, types, and required files/URLs are required"
-				);
-				return;
-			}
-
-			if (
-				moduleData.quizzes.some(
-					(quiz) =>
-						!quiz.title?.trim() ||
-						quiz.questions.some(
-							(question) =>
-								!question.text?.trim() ||
-								!question.type ||
-								(["SINGLE_CHOICE", "MULTI_CHOICE", "ORDERING"].includes(
-									question.type
-								) &&
-									question.options.some((option) => !option.text?.trim())) ||
-								(question.type === "SCALE" &&
-									(question.scaleMin === undefined ||
-										question.scaleMax === undefined))
-						)
-				)
-			) {
-				message.error(
-					"All quiz titles, questions, and options must be filled correctly"
-				);
-				return;
-			}
-
-			// Create FormData for submission
-			const formData = new FormData();
-
-			// Add module title
-			formData.append("title", moduleData.moduleTitle);
-
-			// Process lessons
-			const lessonsData = moduleData.lessons.map((lesson, index) => ({
-				title: lesson.title,
-				type: lesson.lessonType,
-				description: lesson.lessonDescription || "",
-				duration: lesson.lessonDuration,
-				durationSecs: convertDurationToSeconds(lesson.lessonDuration),
-				position: index,
-				...(lesson.lessonType === "video" &&
-					lesson.videoUrl && { videoUrl: lesson.videoUrl }),
+	// Update duration seconds automatically when duration changes
+	const updateDuration = useCallback(
+		(duration: string) => {
+			const durationSecs = convertDurationToSeconds(duration);
+			setModuleData((prev) => ({
+				...prev,
+				lesson: {
+					...prev.lesson,
+					duration,
+					durationSecs,
+				},
 			}));
+		},
+		[convertDurationToSeconds]
+	);
 
-			formData.append("lessons", JSON.stringify(lessonsData));
+	// Validation
+	const validateForm = useCallback((): boolean => {
+		const { title, lesson, quiz, hasQuiz } = moduleData;
 
-			// Add lesson files
-			moduleData.lessons.forEach((lesson, index) => {
-				if (lesson.lessonVideoFile) {
-					formData.append(`videoUrl`, lesson.lessonVideoFile);
+		if (!title.trim()) {
+			message.error("Module title is required");
+			return false;
+		}
+
+		if (!lesson.title.trim() || !lesson.duration.trim()) {
+			message.error("Lesson title and duration are required");
+			return false;
+		}
+
+		if (lesson.type === "video" && !lesson.videoUrl && !lesson.videoFile) {
+			message.error("Video URL or video file is required for video lessons");
+			return false;
+		}
+
+		if (lesson.type === "doc" && !lesson.documentFile && !lesson.description) {
+			message.error(
+				"Document file or description is required for document lessons"
+			);
+			return false;
+		}
+
+		if (hasQuiz && quiz) {
+			if (!quiz.title.trim()) {
+				message.error("Quiz title is required");
+				return false;
+			}
+
+			const hasInvalidQuestion = quiz.questions.some((question) => {
+				if (!question.text.trim()) return true;
+
+				if (
+					["SINGLE_CHOICE", "MULTI_CHOICE", "ORDERING"].includes(question.type)
+				) {
+					return question.options.some((option) => !option.text.trim());
 				}
-				if (lesson.lessonDocumentFile) {
-					formData.append(`lessonDocument_${index}`, lesson.lessonDocumentFile);
+
+				if (question.type === "SCALE") {
+					return (
+						question.scaleMin === undefined || question.scaleMax === undefined
+					);
 				}
+
+				return false;
 			});
 
-			// Process quizzes
-			if (moduleData.quizzes.length > 0) {
-				const quizzesData = moduleData.quizzes.map((quiz, index) => ({
-					title: quiz.title,
-					position: index,
-					questions: quiz.questions.map((question, qIndex) => ({
-						text: question.text,
-						type: question.type,
-						position: qIndex,
-						options: ["SINGLE_CHOICE", "MULTI_CHOICE", "ORDERING"].includes(
-							question.type
-						)
-							? question.options.map((option, oIndex) => ({
-									text: option.text,
-									isCorrect: option.isCorrect,
-									position: oIndex,
-							  }))
-							: [],
-						...(question.type === "SCALE" && {
-							scaleMin: question.scaleMin,
-							scaleMax: question.scaleMax,
-						}),
-					})),
-				}));
-
-				formData.append("quizzes", JSON.stringify(quizzesData));
+			if (hasInvalidQuestion) {
+				message.error("All quiz questions and options must be properly filled");
+				return false;
 			}
+		}
 
-			// Debug: Log FormData contents
+		return true;
+	}, [moduleData]);
+
+	// Create FormData for submission
+	const createFormData = useCallback((): FormData => {
+		const formData = new FormData();
+		const { title, lesson, quiz, hasQuiz } = moduleData;
+
+		// Create body data structure
+		const bodyData = {
+			title,
+			lesson: {
+				title: lesson.title,
+				type: lesson.type,
+				description: lesson.description || "",
+				duration: lesson.duration,
+				durationSecs: lesson.durationSecs,
+				...(lesson.type === "video" &&
+					lesson.videoUrl && { videoUrl: lesson.videoUrl }),
+			},
+			...(hasQuiz &&
+				quiz && {
+					quiz: {
+						title: quiz.title,
+						questions: quiz.questions.map((question) => ({
+							text: question.text,
+							type: question.type,
+							options: ["SINGLE_CHOICE", "MULTI_CHOICE", "ORDERING"].includes(
+								question.type
+							)
+								? question.options.map((option) => ({
+										text: option.text,
+										isCorrect: option.isCorrect,
+								  }))
+								: [],
+							...(question.type === "SCALE" && {
+								scaleMin: question.scaleMin,
+								scaleMax: question.scaleMax,
+							}),
+						})),
+					},
+				}),
+		};
+
+		// Append JSON data
+		formData.append("bodyData", JSON.stringify(bodyData));
+
+		// Append files without index
+		if (lesson.videoFile) {
+			formData.append("videoUrl", lesson.videoFile);
+		}
+
+		if (lesson.documentFile) {
+			formData.append("documentFile", lesson.documentFile);
+		}
+
+		return formData;
+	}, [moduleData]);
+
+	// Submit handler
+	const handleSubmit = async () => {
+		try {
+			if (!validateForm()) return;
+
+			const formData = createFormData();
+
+			// Debug log
 			console.log("FormData contents:");
 			for (const [key, value] of formData.entries()) {
 				console.log(key, value instanceof File ? `File: ${value.name}` : value);
 			}
 
-			await addCourseModule({
-				id: courseId,
-				formData,
-			}).unwrap();
+			await addCourseModule({ id: courseId, formData }).unwrap();
 
 			message.success("Module added successfully!");
 			onSuccess?.();
@@ -231,257 +275,404 @@ export default function AddModuleModal({
 		}
 	};
 
-	const handleCancel = () => {
+	const handleCancel = useCallback(() => {
 		setModuleData({
-			moduleTitle: "",
-			lessons: [
-				{
-					lessonType: "video",
-					title: "",
-					lessonDescription: "",
-					lessonDuration: "",
-					durationSecs: 0,
-					videoUrl: "",
-				},
-			],
-			quizzes: [],
+			title: "",
+			lesson: { ...INITIAL_LESSON },
+			hasQuiz: false,
 		});
 		onCancel();
-	};
+	}, [onCancel]);
 
-	const addLesson = () => {
+	// Lesson handlers
+	const updateLesson = useCallback((field: keyof Lesson, value: any) => {
 		setModuleData((prev) => ({
 			...prev,
-			lessons: [
-				...prev.lessons,
-				{
-					lessonType: "video",
-					title: "",
-					lessonDescription: "",
-					lessonDuration: "",
-					durationSecs: 0,
-					videoUrl: "",
-				},
-			],
+			lesson: { ...prev.lesson, [field]: value },
 		}));
-	};
+	}, []);
 
-	const removeLesson = (index: number) => {
-		if (moduleData.lessons.length > 1) {
-			setModuleData((prev) => ({
-				...prev,
-				lessons: prev.lessons.filter((_, i) => i !== index),
-			}));
-		}
-	};
+	const handleVideoUpload = useCallback(
+		(file: File) => {
+			updateLesson("videoFile", file);
+			updateLesson("isUploading", true);
+			updateLesson("uploadProgress", 0);
 
-	const updateLesson = (index: number, field: keyof Lesson, value: any) => {
+			// Simulate upload progress
+			let progress = 0;
+			const interval = setInterval(() => {
+				progress += Math.random() * 15 + 5;
+				if (progress >= 100) {
+					progress = 100;
+					clearInterval(interval);
+					updateLesson("isUploading", false);
+					updateLesson("uploadProgress", 100);
+					message.success("Video uploaded successfully!");
+				}
+				updateLesson("uploadProgress", Math.min(progress, 100));
+			}, 200 + Math.random() * 300);
+
+			return false;
+		},
+		[updateLesson]
+	);
+
+	const handleDocumentUpload = useCallback(
+		(file: File) => {
+			updateLesson("documentFile", file);
+			message.success("Document uploaded successfully!");
+			return false;
+		},
+		[updateLesson]
+	);
+
+	// Quiz handlers
+	const toggleQuiz = useCallback((checked: boolean) => {
 		setModuleData((prev) => ({
 			...prev,
-			lessons: prev.lessons.map((lesson, i) =>
-				i === index ? { ...lesson, [field]: value } : lesson
-			),
+			hasQuiz: checked,
+			quiz: checked ? { ...INITIAL_QUIZ } : undefined,
 		}));
-	};
+	}, []);
 
-	const handleVideoUpload = (index: number, file: File) => {
-		updateLesson(index, "lessonVideoFile", file);
-		updateLesson(index, "lessonVideoName", file.name);
-		updateLesson(index, "isUploading", true);
-		updateLesson(index, "uploadProgress", 0);
+	const updateQuiz = useCallback((field: keyof Quiz, value: any) => {
+		setModuleData((prev) => ({
+			...prev,
+			quiz: prev.quiz ? { ...prev.quiz, [field]: value } : undefined,
+		}));
+	}, []);
 
-		let progress = 0;
-		const interval = setInterval(() => {
-			progress += Math.random() * 15 + 5;
-			if (progress >= 100) {
-				progress = 100;
-				clearInterval(interval);
-				updateLesson(index, "isUploading", false);
-				updateLesson(index, "uploadProgress", 100);
-				message.success("Video uploaded successfully!");
+	const addQuestion = useCallback(() => {
+		if (!moduleData.quiz) return;
+
+		const newQuestion = { ...INITIAL_QUIZ_QUESTION };
+		updateQuiz("questions", [...moduleData.quiz.questions, newQuestion]);
+	}, [moduleData.quiz, updateQuiz]);
+
+	const removeQuestion = useCallback(
+		(questionIndex: number) => {
+			if (!moduleData.quiz || moduleData.quiz.questions.length <= 1) return;
+
+			const filteredQuestions = moduleData.quiz.questions.filter(
+				(_, i) => i !== questionIndex
+			);
+			updateQuiz("questions", filteredQuestions);
+		},
+		[moduleData.quiz, updateQuiz]
+	);
+
+	const updateQuestion = useCallback(
+		(questionIndex: number, field: string, value: any) => {
+			if (!moduleData.quiz) return;
+
+			const updatedQuestions = moduleData.quiz.questions.map((question, i) =>
+				i === questionIndex ? { ...question, [field]: value } : question
+			);
+			updateQuiz("questions", updatedQuestions);
+		},
+		[moduleData.quiz, updateQuiz]
+	);
+
+	const handleQuestionTypeChange = useCallback(
+		(questionIndex: number, type: QuizQuestion["type"]) => {
+			let newOptions: QuizOption[] = [];
+
+			if (["SINGLE_CHOICE", "MULTI_CHOICE", "ORDERING"].includes(type)) {
+				newOptions = [
+					{ text: "", isCorrect: true },
+					{ text: "", isCorrect: false },
+				];
 			}
-			updateLesson(index, "uploadProgress", Math.min(progress, 100));
-		}, 200 + Math.random() * 300);
 
-		return false; // Prevent default upload behavior
-	};
+			updateQuestion(questionIndex, "type", type);
+			updateQuestion(questionIndex, "options", newOptions);
 
-	const addQuiz = () => {
-		setModuleData((prev) => ({
-			...prev,
-			quizzes: [
-				...prev.quizzes,
-				{
-					title: "",
-					questions: [
-						{
-							text: "",
-							type: "SINGLE_CHOICE",
-							options: [
-								{ text: "", isCorrect: true },
-								{ text: "", isCorrect: false },
-							],
-						},
-					],
-				},
-			],
-		}));
-	};
+			if (type === "SCALE") {
+				updateQuestion(questionIndex, "scaleMin", 1);
+				updateQuestion(questionIndex, "scaleMax", 10);
+			}
+		},
+		[updateQuestion]
+	);
 
-	const removeQuiz = (index: number) => {
-		setModuleData((prev) => ({
-			...prev,
-			quizzes: prev.quizzes.filter((_, i) => i !== index),
-		}));
-	};
+	const addOption = useCallback(
+		(questionIndex: number) => {
+			if (!moduleData.quiz) return;
 
-	const addQuizQuestion = (quizIndex: number) => {
-		setModuleData((prev) => ({
-			...prev,
-			quizzes: prev.quizzes.map((quiz, i) =>
-				i === quizIndex
-					? {
-							...quiz,
-							questions: [
-								...quiz.questions,
-								{
-									text: "",
-									type: "SINGLE_CHOICE",
-									options: [
-										{ text: "", isCorrect: true },
-										{ text: "", isCorrect: false },
-									],
-								},
-							],
-					  }
-					: quiz
-			),
-		}));
-	};
+			const question = moduleData.quiz.questions[questionIndex];
+			const newOption = { text: "", isCorrect: false };
+			const updatedOptions = [...question.options, newOption];
+			updateQuestion(questionIndex, "options", updatedOptions);
+		},
+		[moduleData.quiz, updateQuestion]
+	);
 
-	const removeQuizQuestion = (quizIndex: number, questionIndex: number) => {
-		setModuleData((prev) => ({
-			...prev,
-			quizzes: prev.quizzes.map((quiz, i) =>
-				i === quizIndex
-					? {
-							...quiz,
-							questions: quiz.questions.filter((_, j) => j !== questionIndex),
-					  }
-					: quiz
-			),
-		}));
-	};
+	const removeOption = useCallback(
+		(questionIndex: number, optionIndex: number) => {
+			if (!moduleData.quiz) return;
 
-	const updateQuizQuestion = (
-		quizIndex: number,
-		questionIndex: number,
-		field: string,
-		value: any
-	) => {
-		setModuleData((prev) => ({
-			...prev,
-			quizzes: prev.quizzes.map((quiz, i) =>
-				i === quizIndex
-					? {
-							...quiz,
-							questions: quiz.questions.map((question, j) =>
-								j === questionIndex ? { ...question, [field]: value } : question
-							),
-					  }
-					: quiz
-			),
-		}));
-	};
+			const question = moduleData.quiz.questions[questionIndex];
+			if (question.options.length <= 2) return;
 
-	const addQuizOption = (quizIndex: number, questionIndex: number) => {
-		setModuleData((prev) => ({
-			...prev,
-			quizzes: prev.quizzes.map((quiz, i) =>
-				i === quizIndex
-					? {
-							...quiz,
-							questions: quiz.questions.map((question, j) =>
-								j === questionIndex
-									? {
-											...question,
-											options: [
-												...question.options,
-												{ text: "", isCorrect: false },
-											],
-									  }
-									: question
-							),
-					  }
-					: quiz
-			),
-		}));
-	};
+			const updatedOptions = question.options.filter(
+				(_, i) => i !== optionIndex
+			);
+			updateQuestion(questionIndex, "options", updatedOptions);
+		},
+		[moduleData.quiz, updateQuestion]
+	);
 
-	const removeQuizOption = (
-		quizIndex: number,
-		questionIndex: number,
-		optionIndex: number
-	) => {
-		setModuleData((prev) => ({
-			...prev,
-			quizzes: prev.quizzes.map((quiz, i) =>
-				i === quizIndex
-					? {
-							...quiz,
-							questions: quiz.questions.map((question, j) =>
-								j === questionIndex
-									? {
-											...question,
-											options: question.options.filter(
-												(_, k) => k !== optionIndex
-											),
-									  }
-									: question
-							),
-					  }
-					: quiz
-			),
-		}));
-	};
+	const updateOption = useCallback(
+		(questionIndex: number, optionIndex: number, field: string, value: any) => {
+			if (!moduleData.quiz) return;
 
-	const updateQuizOption = (
-		quizIndex: number,
-		questionIndex: number,
-		optionIndex: number,
-		field: string,
-		value: any
-	) => {
-		setModuleData((prev) => ({
-			...prev,
-			quizzes: prev.quizzes.map((quiz, i) =>
-				i === quizIndex
-					? {
-							...quiz,
-							questions: quiz.questions.map((question, j) =>
-								j === questionIndex
-									? {
-											...question,
-											options: question.options.map((option, k) =>
-												k === optionIndex
-													? { ...option, [field]: value }
-													: option
-											),
-									  }
-									: question
-							),
-					  }
-					: quiz
-			),
-		}));
-	};
+			const question = moduleData.quiz.questions[questionIndex];
+			const updatedOptions = question.options.map((option, i) =>
+				i === optionIndex ? { ...option, [field]: value } : option
+			);
+			updateQuestion(questionIndex, "options", updatedOptions);
+		},
+		[moduleData.quiz, updateQuestion]
+	);
 
-	const handleLessonDescriptionChange = (
-		lessonIndex: number,
-		content: string
-	) => {
-		updateLesson(lessonIndex, "lessonDescription", content);
-	};
+	const handleOptionCorrectChange = useCallback(
+		(questionIndex: number, optionIndex: number, question: QuizQuestion) => {
+			if (question.type === "SINGLE_CHOICE") {
+				// Single choice: only one can be correct
+				const newOptions = question.options.map((opt, idx) => ({
+					...opt,
+					isCorrect: idx === optionIndex,
+				}));
+				updateQuestion(questionIndex, "options", newOptions);
+			} else {
+				// Multi choice: toggle this option
+				updateOption(
+					questionIndex,
+					optionIndex,
+					"isCorrect",
+					!question.options[optionIndex].isCorrect
+				);
+			}
+		},
+		[updateQuestion, updateOption]
+	);
+
+	// Render lesson content based on type
+	const renderLessonContent = useCallback(() => {
+		const { lesson } = moduleData;
+
+		if (lesson.type === "doc") {
+			return (
+				<>
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Lesson Description
+						</label>
+						<Editor
+							contents={lesson.description}
+							onSave={(content) => updateLesson("description", content)}
+							onBlur={() => {}}
+						/>
+					</div>
+					<div className="flex items-center gap-3">
+						<Upload
+							beforeUpload={handleDocumentUpload}
+							accept=".pdf,.doc,.docx,.txt"
+							showUploadList={false}
+						>
+							<AntButton icon={<UploadOutlined />}>Upload Document</AntButton>
+						</Upload>
+						{lesson.documentFile && (
+							<span className="text-sm text-gray-700 bg-white px-3 py-1 rounded border font-medium">
+								📄 {lesson.documentFile.name}
+							</span>
+						)}
+					</div>
+				</>
+			);
+		}
+
+		return (
+			<div className="space-y-3">
+				<Input
+					placeholder="Video URL"
+					value={lesson.videoUrl}
+					onChange={(e) => updateLesson("videoUrl", e.target.value)}
+				/>
+				<div className="flex items-center gap-3">
+					<Upload
+						beforeUpload={handleVideoUpload}
+						accept="video/*"
+						showUploadList={false}
+						disabled={lesson.isUploading}
+					>
+						<AntButton icon={<UploadOutlined />} disabled={lesson.isUploading}>
+							{lesson.isUploading ? "Uploading..." : "Upload Video"}
+						</AntButton>
+					</Upload>
+					{lesson.videoFile && (
+						<div className="flex items-center gap-2">
+							<span className="text-sm text-gray-700 bg-white px-3 py-1 rounded border font-medium">
+								📹 {lesson.videoFile.name}
+							</span>
+							{lesson.isUploading && (
+								<span className="text-xs text-blue-600 font-medium">
+									{Math.round(lesson.uploadProgress || 0)}%
+								</span>
+							)}
+						</div>
+					)}
+				</div>
+				{lesson.isUploading && lesson.uploadProgress !== undefined && (
+					<div className="space-y-1">
+						<div className="w-full bg-gray-200 rounded-full h-2">
+							<div
+								className="bg-blue-500 h-2 rounded-full transition-all duration-300 ease-out"
+								style={{ width: `${lesson.uploadProgress}%` }}
+							/>
+						</div>
+						<p className="text-xs text-gray-600">
+							Uploading video... {Math.round(lesson.uploadProgress)}% complete
+						</p>
+					</div>
+				)}
+			</div>
+		);
+	}, [
+		moduleData.lesson,
+		updateLesson,
+		handleDocumentUpload,
+		handleVideoUpload,
+	]);
+
+	// Render quiz options based on question type
+	const renderQuizOptions = useCallback(
+		(question: QuizQuestion, questionIndex: number) => {
+			if (question.type === "SCALE") {
+				return (
+					<div className="grid grid-cols-2 gap-3">
+						<Input
+							type="number"
+							placeholder="Min Scale Value"
+							value={question.scaleMin || ""}
+							onChange={(e) =>
+								updateQuestion(
+									questionIndex,
+									"scaleMin",
+									parseInt(e.target.value) || 1
+								)
+							}
+						/>
+						<Input
+							type="number"
+							placeholder="Max Scale Value"
+							value={question.scaleMax || ""}
+							onChange={(e) =>
+								updateQuestion(
+									questionIndex,
+									"scaleMax",
+									parseInt(e.target.value) || 10
+								)
+							}
+						/>
+					</div>
+				);
+			}
+
+			if (question.type === "TEXT") {
+				return (
+					<div className="p-3 bg-gray-50 rounded border">
+						<p className="text-sm text-gray-600">
+							This is a text answer question. Students will provide written
+							responses.
+						</p>
+					</div>
+				);
+			}
+
+			const isOrderingType = question.type === "ORDERING";
+
+			return (
+				<div className="space-y-2">
+					<div className="flex justify-between items-center">
+						<label className="text-sm font-medium text-gray-700">
+							{isOrderingType ? "Items to Order:" : "Answer Options:"}
+						</label>
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => addOption(questionIndex)}
+						>
+							<Plus className="w-3 h-3 mr-1" />
+							Add {isOrderingType ? "Item" : "Option"}
+						</Button>
+					</div>
+					{question.options.map((option, optionIndex) => (
+						<div
+							key={optionIndex}
+							className="flex items-center gap-2 p-2 border rounded bg-gray-50"
+						>
+							{isOrderingType ? (
+								<span className="text-sm font-medium w-8">
+									{optionIndex + 1}.
+								</span>
+							) : question.type === "SINGLE_CHOICE" ? (
+								<Radio
+									checked={option.isCorrect}
+									onChange={() =>
+										handleOptionCorrectChange(
+											questionIndex,
+											optionIndex,
+											question
+										)
+									}
+								/>
+							) : (
+								<Checkbox
+									checked={option.isCorrect}
+									onChange={() =>
+										handleOptionCorrectChange(
+											questionIndex,
+											optionIndex,
+											question
+										)
+									}
+								/>
+							)}
+							<Input
+								placeholder={`${isOrderingType ? "Item" : "Option"} ${
+									optionIndex + 1
+								}`}
+								value={option.text}
+								onChange={(e) =>
+									updateOption(
+										questionIndex,
+										optionIndex,
+										"text",
+										e.target.value
+									)
+								}
+								className="flex-1"
+							/>
+							{question.options.length > 2 && (
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={() => removeOption(questionIndex, optionIndex)}
+								>
+									<Trash2 className="w-3 h-3" />
+								</Button>
+							)}
+						</div>
+					))}
+				</div>
+			);
+		},
+		[addOption, updateOption, removeOption, handleOptionCorrectChange]
+	);
+
+	const isMicroLearningPath =
+		pathname === "/dashboard/micro-learning/add-microLearning";
 
 	return (
 		<Modal
@@ -511,193 +702,75 @@ export default function AddModuleModal({
 					</label>
 					<Input
 						placeholder="Enter module title"
-						value={moduleData.moduleTitle}
+						value={moduleData.title}
 						onChange={(e) =>
-							setModuleData((prev) => ({
-								...prev,
-								moduleTitle: e.target.value,
-							}))
+							setModuleData((prev) => ({ ...prev, title: e.target.value }))
 						}
 					/>
 				</div>
 
-				{/* Lessons */}
+				{/* Lesson Section */}
 				<div className="space-y-4">
-					<div className="flex justify-between items-center">
-						<h4 className="font-medium text-gray-700">Lessons</h4>
-						<Button onClick={addLesson} variant="outline" size="sm">
-							<Plus className="w-4 h-4 mr-2" />
-							Add Lesson
-						</Button>
-					</div>
+					<h4 className="font-medium text-gray-700">Lesson</h4>
+					<Card className="border border-gray-200">
+						<CardContent className="p-4 space-y-3">
+							<div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+								<Input
+									placeholder="Lesson Title *"
+									value={moduleData.lesson.title}
+									onChange={(e) => updateLesson("title", e.target.value)}
+								/>
+								<Input
+									placeholder="Duration (e.g., 5m, 30s) *"
+									value={moduleData.lesson.duration}
+									onChange={(e) => updateDuration(e.target.value)}
+								/>
+								<Select
+									value={moduleData.lesson.type}
+									onChange={(value) => updateLesson("type", value)}
+									placeholder="Lesson Type *"
+								>
+									<Option value="video">Video</Option>
+									<Option value="doc">Document</Option>
+								</Select>
+							</div>
 
-					{moduleData.lessons.map((lesson, index) => (
-						<Card key={index} className="border border-gray-200">
-							<CardContent className="p-4 space-y-3">
-								<div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-									<Input
-										placeholder="Lesson Title *"
-										value={lesson.title}
-										onChange={(e) =>
-											updateLesson(index, "title", e.target.value)
-										}
-									/>
-									<Input
-										placeholder="Duration (e.g., 5m) *"
-										value={lesson.lessonDuration}
-										onChange={(e) =>
-											updateLesson(index, "lessonDuration", e.target.value)
-										}
-									/>
-									<Select
-										value={lesson.lessonType}
-										onChange={(value) =>
-											updateLesson(index, "lessonType", value)
-										}
-										placeholder="Lesson Type *"
-									>
-										<Option value="video">Video</Option>
-										<Option value="doc">Document</Option>
-									</Select>
-								</div>
-
-								{lesson.lessonType === "doc" && (
-									<div>
-										<label className="block text-sm font-medium text-gray-700 mb-2">
-											Lesson Description
-										</label>
-										<Editor
-											contents={lesson.lessonDescription}
-											onSave={(content) =>
-												handleLessonDescriptionChange(index, content)
-											}
-											onBlur={() => {}}
-										/>
-									</div>
-								)}
-
-								{lesson.lessonType === "video" && (
-									<div className="space-y-3">
-										<Input
-											placeholder="Video URL"
-											value={lesson.videoUrl}
-											onChange={(e) =>
-												updateLesson(index, "videoUrl", e.target.value)
-											}
-										/>
-
-										<div className="flex items-center gap-3">
-											<Upload
-												beforeUpload={(file) => handleVideoUpload(index, file)}
-												accept="video/*"
-												showUploadList={false}
-												disabled={lesson.isUploading}
-											>
-												<AntButton
-													icon={<UploadOutlined />}
-													disabled={lesson.isUploading}
-												>
-													{lesson.isUploading ? "Uploading..." : "Upload Video"}
-												</AntButton>
-											</Upload>
-
-											{lesson.lessonVideoName && (
-												<div className="flex items-center gap-2">
-													<span className="text-sm text-gray-700 bg-white px-3 py-1 rounded border font-medium">
-														📹 {lesson.lessonVideoName}
-													</span>
-													{lesson.isUploading && (
-														<span className="text-xs text-blue-600 font-medium">
-															{Math.round(lesson.uploadProgress || 0)}%
-														</span>
-													)}
-												</div>
-											)}
-										</div>
-
-										{lesson.isUploading &&
-											lesson.uploadProgress !== undefined && (
-												<div className="space-y-1">
-													<div className="w-full bg-gray-200 rounded-full h-2">
-														<div
-															className="bg-blue-500 h-2 rounded-full transition-all duration-300 ease-out"
-															style={{ width: `${lesson.uploadProgress}%` }}
-														/>
-													</div>
-													<p className="text-xs text-gray-600">
-														Uploading video...{" "}
-														{Math.round(lesson.uploadProgress)}% complete
-													</p>
-												</div>
-											)}
-									</div>
-								)}
-
-								{moduleData.lessons.length > 1 && (
-									<div className="flex justify-end">
-										<Button
-											variant="outline"
-											size="sm"
-											onClick={() => removeLesson(index)}
-										>
-											<Trash2 className="w-4 h-4 mr-2" />
-											Remove Lesson
-										</Button>
-									</div>
-								)}
-							</CardContent>
-						</Card>
-					))}
+							{renderLessonContent()}
+						</CardContent>
+					</Card>
 				</div>
 
-				{/* Quizzes */}
+				{/* Quiz Section */}
 				<div className="space-y-4">
-					<div className="flex justify-between items-center">
-						<h4 className="font-medium text-gray-700">Quizzes (Optional)</h4>
-						<Button onClick={addQuiz} variant="outline" size="sm">
-							<Plus className="w-4 h-4 mr-2" />
-							Add Quiz
-						</Button>
+					<div className="flex items-center gap-3">
+						<Checkbox
+							checked={moduleData.hasQuiz}
+							onChange={(e) => toggleQuiz(e.target.checked)}
+						>
+							<span className="font-medium text-gray-700">
+								Add Quiz (Optional)
+							</span>
+						</Checkbox>
 					</div>
 
-					{moduleData.quizzes.map((quiz, quizIndex) => (
-						<Card key={quizIndex} className="border border-blue-200 bg-blue-50">
-							<CardContent className="p-4 space-y-3">
-								<div className="flex items-center gap-3">
-									<Input
-										placeholder="Quiz Title *"
-										value={quiz.title}
-										onChange={(e) => {
-											setModuleData((prev) => ({
-												...prev,
-												quizzes: prev.quizzes.map((q, i) =>
-													i === quizIndex ? { ...q, title: e.target.value } : q
-												),
-											}));
-										}}
-									/>
-									<Button
-										variant="outline"
-										size="sm"
-										onClick={() => removeQuiz(quizIndex)}
-									>
-										<Trash2 className="w-4 h-4" />
-									</Button>
-								</div>
+					{moduleData.hasQuiz && moduleData.quiz && (
+						<Card className="border border-blue-200 bg-blue-50">
+							<CardContent className="p-4 space-y-4">
+								<Input
+									placeholder="Quiz Title *"
+									value={moduleData.quiz.title}
+									onChange={(e) => updateQuiz("title", e.target.value)}
+								/>
 
-								<div className="flex justify-end">
-									<Button
-										type="button"
-										variant="outline"
-										size="sm"
-										onClick={() => addQuizQuestion(quizIndex)}
-									>
+								<div className="flex justify-between items-center">
+									<h5 className="font-medium text-gray-700">Questions</h5>
+									<Button variant="outline" size="sm" onClick={addQuestion}>
 										<Plus className="w-3 h-3 mr-1" />
 										Add Question
 									</Button>
 								</div>
 
-								{quiz.questions.map((question, questionIndex) => (
+								{moduleData.quiz.questions.map((question, questionIndex) => (
 									<div
 										key={questionIndex}
 										className="space-y-3 p-4 bg-white rounded border"
@@ -707,30 +780,19 @@ export default function AddModuleModal({
 												placeholder="Question Text *"
 												value={question.text}
 												onChange={(e) =>
-													updateQuizQuestion(
-														quizIndex,
-														questionIndex,
-														"text",
-														e.target.value
-													)
+													updateQuestion(questionIndex, "text", e.target.value)
 												}
 												className="flex-1"
 											/>
 											<Select
 												value={question.type}
 												onChange={(value) =>
-													updateQuizQuestion(
-														quizIndex,
-														questionIndex,
-														"type",
-														value
-													)
+													handleQuestionTypeChange(questionIndex, value)
 												}
 												className="w-48"
 											>
 												<Option value="SINGLE_CHOICE">Single Choice</Option>
-												{pathname ===
-													"/dashboard/micro-learning/add-microLearning" && (
+												{isMicroLearningPath && (
 													<>
 														<Option value="MULTI_CHOICE">Multi Choice</Option>
 														<Option value="ORDERING">Ordering</Option>
@@ -739,210 +801,24 @@ export default function AddModuleModal({
 													</>
 												)}
 											</Select>
-											{quiz.questions.length > 1 && (
-												<Button
-													variant="outline"
-													size="sm"
-													onClick={() =>
-														removeQuizQuestion(quizIndex, questionIndex)
-													}
-												>
-													<Trash2 className="w-3 h-3" />
-												</Button>
-											)}
+											{moduleData.quiz &&
+												moduleData.quiz.questions.length > 1 && (
+													<Button
+														variant="outline"
+														size="sm"
+														onClick={() => removeQuestion(questionIndex)}
+													>
+														<Trash2 className="w-3 h-3" />
+													</Button>
+												)}
 										</div>
 
-										{/* Scale Options */}
-										{question.type === "SCALE" && (
-											<div className="grid grid-cols-2 gap-3">
-												<Input
-													type="number"
-													placeholder="Min Scale Value"
-													value={question.scaleMin || ""}
-													onChange={(e) =>
-														updateQuizQuestion(
-															quizIndex,
-															questionIndex,
-															"scaleMin",
-															parseInt(e.target.value) || 1
-														)
-													}
-												/>
-												<Input
-													type="number"
-													placeholder="Max Scale Value"
-													value={question.scaleMax || ""}
-													onChange={(e) =>
-														updateQuizQuestion(
-															quizIndex,
-															questionIndex,
-															"scaleMax",
-															parseInt(e.target.value) || 10
-														)
-													}
-												/>
-											</div>
-										)}
-
-										{/* Question Options for choice-based questions */}
-										{(question.type === "SINGLE_CHOICE" ||
-											question.type === "MULTI_CHOICE") && (
-											<div className="space-y-2">
-												<div className="flex justify-between items-center">
-													<label className="text-sm font-medium text-gray-700">
-														Answer Options:
-													</label>
-													<Button
-														variant="outline"
-														size="sm"
-														onClick={() =>
-															addQuizOption(quizIndex, questionIndex)
-														}
-													>
-														<Plus className="w-3 h-3 mr-1" />
-														Add Option
-													</Button>
-												</div>
-												{question.options.map((option, optionIndex) => (
-													<div
-														key={optionIndex}
-														className="flex items-center gap-2 p-2 border rounded bg-gray-50"
-													>
-														<input
-															type={
-																question.type === "SINGLE_CHOICE"
-																	? "radio"
-																	: "checkbox"
-															}
-															name={
-																question.type === "SINGLE_CHOICE"
-																	? `quiz-${quizIndex}-${questionIndex}`
-																	: undefined
-															}
-															checked={option.isCorrect}
-															onChange={() => {
-																if (question.type === "SINGLE_CHOICE") {
-																	// Single choice: only one can be correct
-																	question.options.forEach((_, idx) => {
-																		updateQuizOption(
-																			quizIndex,
-																			questionIndex,
-																			idx,
-																			"isCorrect",
-																			idx === optionIndex
-																		);
-																	});
-																} else {
-																	// Multi choice: toggle this option
-																	updateQuizOption(
-																		quizIndex,
-																		questionIndex,
-																		optionIndex,
-																		"isCorrect",
-																		!option.isCorrect
-																	);
-																}
-															}}
-															className="w-4 h-4"
-														/>
-														<Input
-															placeholder={`Option ${optionIndex + 1}`}
-															value={option.text}
-															onChange={(e) =>
-																updateQuizOption(
-																	quizIndex,
-																	questionIndex,
-																	optionIndex,
-																	"text",
-																	e.target.value
-																)
-															}
-															className="flex-1"
-														/>
-														{question.options.length > 2 && (
-															<Button
-																variant="outline"
-																size="sm"
-																onClick={() =>
-																	removeQuizOption(
-																		quizIndex,
-																		questionIndex,
-																		optionIndex
-																	)
-																}
-															>
-																<Trash2 className="w-3 h-3" />
-															</Button>
-														)}
-													</div>
-												))}
-											</div>
-										)}
-
-										{/* Ordering Options */}
-										{question.type === "ORDERING" && (
-											<div className="space-y-2">
-												<div className="flex justify-between items-center">
-													<label className="text-sm font-medium text-gray-700">
-														Items to Order:
-													</label>
-													<Button
-														variant="outline"
-														size="sm"
-														onClick={() =>
-															addQuizOption(quizIndex, questionIndex)
-														}
-													>
-														<Plus className="w-3 h-3 mr-1" />
-														Add Item
-													</Button>
-												</div>
-												{question.options.map((option, optionIndex) => (
-													<div
-														key={optionIndex}
-														className="flex items-center gap-2 p-2 border rounded bg-gray-50"
-													>
-														<span className="text-sm font-medium w-8">
-															{optionIndex + 1}.
-														</span>
-														<Input
-															placeholder={`Item ${optionIndex + 1}`}
-															value={option.text}
-															onChange={(e) =>
-																updateQuizOption(
-																	quizIndex,
-																	questionIndex,
-																	optionIndex,
-																	"text",
-																	e.target.value
-																)
-															}
-															className="flex-1"
-														/>
-														{question.options.length > 2 && (
-															<Button
-																variant="outline"
-																size="sm"
-																onClick={() =>
-																	removeQuizOption(
-																		quizIndex,
-																		questionIndex,
-																		optionIndex
-																	)
-																}
-															>
-																<Trash2 className="w-3 h-3" />
-															</Button>
-														)}
-													</div>
-												))}
-											</div>
-										)}
+										{renderQuizOptions(question, questionIndex)}
 									</div>
 								))}
 							</CardContent>
 						</Card>
-					))}
+					)}
 				</div>
 			</div>
 		</Modal>

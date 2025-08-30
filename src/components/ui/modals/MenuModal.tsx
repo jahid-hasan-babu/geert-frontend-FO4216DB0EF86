@@ -8,7 +8,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { PersonalInfoModal } from "./PersonalInformation";
 import { PasswordModal } from "./PasswordModal";
-import { LanguageModal } from "./LanguageModal";
 import { logoutHandler } from "@/utils/handleLogout";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
@@ -54,12 +53,10 @@ export function MenuModal({
 
 	const [isProfileInfo, setIsProfileInfo] = useState(false);
 	const [isPasswordOpen, setIsPasswordOpen] = useState(false);
-	const [isLanguageOpen, setIsLanguageOpen] = useState(false);
 
 	const menuItems: MenuItem[] = [
 		{ label: "My Learning", onClick: () => router.push("/learning") },
 		{ label: "Password", onClick: () => setIsPasswordOpen(true) },
-		{ label: "Language", onClick: () => setIsLanguageOpen(true) },
 		{
 			label: "Help & Support",
 			onClick: () => console.log("Help & Support clicked"),
@@ -166,10 +163,6 @@ export function MenuModal({
 			<PasswordModal
 				isOpen={isPasswordOpen}
 				onClose={() => setIsPasswordOpen(false)}
-			/>
-			<LanguageModal
-				isOpen={isLanguageOpen}
-				onClose={() => setIsLanguageOpen(false)}
 			/>
 		</>
 	);

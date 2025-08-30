@@ -272,7 +272,7 @@ export const AddLessonModal: React.FC<AddLessonModalProps> = ({
 			footer={null}
 			width="90%"
 			style={{ maxWidth: 700 }}
-			destroyOnClose
+			destroyOnHidden
 		>
 			<Form
 				form={form}
