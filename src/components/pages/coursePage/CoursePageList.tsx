@@ -7,7 +7,7 @@ import Pagination from "@/components/ui/pagination/Pagination";
 import CourseSearch from "@/components/ui/search/CourseSearch";
 import Link from "next/link";
 import axios from "axios";
-import { Lesson } from "@/components/ui/context/CourseContext";
+import { LessonsItem } from "@/components/ui/context/CourseContext";
 
 interface Category {
   id: string;
@@ -17,7 +17,7 @@ interface Course {
   id: string;
   title: string;
   slug: string;
-  courseContexts: Lesson[];
+  courseContexts: LessonsItem[];
   lessons: number;
   duration: string;
   rating: number;
@@ -105,7 +105,7 @@ export default function CoursesPageList() {
     if (token) fetchCourses();
   }, [currentPage, searchQuery, activeFilter, token]);
 
-
+  console.log("COurseS ...", courses);
 
   return (
     <div className="container mx-auto px-3 lg:px-6 py-5 lg:py-[80px]">

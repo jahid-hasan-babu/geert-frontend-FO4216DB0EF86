@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
-import { ChevronDown, CheckCircle, Play, Circle } from "lucide-react";
+import { ChevronDown, CheckCircle, Play, Lock } from "lucide-react";
 import CourseCertification from "@/components/certification/CourseCertification";
 import { QuizModal, Quiz } from "../modals/QuizModal";
 
@@ -198,23 +197,31 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({ modules }) => {
                         </p>
                       </div>
 
-                    <div className="flex items-center space-x-2">
-                      {lesson.type === "quiz" && lesson.quiz && (
-                        <button
-                          onClick={() => openQuiz(lesson.quiz)}
-                          className="p-2 rounded-full hover:bg-gray-200 cursor-pointer"
-                        >
-                          <CheckCircle className="w-5 h-5 text-blue-500" />
-                        </button>
-                      )}
-                      {lesson.type === "video" && (
-                        <button
-                          onClick={() => setCurrentLesson(lesson)}
-                          className="p-2 rounded-full hover:bg-gray-200 cursor-pointer"
-                        >
-                          <Play className="w-5 h-5 text-gray-600" />
-                        </button>
-                      )}
+                      <div className="flex items-center space-x-2">
+                        {lesson.type === "quiz" && lesson.quiz && !isLocked && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openQuiz(lesson.quiz ?? null);
+                            }}
+                            className="p-2 rounded-full hover:bg-gray-200 cursor-pointer"
+                          >
+                            <CheckCircle className="w-5 h-5 text-blue-500" />
+                          </button>
+                        )}
+                        {lesson.type === "video" && !isLocked && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCurrentLesson(lesson);
+                            }}
+                            className="p-2 rounded-full hover:bg-gray-200 cursor-pointer"
+                          >
+                            <Play className="w-5 h-5 text-gray-600" />
+                          </button>
+                        )}
+                        {isLocked && <Lock className="w-5 h-5 text-gray-400" />}
+                      </div>
                     </div>
                   </div>
                 );

@@ -9,17 +9,20 @@ import axios, { AxiosError } from "axios";
 import course_image from "@/assets/images/course_image.png";
 import { reviewData } from "@/utils/dummyData";
 import { toast } from "sonner";
-import { Lesson } from "../context/CourseContext";
+import { LessonsItem } from "@/components/ui/context/CourseContext";
+
+
 
 interface Course {
   id: string;
   title: string;
   slug?: string;
-  courseContexts?: Lesson[];
+  courseContexts?: LessonsItem[];
   totalLessons?: number;
   duration: string;
   rating?: number;
   category?: string;
+  lessons?: number;
   type?: string;
   completed?: number;
   isBestseller?: boolean;
@@ -130,7 +133,7 @@ export default function CourseCard({ course }: { course: Course }) {
           <div className="flex items-center space-x-1">
             <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
             <span className="font-medium text-[#404040]">
-              {course.rating ?? course.avgRating ?? 0} ({filteredReviews.length})
+              {course.rating ?? 0} ({filteredReviews.length})
             </span>
           </div>
         </div>

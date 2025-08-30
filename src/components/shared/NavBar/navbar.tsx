@@ -35,82 +35,49 @@ interface User {
 }
 
 interface Course {
-  id: string;
-  title: string;
+	id: string;
+	title: string;
 }
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isNotifOpen, setIsNotifOpen] = useState(false);
-  const [isReviewOpen, setIsReviewOpen] = useState(false);
-  const [isProgressOpen, setIsProgressOpen] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [userData, setUserData] = useState<User | null>(null);
-  const [courseData, setCourseData] = useState<Course | null>(null);
+	const [isOpen, setIsOpen] = useState(false);
+	const [isNotifOpen, setIsNotifOpen] = useState(false);
+	const [isReviewOpen, setIsReviewOpen] = useState(false);
+	const [isProgressOpen, setIsProgressOpen] = useState(false);
+	const [isMenuOpen, setIsMenuOpen] = useState(false);
+	const [userData, setUserData] = useState<User | null>(null);
+	const [courseData, setCourseData] = useState<Course | null>(null);
+	const pathname = usePathname();
+	const { data, isLoading } = useGetNotificationsQuery({});
+	const { data: use, isLoading: isLoadingUser } = useGetMeQuery({});
+	const courseId = pathname.split("/")[2];
+	const { data: course, isLoading: isLoadingCourse } =
+		useGetCourseByIdQuery(courseId);
+	useEffect(() => {
+		if (use?.data) {
+			setUserData(use.data);
+		}
+	}, [use?.data]);
 
-  const pathname = usePathname();
+	useEffect(() => {
+		if (course?.data) {
+			setCourseData(course.data);
+		}
+	}, [course?.data]);
 
-  // Fetch user data
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-
-        const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/users/me`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        if (res.data.success) {
-          setUserData(res.data.data);
-        }
-      } catch (err) {
-        console.error("Failed to fetch user:", err);
-      }
-    };
-    fetchUser();
-  }, []);
-
-  // Fetch course data if on a course page
-  useEffect(() => {
-    const fetchCourse = async () => {
-      if (!pathname.startsWith("/courses/")) return;
-
-      const courseId = pathname.split("/")[2];
-      if (!courseId) return;
-
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-
-        const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/courses/single-course/${courseId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        if (res.data.success) {
-          setCourseData(res.data.data);
-        }
-      } catch (err) {
-        console.error("Failed to fetch course:", err);
-      }
-    };
-    fetchCourse();
-  }, [pathname]);
+	const notificationsData = data?.data?.data || [];
 
 	const isActive = (href: string) => pathname === href;
 
-  return (
-    <header className="bg-white sticky top-0 z-50">
-      <nav className="container mx-auto px-4 py-3 flex items-center justify-between">
-        <Link href="/" className="cursor-pointer flex items-center justify-center">
-          <Image src={logo} alt="Logo" />
-        </Link>
+	return (
+		<header className="bg-white sticky top-0 z-50">
+			<nav className="container mx-auto px-4 py-3 flex items-center justify-between">
+				<Link
+					href="/"
+					className="cursor-pointer flex items-center justify-center"
+				>
+					<Image src={logo || "/placeholder.svg"} alt="Logo" />
+				</Link>
 
 				{/* Course Page Header */}
 
@@ -192,23 +159,27 @@ export default function Navbar() {
 					)}
 				</div>
 
-        {/* Mobile Menu Button */}
-        <button
-          className="md:hidden text-gray-800"
-          onClick={() => setIsOpen(true)}
-          aria-label="Open menu"
-        >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
-      </nav>
+				{/* Mobile Menu Button */}
+				<button
+					className="md:hidden text-gray-800"
+					onClick={() => setIsOpen(true)}
+					aria-label="Open menu"
+				>
+					<svg
+						className="w-6 h-6"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth={2}
+						viewBox="0 0 24 24"
+					>
+						<path
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							d="M4 6h16M4 12h16M4 18h16"
+						/>
+					</svg>
+				</button>
+			</nav>
 
 			{/* Mobile Drawer */}
 			<Dialog
@@ -230,25 +201,33 @@ export default function Navbar() {
 						</button>
 					</div>
 
-          {courseData ? (
-            <h1 className="text-lg font-semibold">{courseData.title}</h1>
-          ) : (
-            <ul className="flex flex-col space-y-4 text-gray-800 font-medium">
-              {navLinks.map(({ href, label }) => (
-                <li key={href}>
-                  <Link
-                    href={href}
-                    className={`block ${
-                      isActive(href) ? "text-[#3399CC] font-semibold" : "hover:text-[#9191c4]"
-                    }`}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
+					{courseData ? (
+						<div>
+							{isLoadingCourse ? (
+								<Spin indicator={<LoadingOutlined spin />} size="large" />
+							) : (
+								<h1 className="text-lg font-semibold">{courseData?.title}</h1>
+							)}
+						</div>
+					) : (
+						<ul className="flex flex-col space-y-4 text-gray-800 font-medium">
+							{navLinks.map(({ href, label }) => (
+								<li key={href}>
+									<Link
+										href={href}
+										className={`block ${
+											isActive(href)
+												? "text-[#3399CC] font-semibold"
+												: "hover:text-[#9191c4]"
+										}`}
+										onClick={() => setIsOpen(false)}
+									>
+										{label}
+									</Link>
+								</li>
+							))}
+						</ul>
+					)}
 
 					<div className="flex items-center space-x-4 pt-4 border-t">
 						<button
@@ -276,24 +255,31 @@ export default function Navbar() {
 				</Dialog.Panel>
 			</Dialog>
 
-      {/* Modals */}
-      <NotificationModal
-        isOpen={isNotifOpen}
-        onClose={() => setIsNotifOpen(false)}
-        notifications={notificationsData}
-      />
-      <ReviewModal isOpen={isReviewOpen} onClose={() => setIsReviewOpen(false)} />
-      <CourseProgressModal
-        isOpen={isProgressOpen}
-        onClose={() => setIsProgressOpen(false)}
-        current={12}
-        total={18}
-      />
-      <MenuModal
-        isOpen={isMenuOpen}
-        onClose={() => setIsMenuOpen(false)}
-        user={userData}
-      />
-    </header>
-  );
+			{/* Modals */}
+			<NotificationModal
+				isOpen={isNotifOpen}
+				onClose={() => setIsNotifOpen(false)}
+				notifications={notificationsData}
+				isLoading={isLoading}
+			/>
+			<ReviewModal
+				isOpen={isReviewOpen}
+				onClose={() => setIsReviewOpen(false)}
+				courseId={courseId}
+				canReview={!!courseData}
+			/>
+			<CourseProgressModal
+				isOpen={isProgressOpen}
+				onClose={() => setIsProgressOpen(false)}
+				current={12}
+				total={18}
+			/>
+			<MenuModal
+				isOpen={isMenuOpen}
+				onClose={() => setIsMenuOpen(false)}
+				user={userData}
+				isLoading={isLoadingUser}
+			/>
+		</header>
+	);
 }
