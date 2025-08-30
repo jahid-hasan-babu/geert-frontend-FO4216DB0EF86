@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Image, { type StaticImageData } from "next/image";
-// import InstructorModal from "../modals/InstructorModal";
-import { InstructorModalTwo } from "../modals/InstructorModalTwo";
+import Image from "next/image";
+import { InstructorModal } from "../modals/InstructorModal";
 
 interface Review {
   id: string;
@@ -13,10 +12,14 @@ interface Review {
   author: string;
 }
 
-interface Instructor {
-  name: string;
-  avatar: string | StaticImageData;
-  bio?: string;
+export interface Instructor {
+  id: string;
+  username: string;
+  email: string;
+  profileImage: string;
+  role: "INSTRUCTOR" | "STUDENT" | "ADMIN";
+  phone: string | null;
+  status: "ACTIVE" | "INACTIVE" | "BANNED";
 }
 
 interface Props {
@@ -85,72 +88,65 @@ export default function CourseReviewAbout({
             className="bg-white rounded-lg p-4 flex items-center space-x-4 cursor-pointer hover:bg-gray-50 transition"
             onClick={() => setIsInstructorOpen(true)}
           >
-            <div className="w-14 h-14 rounded-full overflow-hidden">
+            <div className="w-14 h-14 rounded-full overflow-hidden relative">
               <Image
-                src={instructor.avatar || "/placeholder.svg"}
-                alt={instructor.name}
-                width={56}
-                height={56}
+                src={instructor?.profileImage || "/default-avatar.png"}
+                alt={instructor?.username || "Instructor"}
+                fill
+                className="object-cover"
               />
             </div>
             <div>
               <p className="text-sm text-gray-600">Instructor</p>
-              <p className="font-semibold text-gray-900">{instructor.name}</p>
+              <p className="font-semibold text-gray-900">{instructor?.username}</p>
             </div>
           </div>
         </div>
       ) : (
         // Reviews Tab
         <div className="space-y-8">
-          <div className="grid md:grid-cols-2 gap-6">
-            {reviews.map((review) => (
-              <div
-                key={review.id}
-                className="bg-white rounded-lg p-6 space-y-4 shadow-sm"
-              >
-                <p className="text-gray-700 leading-relaxed">{review.text}</p>
-                <div className="flex items-center space-x-2">
-                  <div className="flex space-x-1">
-                    {[...Array(5)].map((_, i) => (
-                      <span
-                        key={i}
-                        className={`text-sm ${
-                          i < review.rating
-                            ? "text-yellow-400"
-                            : "text-gray-300"
-                        }`}
-                      >
-                        ★
-                      </span>
-                    ))}
+          {reviews.length === 0 ? (
+            <p className="text-gray-500 text-center py-6">No reviews yet.</p>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-6">
+              {reviews.map((review) => (
+                <div
+                  key={review.id}
+                  className="bg-white rounded-lg p-6 space-y-4 shadow-sm"
+                >
+                  <p className="text-gray-700 leading-relaxed">{review.text}</p>
+                  <div className="flex items-center space-x-2">
+                    <div className="flex space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <span
+                          key={i}
+                          className={`text-sm ${
+                            i < review?.rating ? "text-yellow-400" : "text-gray-300"
+                          }`}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                    <span className="text-gray-600 text-sm font-medium">
+                      {review.rating} | {review.date}
+                    </span>
                   </div>
-                  <span className="text-gray-600 text-sm font-medium">
-                    {review.rating} | {review.date}
-                  </span>
+                  <p className="text-gray-500 text-sm italic">
+                    — {review.author}
+                  </p>
                 </div>
-                <p className="text-gray-500 text-sm italic">
-                  — {review.author}
-                </p>
-              </div>
-            ))}
-          </div>
-          <div className="text-center">
-            <button className="hover:bg-sky-200 bg-[#EBF5FA] px-8 py-3 rounded-full font-medium transition-colors duration-200 w-full cursor-pointer">
-              View More
-            </button>
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
       {/* Instructor Modal */}
-      {/* <InstructorModal
+      <InstructorModal
         isOpen={isInstructorOpen}
         onClose={() => setIsInstructorOpen(false)}
-        instructor={instructor}
-      /> */}
-      <InstructorModalTwo
-        isOpen={isInstructorOpen}
-        onClose={() => setIsInstructorOpen(false)}
+        instructorId={instructor.id}
       />
     </div>
   );
