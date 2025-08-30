@@ -6,24 +6,19 @@ import { Search } from "lucide-react";
 import CourseCard from "@/components/ui/card/CourseCard";
 import Pagination from "@/components/ui/pagination/Pagination";
 import Link from "next/link";
-import axios from "axios";
-import { Lesson } from "@/components/ui/context/CourseContext";
+import { Skeleton } from "antd";
+import { useGetAllCoursesQuery } from "@/redux/features/courses/coursesApi";
 
-interface Course {
-  id: string;
-  title: string;
-  slug: string;
-  courseContexts: Lesson[];
-  lessons: number;
-  duration: string;
-  rating: number;
-  category: string;
-  type: string;
-  completed: number;
-  isBestseller?: boolean;
-  isMicroLearning?: boolean;
-  description: string;
-  coverImage: string;
+export interface Course {
+	id: string;
+	title: string;
+	coverImage: string;
+	duration: string;
+	price: string;
+	totalRaters: number;
+	avgRating: number;
+	totalLessons: number;
+	isFavorite: boolean;
 }
 
 const CoursesPage = () => {
@@ -49,7 +44,7 @@ const CoursesPage = () => {
 						/>
 					</div>
 					<Link href="/dashboard/course/add-course">
-						<button className="bg-[#3399CC] hover:bg-[#0077CC] duration-300 text-white px-2 lg:px-4 py-[5px] lg:py-[10px] text-xs lg:text-sm rounded-full font-semibold transition-colors duration-200 shadow-lg cursor-pointer font-sans">
+						<button className="bg-[#3399CC] hover:bg-[#0077CC] duration-300 text-white px-2 lg:px-4 py-[5px] lg:py-[10px] text-xs lg:text-sm rounded-full font-semibold transition-colors shadow-lg cursor-pointer font-sans">
 							+ Add Course
 						</button>
 					</Link>
