@@ -44,7 +44,9 @@ export const QuizModal: React.FC<QuizModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const [answers, setAnswers] = useState<{ [questionId: string]: AnswerValue }>({});
+  const [answers, setAnswers] = useState<{ [questionId: string]: AnswerValue }>(
+    {}
+  );
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -79,23 +81,40 @@ export const QuizModal: React.FC<QuizModalProps> = ({
 
     const payload = quiz.questions.map((q) => {
       const ans = answers[q.id];
-      if (!ans) return { questionId: q.id }; // no answer
+      if (!ans) return { questionId: q.id }; // unanswered
 
       switch (q.type) {
         case "SINGLE_CHOICE":
         case "MULTI_CHOICE":
+          return {
+            questionId: q.id,
+            selectedOptionIds: Array.isArray(ans)
+              ? (ans as string[])
+              : [ans as string],
+          };
+
+        case "ORDERING":
+          const numbers = ans as number[];
+          const orderedOptionIds = numbers
+            .map((num) => q.options[num - 1]?.id)
+            .filter((id): id is string => !!id);
+          return {
+            questionId: q.id,
+            orderedOptionIds,
+          };
+
         case "SCALE":
           return {
             questionId: q.id,
-            selectedOptionIds: Array.isArray(ans) ? ans : [ans],
+            scaleAnswer: ans as number,
           };
-        case "ORDERING":
-          // map the numbers to the corresponding option IDs
-          const numbers = ans as number[];
-          const orderedOptionIds = numbers.map((num) => q.options[num - 1]?.id).filter(Boolean);
-          return { questionId: q.id, orderedOptionIds };
+
         case "TEXT":
-          return { questionId: q.id, textAnswer: ans as string };
+          return {
+            questionId: q.id,
+            textAnswer: ans as string,
+          };
+
         default:
           return { questionId: q.id };
       }
@@ -133,7 +152,10 @@ export const QuizModal: React.FC<QuizModalProps> = ({
                 onValueChange={(val) => handleAnswerChange(q.id, val)}
               >
                 {q.options.map((opt) => (
-                  <div key={opt.id} className="flex items-center space-x-2 mb-1">
+                  <div
+                    key={opt.id}
+                    className="flex items-center space-x-2 mb-1"
+                  >
                     <RadioGroupItem value={opt.id} id={opt.id} />
                     <Label htmlFor={opt.id}>{opt.text}</Label>
                   </div>
@@ -144,17 +166,25 @@ export const QuizModal: React.FC<QuizModalProps> = ({
             {q.type === "MULTI_CHOICE" && (
               <div>
                 {q.options.map((opt) => (
-                  <label key={opt.id} className="flex items-center space-x-2 mb-1">
+                  <label
+                    key={opt.id}
+                    className="flex items-center space-x-2 mb-1"
+                  >
                     <input
                       type="checkbox"
                       value={opt.id}
-                      checked={((answers[q.id] as string[]) || []).includes(opt.id)}
+                      checked={((answers[q.id] as string[]) || []).includes(
+                        opt.id
+                      )}
                       onChange={(e) => {
                         const prev = (answers[q.id] as string[]) || [];
                         if (e.target.checked) {
                           handleAnswerChange(q.id, [...prev, opt.id]);
                         } else {
-                          handleAnswerChange(q.id, prev.filter((id) => id !== opt.id));
+                          handleAnswerChange(
+                            q.id,
+                            prev.filter((id) => id !== opt.id)
+                          );
                         }
                       }}
                     />
@@ -166,7 +196,9 @@ export const QuizModal: React.FC<QuizModalProps> = ({
 
             {q.type === "ORDERING" && (
               <div className="mb-4">
-                <p className="text-sm text-gray-500 mb-2">Enter the order of the items:</p>
+                <p className="text-sm text-gray-500 mb-2">
+                  Enter the order of the items:
+                </p>
                 <ul className="mb-2 list-decimal list-inside">
                   {q.options.map((opt) => (
                     <li key={opt.id}>{opt.text}</li>
@@ -201,7 +233,9 @@ export const QuizModal: React.FC<QuizModalProps> = ({
                   min={1}
                   max={5}
                   value={(answers[q.id] as number) || 3}
-                  onChange={(e) => handleAnswerChange(q.id, Number(e.target.value))}
+                  onChange={(e) =>
+                    handleAnswerChange(q.id, Number(e.target.value))
+                  }
                 />
                 <span>High</span>
                 <span className="ml-2">{answers[q.id] || 3}</span>
