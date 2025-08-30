@@ -1,12 +1,12 @@
-import React from 'react'
-import CourseAddPage from '@/components/pages/AdminDashbaordPages/CourseAddPage'
+import React from "react";
+import CourseAddPage from "@/components/pages/AdminDashbaordPages/CourseAddPage";
 
 const page = () => {
   return (
     <>
-    <CourseAddPage/>
+      <CourseAddPage />
     </>
-  )
-}
+  );
+};
 
-export default page
+export default page;
