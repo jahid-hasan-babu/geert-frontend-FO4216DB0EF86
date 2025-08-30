@@ -50,7 +50,7 @@ const CoursesPage = () => {
 						/>
 					</div>
 					<Link href="/dashboard/course/add-course">
-						<button className="bg-[#3399CC] hover:bg-[#0077CC] duration-300 text-white px-2 lg:px-4 py-[5px] lg:py-[10px] text-xs lg:text-sm rounded-full font-semibold transition-colors duration-200 shadow-lg cursor-pointer font-sans">
+						<button className="bg-[#3399CC] hover:bg-[#0077CC] duration-300 text-white px-2 lg:px-4 py-[5px] lg:py-[10px] text-xs lg:text-sm rounded-full font-semibold transition-colors shadow-lg cursor-pointer font-sans">
 							+ Add Course
 						</button>
 					</Link>

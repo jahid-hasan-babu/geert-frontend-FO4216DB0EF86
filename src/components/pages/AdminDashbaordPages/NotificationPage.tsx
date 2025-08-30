@@ -17,7 +17,7 @@ export default function NotificationPage() {
   const [message, setMessage] = useState("")
   const [errors, setErrors] = useState<Partial<Record<keyof NotificationFormData, string>>>({})
 
-  const { data, isLoading } = useGetAllCoursesQuery({})
+  const { data, isLoading } = useGetAllCoursesQuery("")
   const [createNotification, { isLoading: isCreating }] = useCreateNotificationMutation()
   const course = data?.data?.data
 

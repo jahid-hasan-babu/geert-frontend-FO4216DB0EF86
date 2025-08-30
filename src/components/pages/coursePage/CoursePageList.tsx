@@ -105,7 +105,7 @@ export default function CoursesPageList() {
     if (token) fetchCourses();
   }, [currentPage, searchQuery, activeFilter, token]);
 
-
+  console.log("COurseS ...", courses);
 
   return (
     <div className="container mx-auto px-3 lg:px-6 py-5 lg:py-[80px]">
