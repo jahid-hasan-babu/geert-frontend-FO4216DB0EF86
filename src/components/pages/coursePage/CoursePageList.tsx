@@ -7,6 +7,7 @@ import Pagination from "@/components/ui/pagination/Pagination";
 import CourseSearch from "@/components/ui/search/CourseSearch";
 import Link from "next/link";
 import axios from "axios";
+import { Lesson } from "@/components/ui/context/CourseContext";
 
 interface Category {
   id: string;
@@ -16,6 +17,7 @@ interface Course {
   id: string;
   title: string;
   slug: string;
+  courseContexts: Lesson[];
   lessons: number;
   duration: string;
   rating: number;

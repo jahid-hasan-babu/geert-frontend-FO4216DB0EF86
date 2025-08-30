@@ -2,100 +2,108 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Star } from "lucide-react";
+import axios from "axios";
 
 interface ReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
+  courseId: string;
+  canReview: boolean; // true if course is finished
 }
 
-export function ReviewModal({ isOpen, onClose }: ReviewModalProps) {
+export function ReviewModal({
+  isOpen,
+  onClose,
+  courseId,
+  canReview,
+}: ReviewModalProps) {
   const [rating, setRating] = useState<number>(0);
   const [hoveredRating, setHoveredRating] = useState<number>(0);
   const [feedback, setFeedback] = useState<string>("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
-    console.log("Review submitted:", { rating, feedback });
-    setRating(0);
-    setFeedback("");
-    onClose();
+  const handleSubmit = async () => {
+    if (!canReview) return;
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/reviews/make-review/${courseId}`,
+        { rating, comment: feedback },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("Review submitted successfully!");
+      setRating(0);
+      setFeedback("");
+      onClose();
+    } catch (err) {
+      console.error("Failed to submit review:", err);
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleStarClick = (starIndex: number) => {
-    setRating(starIndex);
-  };
-
-  const handleStarHover = (starIndex: number) => {
-    setHoveredRating(starIndex);
-  };
-
-  const handleStarLeave = () => {
-    setHoveredRating(0);
-  };
+  if (!canReview) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-md p-6 text-center">
+          <p className="text-gray-600">
+            You can leave a review only after completing the course.
+          </p>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader className="relative">
-          <DialogTitle className="text-center text-2xl font-semibold">
-            Leave Review
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-md p-6">
+        <h2 className="text-center text-2xl font-semibold mb-4">
+          Leave Review
+        </h2>
 
-        <div className="space-y-6 py-4">
-          {/* Star Rating Section */}
-          <div className="space-y-3">
-            <h3 className="text-center text-gray-600 font-medium">
-              Select Rating
-            </h3>
-            <div className="flex justify-center gap-2">
-              {[1, 2, 3, 4, 5].map((starIndex) => (
-                <button
-                  key={starIndex}
-                  type="button"
-                  onClick={() => handleStarClick(starIndex)}
-                  onMouseEnter={() => handleStarHover(starIndex)}
-                  onMouseLeave={handleStarLeave}
-                  className="transition-colors duration-150"
-                >
-                  <Star
-                    className={`h-8 w-8 ${
-                      starIndex <= (hoveredRating || rating)
-                        ? "fill-yellow-400 text-yellow-400"
-                        : "text-gray-300"
-                    }`}
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Feedback Section */}
-          <div className="space-y-3">
-            <h3 className="text-gray-600 font-medium">Write Feedback</h3>
-            <Textarea
-              placeholder="Write here..."
-              value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
-              className="min-h-[120px] resize-none"
-            />
-          </div>
-
-          {/* Submit Button */}
-          <Button
-            onClick={handleSubmit}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-full"
-          >
-            Submit
-          </Button>
+        {/* Star Rating */}
+        <div className="flex justify-center gap-2 mb-4">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              type="button"
+              onClick={() => setRating(star)}
+              onMouseEnter={() => setHoveredRating(star)}
+              onMouseLeave={() => setHoveredRating(0)}
+              aria-label={`${star} star`}
+            >
+              <Star
+                className={`h-8 w-8 ${
+                  star <= (hoveredRating || rating)
+                    ? "fill-yellow-400 text-yellow-400"
+                    : "text-gray-300"
+                }`}
+              />
+            </button>
+          ))}
         </div>
+
+        {/* Feedback */}
+        <Textarea
+          placeholder="Write your feedback..."
+          value={feedback}
+          onChange={(e) => setFeedback(e.target.value)}
+          className="w-full min-h-[120px] mb-4 resize-none"
+        />
+
+        {/* Submit Button */}
+        <Button
+          onClick={handleSubmit}
+          disabled={loading || rating === 0}
+          className="w-full py-3 rounded-full bg-blue-500 hover:bg-blue-600 text-white disabled:bg-gray-300"
+        >
+          {loading ? "Submitting..." : "Submit"}
+        </Button>
       </DialogContent>
     </Dialog>
   );

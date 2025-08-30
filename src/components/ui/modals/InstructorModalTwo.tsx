@@ -16,7 +16,7 @@ export function InstructorModalTwo({ isOpen, onClose }: InstructorModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md p-0 gap-0 bg-white">
-        {/* Header with close button */}
+        
         <div className="flex justify-between items-center p-6 pb-4">
           <h2 className="text-2xl font-bold text-center flex-1 font-playfairDisplay">Instructor</h2>
         </div>

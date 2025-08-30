@@ -2,36 +2,68 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import course_details_image from "@/assets/images/course_details_image.png";
-import instructorImage from "@/assets/images/about_dp.png";
 import CourseReviewAbout from "@/components/ui/review/CourseReviewAbout";
 import Promotion from "@/components/shared/Promotion/Promotion";
 import CourseVideoPlayer from "@/components/ui/videoPlayer/CourseVideoPlayer";
 import {
   CourseProvider,
-  useCourse,
   CourseSidebar,
   Module,
+  LessonsItem,
 } from "@/components/ui/context/CourseContext";
 import { reviewData } from "@/utils/dummyData";
-import { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
 
-interface Instructor {
-  name: string;
-  avatar: string;
+// ---------------- Types ----------------
+export interface Instructor {
+  id: string;
+  username: string;
+  email: string;
+  profileImage: string;
+  role: "INSTRUCTOR" | "STUDENT" | "ADMIN";
+  phone: string | null;
+  status: "ACTIVE" | "INACTIVE" | "BANNED";
+}
+
+interface LessonFromAPI {
+  id: string;
+  title: string;
+  type?: "video" | "doc" | "quiz";
+  duration?: string;
+  durationSecs?: number;
+  completed?: boolean;
+  videoUrl?: string;
+  quiz?: QuizFromAPI;
+  locked?: boolean;
+}
+
+export type QuizQuestion = {
+  id: string;
+  text: string;
+  type: "SINGLE_CHOICE" | "MULTI_CHOICE" | "ORDERING" | "SCALE" | "TEXT";
+  options: QuizOption[];
+};
+
+export type QuizOption = {
+  id: string;
+  text: string;
+  questionId: string;
+  value?: string;
+};
+
+interface QuizFromAPI {
+  id: string;
+  title: string;
+  questions?: QuizQuestion[];
+  locked?: boolean;
 }
 
 interface ModuleFromAPI {
   id: string;
   title: string;
-  lessons: {
-    id: string;
-    title: string;
-    type?: "video" | "doc" | "quiz";
-    duration?: string;
-    completed?: boolean;
-    videoUrl?: string;
-  }[];
+  lessons: LessonFromAPI[];
+  Quiz?: QuizFromAPI[];
+  locked?: boolean;
 }
 
 interface CourseFromAPI {
@@ -41,7 +73,7 @@ interface CourseFromAPI {
   description: string;
   rating: number;
   isMicroLearning?: boolean;
-  instructorName?: string;
+  instructor?: Instructor;
   modules?: ModuleFromAPI[];
 }
 
@@ -57,22 +89,21 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
   useEffect(() => {
     const fetchCourse = async () => {
       try {
+        if (typeof window === "undefined") return;
+
         const token = localStorage.getItem("token");
         if (!token) throw new Error("No access token found");
 
-        const res = await fetch(
+        const { data } = await axios.get<{ data: CourseFromAPI }>(
           `${process.env.NEXT_PUBLIC_BASE_URL}/courses/single-course/${slug}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        if (!res.ok) throw new Error("Failed to fetch course");
-
-        const data = await res.json();
-        setCourse(data?.data);
+        setCourse(data.data);
       } catch (err) {
         const error = err as AxiosError<{ message: string }>;
         console.error(error);
-        setError(error.message || "Something went wrong");
+        setError(error.response?.data?.message || "Something went wrong");
       } finally {
         setLoading(false);
       }
@@ -81,45 +112,60 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
     fetchCourse();
   }, [slug]);
 
-  if (loading)
-    return <p className="text-center py-10">Loading course...</p>;
-  if (error)
-    return (
-      <p className="text-center py-10 text-red-500">{error}</p>
-    );
+  if (loading) return <p className="text-center py-10">Loading course...</p>;
+  if (error) return <p className="text-center py-10 text-red-500">{error}</p>;
   if (!course) return <p className="text-center py-10">Course not found</p>;
+  if (!course.instructor)
+    return <p className="text-center py-10">Instructor not found</p>;
 
-  const instructor: Instructor = {
-    name: course.instructorName || "Instructor",
-    avatar: instructorImage.src,
-  };
-
+  const courseId = course._id || course.id || "";
   const filteredReviews = reviewData.filter(
-    (review) => review.courseId === (course._id || course.id)
+    (review) => review.courseId === courseId
   );
 
+  // ---------------- Modules Mapping ----------------
   const modules: Module[] =
-    course.modules?.map((m) => ({
-      id: m.id,
-      title: m.title,
-      lessons: m.lessons.map((l) => ({
+    course.modules?.map((m) => {
+      const lessons: LessonsItem[] = m.lessons.map((l) => ({
         id: l.id,
         title: l.title,
-        type: l.type,
+        type: l.type || "doc",
         duration: l.duration,
+        durationSecs: l.durationSecs,
         completed: l.completed,
         videoUrl: l.videoUrl,
-      })),
-    })) || [];
+        locked: l.locked ?? false,
+        quiz: undefined,
+      }));
+
+      const quizLessons: LessonsItem[] = (m.Quiz ?? []).map((q) => ({
+        id: q.id,
+        title: q.title,
+        type: "quiz",
+        locked: q?.locked ?? true,
+        quiz: {
+          id: q.id,
+          title: q.title,
+          questions: q.questions ?? [],
+          locked: q?.locked ?? true,
+        },
+      }));
+
+      return {
+        id: m.id,
+        title: m.title,
+        locked: m.locked ?? false,
+        lessons: [...lessons, ...quizLessons],
+      };
+    }) || [];
 
   return (
     <CourseProvider modules={modules}>
       <div className="container">
         <section className="py-8 lg:py-12 mx-auto">
           <div className="grid lg:grid-cols-4 gap-12 items-start">
-            {/* Left: Video + Course Info */}
             <div className="lg:col-span-3 space-y-6">
-              <CourseVideoPlayer />
+              <CourseVideoPlayer courseId={courseId} />
 
               <div className="flex justify-between items-start">
                 <div>
@@ -129,7 +175,7 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
                         <span
                           key={i}
                           className={`text-lg ${
-                            i < Math.round(course.rating)
+                            i < Math.floor(course.rating)
                               ? "text-yellow-400"
                               : "text-gray-300"
                           }`}
@@ -158,12 +204,11 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
 
               <CourseReviewAbout
                 description={course.description}
-                instructor={instructor}
+                instructor={course.instructor}
                 reviews={filteredReviews}
               />
             </div>
 
-            {/* Right Sidebar: Lessons + Quiz + Certification */}
             <div className="lg:col-span-1">
               <CourseSidebar modules={modules} />
             </div>

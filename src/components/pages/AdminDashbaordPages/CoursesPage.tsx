@@ -6,19 +6,24 @@ import { Search } from "lucide-react";
 import CourseCard from "@/components/ui/card/CourseCard";
 import Pagination from "@/components/ui/pagination/Pagination";
 import Link from "next/link";
-import { Skeleton } from "antd";
-import { useGetAllCoursesQuery } from "@/redux/features/courses/coursesApi";
+import axios from "axios";
+import { Lesson } from "@/components/ui/context/CourseContext";
 
-export interface Course {
-	id: string;
-	title: string;
-	coverImage: string;
-	duration: string;
-	price: string;
-	totalRaters: number;
-	avgRating: number;
-	totalLessons: number;
-	isFavorite: boolean;
+interface Course {
+  id: string;
+  title: string;
+  slug: string;
+  courseContexts: Lesson[];
+  lessons: number;
+  duration: string;
+  rating: number;
+  category: string;
+  type: string;
+  completed: number;
+  isBestseller?: boolean;
+  isMicroLearning?: boolean;
+  description: string;
+  coverImage: string;
 }
 
 const CoursesPage = () => {
