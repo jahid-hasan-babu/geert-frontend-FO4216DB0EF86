@@ -59,7 +59,7 @@ export function MenuModal({
 		{ label: "Password", onClick: () => setIsPasswordOpen(true) },
 		{
 			label: "Help & Support",
-			onClick: () => console.log("Help & Support clicked"),
+			onClick: () => router.push("/help-support"),
 		},
 		{ label: "Sign Out", onClick: handleLogout, closeOnClick: false },
 	];

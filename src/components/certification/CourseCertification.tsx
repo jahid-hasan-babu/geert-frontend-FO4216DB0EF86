@@ -71,7 +71,7 @@ export default function CourseCertification({ courseId }: Props) {
       } catch (err) {
         const error = err as AxiosError;
         console.error("Error fetching data:", error);
-        setError("Failed to fetch certificate");
+        setError("Certificate not for now!");
       } finally {
         setLoading(false);
       }

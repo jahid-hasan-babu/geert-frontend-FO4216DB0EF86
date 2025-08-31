@@ -17,7 +17,7 @@ export default function CourseFilter({
         <button
           key={filter}
           onClick={() => onChange(filter)}
-          className={`text-sm lg:text-base px-3 lg:px-6 py-1 lg:py-3 rounded-full font-medium transition-colors duration-200 cursor-pointer font-sans ${
+          className={`text-sm lg:text-base px-3 lg:px-6 py-1 lg:py-3 rounded-full font-medium transition-colors duration-200 cursor-pointer font-sans capitalize ${
             activeFilter === filter
               ? "bg-[#3399CC] text-white"
               : "bg-[#EBF5FA] text-[#404040]"

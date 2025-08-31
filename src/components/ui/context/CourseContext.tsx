@@ -266,7 +266,7 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
                           lesson.completed
                             ? "bg-green-500 border-green-500"
                             : !isLocked
-                            ? "bg-white border-gray-300"
+                            ? "bg-green-500"
                             : "border-gray-300 bg-white"
                         }`}
                       >
