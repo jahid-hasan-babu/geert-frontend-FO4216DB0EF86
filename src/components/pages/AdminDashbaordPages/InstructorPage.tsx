@@ -5,6 +5,8 @@ import { Search, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { LoadingOutlined } from '@ant-design/icons';
+
 import {
   Table,
   TableBody,
@@ -25,6 +27,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import { Spin } from "antd";
 
 export interface Instructor {
   id: string;
@@ -183,7 +186,8 @@ export default function InstructorPage() {
                     colSpan={7}
                     className="text-center py-6 text-gray-500"
                   >
-                    Loading instructors...
+                        <Spin indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />} />
+
                   </TableCell>
                 </TableRow>
               ) : currentInstructors.length > 0 ? (

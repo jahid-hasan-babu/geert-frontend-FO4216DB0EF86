@@ -5,11 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2, Edit } from "lucide-react";
 import { toast } from "sonner";
+import { LoadingOutlined } from '@ant-design/icons';
 import {
 	useGetCoursesCategoryQuery,
 	useAddCourseCategoryMutation,
 	useEditCourseCategoryMutation,
 } from "@/redux/features/users&category/usersCategoryApi";
+import { Spin } from "antd";
 
 interface Category {
 	id: string;
@@ -98,9 +100,10 @@ const CategoryPage = () => {
 
 			{/* Categories list */}
 			{isLoading ? (
-				<div className="flex justify-center">
-					<Loader2 className="w-6 h-6 animate-spin" />
-				</div>
+				    <div className="flex justify-center">
+						<Spin indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />} />
+					</div>
+
 			) : (
 				<div className="space-y-2">
 					{categories?.map((category) => (

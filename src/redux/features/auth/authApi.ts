@@ -80,6 +80,16 @@ const authApi = baseApi.injectEndpoints({
       }),
       providesTags: ["user"],
     }),
+    addStudent: builder.mutation({
+      query: (studentInfo) => {
+        return {
+          url: "/users/add-student",
+          method: "POST",
+          body: studentInfo,
+        };
+      },
+      invalidatesTags: ["user"],
+    }),
   }),
 });
 
@@ -92,4 +102,5 @@ export const {
   useUpdateUserMutation,
   useOtpMutation,
   useGetMeQuery,
+  useAddStudentMutation,
 } = authApi;
