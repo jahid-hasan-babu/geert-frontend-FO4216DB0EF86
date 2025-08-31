@@ -133,6 +133,49 @@ export default function Navbar() {
                   Leave Review
                 </span>
               </button>
+				{/* Course Page Header */}
+
+				<>
+					
+
+						<div className="flex "> 
+						
+					
+						<ul className="hidden md:flex items-center space-x-8 font-medium font-sans">
+							{navLinks.map(({ href, label }) => (
+								<li key={href}>
+									<Link
+										href={href}
+										className={`transition-colors duration-300 ${
+											isActive(href)
+												? "text-[#3399CC] font-semibold"
+												: "text-gray-800 hover:text-[#9191c4]"
+										}`}
+									>
+										{label}
+									</Link>
+								</li>
+							))}
+						</ul>
+
+						{
+							pathname === `/courses/${courseData?.id}` || pathname === `/courses/${courseData?.id}/progress` ? (
+								<div >
+									<div className="w-full px-4 flex justify-between items-center">
+							{isLoadingCourse && (
+								<Spin indicator={<LoadingOutlined spin />} size="large" />
+							) }
+
+							<div className="flex items-center space-x-[12px]">
+								<button
+									onClick={() => setIsReviewOpen(true)}
+									className="flex items-center space-x-2 font-sans"
+								>
+									<Star className="w-5 h-5 text-gray-500" />
+									<span className="text-gray-700 font-medium leading-[120%] cursor-pointer">
+										Leave Review
+									</span>
+								</button>
 
               <div
                 className="flex items-center space-x-2 font-sans cursor-pointer"
@@ -163,6 +206,26 @@ export default function Navbar() {
             ))}
           </ul>
         )}
+								<div
+									className="flex items-center space-x-2 font-sans cursor-pointer"
+									onClick={() => setIsProgressOpen(true)}
+								>
+									<span className="text-gray-700 font-medium leading-[120%]">
+										Your Progress
+									</span>
+									<ChevronDown className="w-6 h-6 text-gray-500" />
+								</div>
+							</div>
+						</div>
+								</div>
+							) : null
+						}
+						
+
+					</div>
+				
+
+				</>
 
         {/* Right Section */}
         <div className="hidden md:flex items-center space-x-5">
