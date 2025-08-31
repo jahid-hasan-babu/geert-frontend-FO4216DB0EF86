@@ -37,7 +37,6 @@ export default function LoginPage() {
   })
 
   const [showPassword, setShowPassword] = useState(false)
-  const [rememberMe, setRememberMe] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
 
   const onSubmit = async (data: LoginFormData) => {
@@ -54,7 +53,6 @@ export default function LoginPage() {
       const { accessToken: token, ...user } = responseData.data
       localStorage.setItem("token", token)
       localStorage.setItem("user", JSON.stringify(user))
-      if (rememberMe) localStorage.setItem("rememberMe", "true")
 
       toast.success("Logged in successfully!")
       if (user?.role === "SUPERADMIN") router.push("/dashboard")
@@ -66,8 +64,6 @@ export default function LoginPage() {
 
   return (
     <div className="container min-h-screen flex bg-white">
-      
-
       <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-12">
         <div className="w-full max-w-lg">
           <Image
@@ -142,19 +138,6 @@ export default function LoginPage() {
                   Forgot Password?
                 </button>
               </div>
-            </div>
-
-            <div className="flex items-center">
-              <input
-                id="rememberMe"
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="h-4 w-4 text-sky-500 focus:ring-sky-500 border-gray-300 rounded"
-              />
-              <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-700">
-                Remember me
-              </label>
             </div>
 
             <button
