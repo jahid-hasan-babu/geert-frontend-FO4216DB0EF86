@@ -5,6 +5,8 @@ import { Search, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { LoadingOutlined } from '@ant-design/icons';
+
 import {
   Table,
   TableBody,
@@ -19,6 +21,7 @@ import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import Image from "next/image";
+import { Spin } from "antd";
 
 type Student = {
   id: string;
@@ -133,7 +136,7 @@ export default function StudentsPage() {
               {loading ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-6 text-gray-500">
-                    Loading students...
+                    <Spin indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />} />
                   </TableCell>
                 </TableRow>
               ) : currentStudents.length > 0 ? (
