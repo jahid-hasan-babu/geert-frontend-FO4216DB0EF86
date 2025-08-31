@@ -12,6 +12,7 @@ import {
   LessonsItem,
 } from "@/components/ui/context/CourseContext";
 import axios, { AxiosError } from "axios";
+import { Spin } from "antd";
 
 // ---------------- Types ----------------
 export interface Instructor {
@@ -122,7 +123,12 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
     fetchCourse();
   }, [slug]);
 
-  if (loadingCourse) return <p className="text-center py-10">Loading course...</p>;
+  if (loadingCourse)
+  return (
+    <div className="flex justify-center items-center py-10">
+      <Spin size="large" tip="Loading course..." />
+    </div>
+  );
   if (error) return <p className="text-center py-10 text-red-500">{error}</p>;
   if (!course) return <p className="text-center py-10">Course not found</p>;
   if (!course.instructor) return <p className="text-center py-10">Instructor not found</p>;

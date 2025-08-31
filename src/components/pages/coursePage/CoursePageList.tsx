@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Spin } from "antd";
 import CourseCard from "@/components/ui/card/CourseCard";
 import CourseFilter from "@/components/ui/filter/CourseFilter";
-import Pagination from "@/components/ui/pagination/Pagination";
 import CourseSearch from "@/components/ui/search/CourseSearch";
-import Link from "next/link";
+import Pagination from "@/components/ui/pagination/Pagination";
 import axios from "axios";
 import { LessonsItem } from "@/components/ui/context/CourseContext";
 
@@ -29,6 +30,7 @@ interface Course {
   isMicroLearning?: boolean;
   description: string;
   coverImage: string;
+  isFavorite?: boolean; // optional if fetched from API
 }
 
 export default function CoursesPageList() {
@@ -41,7 +43,7 @@ export default function CoursesPageList() {
   const [totalPages, setTotalPages] = useState(1);
 
   const coursesPerPage = 9;
-  const token = localStorage.getItem("token");
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
   // Fetch categories
   useEffect(() => {
@@ -133,13 +135,15 @@ export default function CoursesPageList() {
 
       {/* Courses List */}
       {loading ? (
-        <p className="text-center text-gray-500 mb-3">Loading courses...</p>
+        <div className="flex justify-center items-center py-20">
+          <Spin size="large" tip="Loading courses..." />
+        </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mb-12">
           {courses.length > 0 ? (
             courses.map((course) => (
               <Link href={`/courses/${course.id}`} key={course.id}>
-                <CourseCard course={course} />
+                <CourseCard course={course} isLoading={loading} />
               </Link>
             ))
           ) : (
