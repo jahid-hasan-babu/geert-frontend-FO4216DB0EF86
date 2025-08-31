@@ -105,41 +105,40 @@ export default function CourseReviewAbout({
       ) : (
         // Reviews Tab
         <div className="space-y-8">
-          <div className="grid md:grid-cols-2 gap-6">
-            {reviews.map((review) => (
-              <div
-                key={review.id}
-                className="bg-white rounded-lg p-6 space-y-4 shadow-sm"
-              >
-                <p className="text-gray-700 leading-relaxed">{review.text}</p>
-                <div className="flex items-center space-x-2">
-                  <div className="flex space-x-1">
-                    {[...Array(5)].map((_, i) => (
-                      <span
-                        key={i}
-                        className={`text-sm ${
-                          i < review?.rating ? "text-yellow-400" : "text-gray-300"
-                        }`}
-                      >
-                        ★
-                      </span>
-                    ))}
+          {reviews.length === 0 ? (
+            <p className="text-gray-500 text-center py-6">No reviews yet.</p>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-6">
+              {reviews.map((review) => (
+                <div
+                  key={review.id}
+                  className="bg-white rounded-lg p-6 space-y-4 shadow-sm"
+                >
+                  <p className="text-gray-700 leading-relaxed">{review.text}</p>
+                  <div className="flex items-center space-x-2">
+                    <div className="flex space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <span
+                          key={i}
+                          className={`text-sm ${
+                            i < review?.rating ? "text-yellow-400" : "text-gray-300"
+                          }`}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                    <span className="text-gray-600 text-sm font-medium">
+                      {review.rating} | {review.date}
+                    </span>
                   </div>
-                  <span className="text-gray-600 text-sm font-medium">
-                    {review.rating} | {review.date}
-                  </span>
+                  <p className="text-gray-500 text-sm italic">
+                    — {review.author}
+                  </p>
                 </div>
-                <p className="text-gray-500 text-sm italic">
-                  — {review.author}
-                </p>
-              </div>
-            ))}
-          </div>
-          <div className="text-center">
-            <button className="hover:bg-sky-200 bg-[#EBF5FA] px-8 py-3 rounded-full font-medium transition-colors duration-200 w-full cursor-pointer">
-              View More
-            </button>
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

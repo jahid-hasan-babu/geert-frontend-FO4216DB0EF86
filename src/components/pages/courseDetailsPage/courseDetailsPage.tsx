@@ -11,7 +11,6 @@ import {
   Module,
   LessonsItem,
 } from "@/components/ui/context/CourseContext";
-import { reviewData } from "@/utils/dummyData";
 import axios, { AxiosError } from "axios";
 
 // ---------------- Types ----------------
@@ -77,20 +76,35 @@ interface CourseFromAPI {
   modules?: ModuleFromAPI[];
 }
 
+interface Review {
+  id: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  course: {
+    id: string;
+    title: string;
+    coverImage: string;
+    avgRating: number;
+    totalRaters: number;
+  };
+}
+
 interface CourseDetailsPageProps {
   slug: string;
 }
 
 export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
   const [course, setCourse] = useState<CourseFromAPI | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loadingCourse, setLoadingCourse] = useState(true);
+  const [loadingReviews, setLoadingReviews] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Fetch course
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        if (typeof window === "undefined") return;
-
         const token = localStorage.getItem("token");
         if (!token) throw new Error("No access token found");
 
@@ -105,23 +119,45 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
         console.error(error);
         setError(error.response?.data?.message || "Something went wrong");
       } finally {
-        setLoading(false);
+        setLoadingCourse(false);
       }
     };
 
     fetchCourse();
   }, [slug]);
 
-  if (loading) return <p className="text-center py-10">Loading course...</p>;
+  // Fetch reviews
+  useEffect(() => {
+    const fetchReviews = async () => {
+      if (!course) return;
+
+      try {
+        setLoadingReviews(true);
+        const token = localStorage.getItem("token");
+        const { data } = await axios.get<{ data: Review[] }>(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/reviews/my-reviews`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        const courseId = course._id || course.id || "";
+        const filtered = data.data.filter((r) => r.course.id === courseId);
+        setReviews(filtered);
+      } catch (err) {
+        console.error("Error fetching reviews:", err);
+      } finally {
+        setLoadingReviews(false);
+      }
+    };
+
+    fetchReviews();
+  }, [course]);
+
+  if (loadingCourse) return <p className="text-center py-10">Loading course...</p>;
   if (error) return <p className="text-center py-10 text-red-500">{error}</p>;
   if (!course) return <p className="text-center py-10">Course not found</p>;
-  if (!course.instructor)
-    return <p className="text-center py-10">Instructor not found</p>;
+  if (!course.instructor) return <p className="text-center py-10">Instructor not found</p>;
 
   const courseId = course._id || course.id || "";
-  const filteredReviews = reviewData.filter(
-    (review) => review.courseId === courseId
-  );
 
   // ---------------- Modules Mapping ----------------
   const modules: Module[] =
@@ -175,9 +211,7 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
                         <span
                           key={i}
                           className={`text-lg ${
-                            i < Math.floor(course.rating)
-                              ? "text-yellow-400"
-                              : "text-gray-300"
+                            i < Math.floor(course.rating) ? "text-yellow-400" : "text-gray-300"
                           }`}
                         >
                           ★
@@ -185,7 +219,7 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
                       ))}
                     </div>
                     <span className="text-gray-700 font-medium text-[14px]">
-                      {course.rating} ({filteredReviews.length})
+                      {course.rating} ({reviews.length})
                     </span>
                   </div>
 
@@ -202,15 +236,25 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
                 </div>
               </div>
 
-              <CourseReviewAbout
-                description={course.description}
-                instructor={course.instructor}
-                reviews={filteredReviews}
-              />
+              {loadingReviews ? (
+                <p className="text-center py-4">Loading reviews...</p>
+              ) : (
+                <CourseReviewAbout
+                  description={course.description}
+                  instructor={course.instructor}
+                  reviews={reviews.map((r) => ({
+                    id: r.id,
+                    text: r.comment,
+                    rating: r.rating,
+                    date: new Date(r.createdAt).toLocaleDateString(),
+                    author: "You",
+                  }))}
+                />
+              )}
             </div>
 
             <div className="lg:col-span-1">
-              <CourseSidebar modules={modules} />
+              <CourseSidebar modules={modules} courseId={courseId} />
             </div>
           </div>
         </section>

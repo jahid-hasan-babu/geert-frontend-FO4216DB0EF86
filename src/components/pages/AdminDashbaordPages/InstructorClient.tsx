@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import InstructorCourses from "@/components/pages/AdminDashbaordPages/InstructorCourses";
 import { LessonsItem } from "@/components/ui/context/CourseContext";
 import axios from "axios";
 
@@ -75,5 +76,5 @@ export default function InstructorClient({ id }: Props) {
   if (error) return <p>{error}</p>;
   if (!data) return <p>No data found</p>;
 
-  // return <InstructorCourses instructor={data.instructor} courses={data.course} />;
+  return <InstructorCourses instructor={data.instructor} courses={data.course} />;
 }
