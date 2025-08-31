@@ -18,6 +18,7 @@ import { AddLessonModal } from "@/components/ui/modal/add-lesson-modal"
 
 // Use shared types from add-lesson-modal to ensure compatibility
 import type { Module, Lesson, Quiz, QuizOption, Question } from "@/components/ui/modal/add-lesson-modal";
+import Editor from "@/components/ui/Editor/Editor"
 
 interface Instructor {
   id: string
@@ -256,14 +257,26 @@ const CourseDetailsPage = () => {
 						<label className="block text-sm font-medium text-gray-700 mb-2">
 							Description
 						</label>
-						<Textarea
+						{/* <Textarea
 							value={isEditMode ? formData.description : course.description}
 							className={`${
 								isEditMode ? "bg-white" : "bg-gray-50"
 							} min-h-[80px]`}
 							readOnly={!isEditMode}
 							onChange={(e) => handleInputChange("description", e.target.value)}
-						/>
+						/> */}
+								{isEditMode ? (
+  <Editor
+    contents={formData.description}
+    onSave={(value: string) => handleInputChange("description", value)}
+    onBlur={() => {}}
+  />
+) : (
+  <div
+    className="bg-gray-50 min-h-[80px] p-2 rounded"
+    dangerouslySetInnerHTML={{ __html: course.description || "" }}
+  />
+)}
 					</div>
 
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -54,7 +54,7 @@ const coursesApi = baseApi.injectEndpoints({
 						: { "Content-Type": "application/json" },
 				};
 			},
-			invalidatesTags: (result, error, { id }) => [{ type: "courses", id }],
+			invalidatesTags: ["courses"],
 		}),
 		addCourseModule: builder.mutation({
 			query: (data) => ({
@@ -62,7 +62,7 @@ const coursesApi = baseApi.injectEndpoints({
 				method: "POST",
 				body: data.formData,
 			}),
-			invalidatesTags: (result, error, { id }) => [{ type: "courses", id }],
+			invalidatesTags: ["courses"],
 		}),
 		addCourseLesson: builder.mutation<
 			{ success: boolean; message?: string },
@@ -73,7 +73,7 @@ const coursesApi = baseApi.injectEndpoints({
 				method: "POST",
 				body: formData,
 			}),
-			invalidatesTags: (result, error, { id }) => [{ type: "courses", id }],
+			invalidatesTags: ["courses"],
 		}),
 	}),
 });

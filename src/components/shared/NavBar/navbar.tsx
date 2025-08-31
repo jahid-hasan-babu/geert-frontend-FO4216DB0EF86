@@ -82,15 +82,35 @@ export default function Navbar() {
 				{/* Course Page Header */}
 
 				<>
-					{courseData ? (
-						<div className="w-full px-4 flex justify-between items-center">
-							{isLoadingCourse ? (
+					
+
+						<div className="flex "> 
+						
+					
+						<ul className="hidden md:flex items-center space-x-8 font-medium font-sans">
+							{navLinks.map(({ href, label }) => (
+								<li key={href}>
+									<Link
+										href={href}
+										className={`transition-colors duration-300 ${
+											isActive(href)
+												? "text-[#3399CC] font-semibold"
+												: "text-gray-800 hover:text-[#9191c4]"
+										}`}
+									>
+										{label}
+									</Link>
+								</li>
+							))}
+						</ul>
+
+						{
+							pathname === `/courses/${courseData?.id}` || pathname === `/courses/${courseData?.id}/progress` ? (
+								<div >
+									<div className="w-full px-4 flex justify-between items-center">
+							{isLoadingCourse && (
 								<Spin indicator={<LoadingOutlined spin />} size="large" />
-							) : (
-								<div className="text-[24px] font-medium font-playfairDisplay text-[#101010]">
-									{courseData?.title}
-								</div>
-							)}
+							) }
 
 							<div className="flex items-center space-x-[12px]">
 								<button
@@ -114,24 +134,14 @@ export default function Navbar() {
 								</div>
 							</div>
 						</div>
-					) : (
-						<ul className="hidden md:flex items-center space-x-8 font-medium font-sans">
-							{navLinks.map(({ href, label }) => (
-								<li key={href}>
-									<Link
-										href={href}
-										className={`transition-colors duration-300 ${
-											isActive(href)
-												? "text-[#3399CC] font-semibold"
-												: "text-gray-800 hover:text-[#9191c4]"
-										}`}
-									>
-										{label}
-									</Link>
-								</li>
-							))}
-						</ul>
-					)}
+								</div>
+							) : null
+						}
+						
+
+					</div>
+				
+
 				</>
 
 				{/* Right Section */}
