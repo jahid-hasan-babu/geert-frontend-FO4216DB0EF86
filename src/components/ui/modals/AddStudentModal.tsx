@@ -13,47 +13,48 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
+import { useAddStudentMutation } from "@/redux/features/auth/authApi";
 
 interface AddStudentModalProps {
   onAddSuccess: () => void;
 }
 
 export default function AddStudentModal({ onAddSuccess }: AddStudentModalProps) {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
+  const [addStudent, { isLoading, error }] = useAddStudentMutation();
+
   const handleSave = async () => {
-    if (!email || !password) {
-      toast.error("Email and password are required");
-      return;
-    }
-
+    setLoading(true);
     try {
-      setLoading(true);
-      const token = localStorage.getItem("token");
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/users/add-student`,
-        { email, password },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      if (res.data.success) {
-        toast.success("Student added successfully");
-        setEmail("");
-        setPassword("");
-        onAddSuccess();
-        setIsOpen(false);
-      } else {
-        toast.error(res.data.message || "Failed to add student");
+      const studentInfo = { firstName, lastName, email };
+      await addStudent(studentInfo).unwrap();
+      toast.success("Student added successfully!");
+      setFirstName("");
+      setLastName("");
+      setEmail("");
+      setIsOpen(false);
+      onAddSuccess();
+    } catch {
+      let errorMessage = "Failed to add student.";
+      if (
+        error &&
+        typeof error === "object" &&
+        "data" in error &&
+        error.data &&
+        typeof error.data === "object" &&
+        "message" in error.data
+      ) {
+        errorMessage = (error.data as { message?: string }).message || errorMessage;
+      } else if (error && typeof error === "object" && "message" in error) {
+        errorMessage = (error as { message?: string }).message || errorMessage;
       }
-    } catch (error) {
-      const err = error as AxiosError<{ message: string }>;
-      console.error(err);
-      toast.error(err.response?.data?.message || "Something went wrong");
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -73,6 +74,26 @@ export default function AddStudentModal({ onAddSuccess }: AddStudentModalProps) 
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
+            <Label htmlFor="firstName">First Name</Label>
+            <Input
+              id="firstName"
+              type="text"
+              placeholder="Enter first name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="lastName">Last Name</Label>
+            <Input
+              id="lastName"
+              type="text"
+              placeholder="Enter last name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+            />
+          </div>
+          <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
@@ -82,24 +103,14 @@ export default function AddStudentModal({ onAddSuccess }: AddStudentModalProps) 
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="Enter password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
         </div>
         <DialogFooter>
           <Button
             onClick={handleSave}
             className="bg-sky-500 hover:bg-sky-600"
-            disabled={loading}
+            disabled={loading || isLoading}
           >
-            {loading ? "Saving..." : "Save"}
+            {loading || isLoading ? "Saving..." : "Save"}
           </Button>
         </DialogFooter>
       </DialogContent>

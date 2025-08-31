@@ -15,6 +15,10 @@ import {
 import { Plus, Trash2, Video, FileText } from "lucide-react";
 import Editor from "../../ui/Editor/Editor";
 import { usePathname } from "next/navigation";
+import { TimePicker } from "antd";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+dayjs.extend(customParseFormat);
 
 type Lesson = {
 	lessonType: "video" | "doc";
@@ -682,19 +686,26 @@ export default function CourseModuleAdd({
 												}
 												required
 											/>
-											<Input
-												placeholder="Duration (e.g., 5m) *"
-												value={lesson.lessonDuration}
-												onChange={(e) =>
-													updateLesson(
-														moduleIndex,
-														lessonIndex,
-														"lessonDuration",
-														e.target.value
-													)
-												}
-												required
-											/>
+											{
+												lesson.lessonType === "video" && (
+												<TimePicker
+												value={lesson.lessonDuration ? dayjs(lesson.lessonDuration, "HH:mm:ss") : null}
+												format="HH:mm:ss"
+												onChange={(time) => {
+													const formatted = time ? time.format("HH:mm:ss") : "00:00:00";
+
+													// Update your lesson state
+													updateLesson(moduleIndex, lessonIndex, "lessonDuration", formatted);
+												}}
+												placeholder="Select duration"
+												secondStep={1} // enable seconds
+												minuteStep={1}
+												hourStep={1}
+												use12Hours={false}
+												/>
+												)
+											}
+											
 											<Select
 												value={lesson.lessonType}
 												onValueChange={(value: "video" | "doc") =>

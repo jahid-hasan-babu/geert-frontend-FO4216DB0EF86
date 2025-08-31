@@ -75,6 +75,17 @@ const coursesApi = baseApi.injectEndpoints({
 			}),
 			invalidatesTags: ["courses"],
 		}),
+		addCourseStudent: builder.mutation<
+			{ success: boolean; message?: string },
+			{ email: string; courseId: string }
+		>({
+			query: ({ email, courseId }) => ({
+				url: `/courses/add-student/`,
+				method: "POST",
+				body: { email, courseId },
+			}),
+			invalidatesTags: ["courses"],
+		}),
 	}),
 });
 
@@ -87,4 +98,5 @@ export const {
 	useGetMicroLearningQuery,
 	useAddCourseModuleMutation,
 	useAddCourseLessonMutation,
+	useAddCourseStudentMutation,
 } = coursesApi;
