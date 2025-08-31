@@ -37,7 +37,11 @@ export const logoutHandler = async (dispatch: Dispatch, router: any) => {
     });
 
     if (result.isConfirmed) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+
       await dispatch(logout());
+
       await Swal.fire({
         title: "Logged Out Successfully!",
         icon: "success",
@@ -47,6 +51,7 @@ export const logoutHandler = async (dispatch: Dispatch, router: any) => {
           popup: "rounded-2xl p-6 shadow-md",
         },
       });
+
       await router.push("/auth/login");
     }
   } catch (error) {

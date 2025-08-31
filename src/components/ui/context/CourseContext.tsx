@@ -1,12 +1,19 @@
-
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
-import { ChevronDown, CheckCircle, Play, Lock } from "lucide-react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useRef,
+  useEffect,
+} from "react";
+import axios from "axios";
+import { ChevronDown, CheckCircle, Play, Lock, FileText } from "lucide-react";
 import CourseCertification from "@/components/certification/CourseCertification";
 import { QuizModal, Quiz } from "../modals/QuizModal";
 
-// ----------------- Types -----------------
+// ---------------- Types ----------------
 export interface LessonsItem {
   id: string;
   title: string;
@@ -15,8 +22,9 @@ export interface LessonsItem {
   durationSecs?: number;
   completed?: boolean;
   videoUrl?: string;
+  description?: string;
   quiz?: Quiz;
-  locked: boolean; // backend provides
+  locked: boolean;
 }
 
 export interface Module {
@@ -35,19 +43,26 @@ interface CourseContextType {
 const CourseContext = createContext<CourseContextType | undefined>(undefined);
 
 export const useCourse = () => {
-  const context = useContext(CourseContext);
-  if (!context) throw new Error("useCourse must be used within CourseProvider");
-  return context;
+  const ctx = useContext(CourseContext);
+  if (!ctx) throw new Error("useCourse must be used within CourseProvider");
+  return ctx;
 };
 
+// ---------------- Course Provider ----------------
 export const CourseProvider: React.FC<{
   modules: Module[];
   children: ReactNode;
 }> = ({ modules, children }) => {
-  const [currentLesson, setCurrentLesson] = useState<LessonsItem | null>(
+  // Initialize currentLesson to first unlocked lesson (video preferred)
+  const initialLesson =
     modules
       .flatMap((m) => m.lessons)
-      .find((l) => !l.locked && l.type === "video") || null
+      .find((l) => !l.locked && l.type === "video") ||
+    modules.flatMap((m) => m.lessons).find((l) => !l.locked) ||
+    null;
+
+  const [currentLesson, setCurrentLesson] = useState<LessonsItem | null>(
+    initialLesson
   );
 
   return (
@@ -59,13 +74,111 @@ export const CourseProvider: React.FC<{
   );
 };
 
-// ----------------- Sidebar -----------------
+// ---------------- Course Video/Doc Player ----------------
+interface CourseVideoPlayerProps {
+  courseId: string;
+}
+
+export const CourseVideoPlayer: React.FC<CourseVideoPlayerProps> = ({
+  courseId,
+}) => {
+  const { currentLesson } = useCourse();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [secondsWatched, setSecondsWatched] = useState(0);
+  const lastTimeRef = useRef(0);
+
+  // Track watched time for videos
+  const handleTimeUpdate = () => {
+    if (!videoRef.current) return;
+    const currentTime = videoRef.current.currentTime;
+    const delta = currentTime - lastTimeRef.current;
+    if (delta > 0 && delta <= 1) setSecondsWatched((prev) => prev + delta);
+    lastTimeRef.current = currentTime;
+  };
+
+  const handleVideoEnd = async () => {
+    if (!currentLesson || !currentLesson.durationSecs) return;
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No token found");
+
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/courses/upgrade-progress/${currentLesson.id}/${courseId}`,
+        {
+          secondsWatched: Math.floor(secondsWatched),
+          durationSecs: currentLesson.durationSecs,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      console.log("Progress updated ✅", Math.floor(secondsWatched));
+    } catch (err) {
+      console.error("Failed to update progress:", err);
+    }
+  };
+
+  // Reset progress when lesson changes
+  useEffect(() => {
+    setSecondsWatched(0);
+    lastTimeRef.current = 0;
+  }, [currentLesson]);
+
+  if (!currentLesson) {
+    return (
+      <div className="w-full h-64 flex items-center justify-center border rounded-lg bg-gray-100 text-gray-500">
+        No lesson selected
+      </div>
+    );
+  }
+
+  if (currentLesson.type === "video") {
+    return (
+      <div>
+        <video
+          key={currentLesson.id}
+          ref={videoRef}
+          src={currentLesson.videoUrl}
+          controls
+          className="w-full rounded-lg"
+          onTimeUpdate={handleTimeUpdate}
+          onEnded={handleVideoEnd}
+        />
+      </div>
+    );
+  }
+
+  if (currentLesson.type === "doc") {
+    return (
+      <div className="w-full border rounded-lg bg-white shadow-sm p-6 prose max-w-none">
+        <h2 className="text-xl font-semibold mb-4">{currentLesson.title}</h2>
+        <div
+          className="text-gray-700 leading-relaxed"
+          dangerouslySetInnerHTML={{ __html: currentLesson.description || "" }}
+        />
+      </div>
+    );
+  }
+
+  if (currentLesson.type === "quiz") {
+    return (
+      <div className="w-full h-64 flex items-center justify-center border rounded-lg bg-yellow-50 p-4">
+        <p className="text-gray-700">📝 Quiz: {currentLesson.title}</p>
+      </div>
+    );
+  }
+
+  return null;
+};
+
+// ---------------- Course Sidebar ----------------
 interface CourseSidebarProps {
   modules: Module[];
   courseId: string;
 }
 
-export const CourseSidebar: React.FC<CourseSidebarProps> = ({ modules, courseId }) => {
+export const CourseSidebar: React.FC<CourseSidebarProps> = ({
+  modules,
+  courseId,
+}) => {
   const { setCurrentLesson } = useCourse();
   const [openModuleId, setOpenModuleId] = useState<string | null>(
     modules[0]?.id || null
@@ -96,7 +209,8 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({ modules, courseId 
         : lesson.locked;
     if (isLocked) return;
 
-    if (lesson.type === "video") setCurrentLesson(lesson);
+    if (lesson.type === "video" || lesson.type === "doc")
+      setCurrentLesson(lesson);
     else if (lesson.type === "quiz" && lesson.quiz) openQuiz(lesson.quiz);
   };
 
@@ -136,10 +250,6 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({ modules, courseId 
                   lesson.type === "quiz"
                     ? lesson.quiz?.locked ?? lesson.locked
                     : lesson.locked;
-
-                console.log("Lesson", lesson);
-                console.log(`isLocked: ${isLocked}`, lesson.title);
-
                 return (
                   <div
                     key={lesson.id}
@@ -156,7 +266,7 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({ modules, courseId 
                           lesson.completed
                             ? "bg-green-500 border-green-500"
                             : !isLocked
-                            ? "bg-green-500 border-green-500"
+                            ? "bg-white border-gray-300"
                             : "border-gray-300 bg-white"
                         }`}
                       >
@@ -193,6 +303,8 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({ modules, courseId 
                         >
                           {lesson.type === "video"
                             ? `Video: ${lesson.duration}`
+                            : lesson.type === "doc"
+                            ? `Doc`
                             : lesson.type === "quiz"
                             ? "Quiz"
                             : lesson.duration}
@@ -211,6 +323,7 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({ modules, courseId 
                             <CheckCircle className="w-5 h-5 text-blue-500" />
                           </button>
                         )}
+
                         {lesson.type === "video" && !isLocked && (
                           <button
                             onClick={(e) => {
@@ -222,6 +335,19 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({ modules, courseId 
                             <Play className="w-5 h-5 text-gray-600" />
                           </button>
                         )}
+
+                        {lesson.type === "doc" && !isLocked && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCurrentLesson(lesson);
+                            }}
+                            className="p-2 rounded-full hover:bg-gray-200 cursor-pointer"
+                          >
+                            <FileText className="w-5 h-5 text-gray-600" />
+                          </button>
+                        )}
+
                         {isLocked && <Lock className="w-5 h-5 text-gray-400" />}
                       </div>
                     </div>
@@ -269,5 +395,3 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({ modules, courseId 
     </div>
   );
 };
-
-export default CourseContext;

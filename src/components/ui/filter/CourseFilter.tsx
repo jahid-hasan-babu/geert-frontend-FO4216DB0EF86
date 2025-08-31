@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
 interface CourseFilterProps {
-  filters: string[]
-  activeFilter: string
-  onChange: (filter: string) => void
+  filters: string[];
+  activeFilter: string;
+  onChange: (filter: string) => void;
 }
 
 export default function CourseFilter({ filters, activeFilter, onChange }: CourseFilterProps) {
@@ -21,5 +21,5 @@ export default function CourseFilter({ filters, activeFilter, onChange }: Course
         </button>
       ))}
     </div>
-  )
+  );
 }

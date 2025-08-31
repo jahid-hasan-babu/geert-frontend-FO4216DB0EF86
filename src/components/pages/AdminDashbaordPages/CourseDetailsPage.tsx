@@ -64,6 +64,8 @@ const CourseDetailsPage = () => {
   const { data, isLoading } = useGetCourseByIdQuery(id)
   const [editCourse, { isLoading: isEditing }] = useEditCourseMutation()
 
+  console.log("Cousers All", data)
+
   const courseModules = course?.modules;
 	useEffect(() => {
 		if (data?.data) {

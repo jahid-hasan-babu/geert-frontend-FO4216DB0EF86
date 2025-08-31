@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -6,18 +7,24 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Bell, ChevronDown, Star, X } from "lucide-react";
-import axios from "axios";
+import { LoadingOutlined } from "@ant-design/icons";
+
 import logo from "@/assets/images/logo.png";
 import profile_dp from "@/assets/images/profile_dp.png";
-import { notificationsData } from "@/utils/dummyData";
 import NotificationModal from "@/components/ui/modals/NotificationModal";
 import { ReviewModal } from "@/components/ui/modals/ReviewModal";
 import { CourseProgressModal } from "@/components/ui/modals/CourseProgressModal";
 import { MenuModal } from "@/components/ui/modals/MenuModal";
+import { useGetNotificationsQuery } from "@/redux/features/notification/notificationsApi";
+import { useGetMeQuery } from "@/redux/features/auth/authApi";
+import {
+  useGetCourseByIdQuery,
+  useGetMyCourseProgressQuery,
+} from "@/redux/features/courses/coursesApi";
+import { Spin } from "antd";
 
 const navLinks = [
   { href: "/", label: "Home" },
-  { href: "/features", label: "Features" },
   { href: "/courses", label: "Courses" },
   { href: "/contact", label: "Contact" },
   { href: "/help-support", label: "Support" },
@@ -31,11 +38,10 @@ interface User {
   role: string;
 }
 
-interface MyCourse {
+interface Course {
+  [x: string]: any;
   id: string;
   title: string;
-  totalLessons: number;
-  completedLessons: number;
 }
 
 export default function Navbar() {
@@ -45,65 +51,30 @@ export default function Navbar() {
   const [isProgressOpen, setIsProgressOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [userData, setUserData] = useState<User | null>(null);
-  const [courseData, setCourseData] = useState<MyCourse | null>(null);
-
+  const [courseData, setCourseData] = useState<Course | null>(null);
   const pathname = usePathname();
-
-  // Fetch user data
+  const { data, isLoading } = useGetNotificationsQuery({});
+  const { data: use, isLoading: isLoadingUser } = useGetMeQuery({});
+  const courseId = pathname.split("/")[2];
+  const { data: course, isLoading: isLoadingCourse } =
+    useGetCourseByIdQuery(courseId);
+  const id = courseData?.id;
+  const { data: Progress } = useGetMyCourseProgressQuery(id);
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
+    if (use?.data) {
+      setUserData(use.data);
+    }
+  }, [use?.data]);
 
-        const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/users/me`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        if (res.data.success) setUserData(res.data.data);
-      } catch (err) {
-        console.error("Failed to fetch user:", err);
-      }
-    };
-    fetchUser();
-  }, []);
-
-  // Fetch "My Courses" and get the matching course based on pathname
   useEffect(() => {
-    const fetchCourse = async () => {
-      if (!pathname.startsWith("/courses/")) {
-        setCourseData(null);
-        return;
-      }
+    if (course?.data) {
+      setCourseData(course.data);
+    }
+  }, [course?.data]);
 
-      const courseId = pathname.split("/")[2];
-      if (!courseId) return;
+  console.log("<<Course Data>> +++", course);
 
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-
-        const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/courses/my-course`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        if (res.data.success) {
-          const courses: MyCourse[] = res.data.data.data;
-          const course = courses.find((c) => c.id === courseId);
-          setCourseData(course || null);
-        }
-      } catch (err) {
-        console.error("Failed to fetch course:", err);
-      }
-    };
-    fetchCourse();
-  }, [pathname]);
+  const notificationsData = data?.data?.data || [];
 
   const isActive = (href: string) => pathname === href;
 
@@ -114,118 +85,64 @@ export default function Navbar() {
           href="/"
           className="cursor-pointer flex items-center justify-center"
         >
-          <Image src={logo} alt="Logo" />
+          <Image src={logo || "/placeholder.svg"} alt="Logo" />
         </Link>
 
         {/* Course Page Header */}
-        {courseData ? (
-          <div className="w-full px-4 flex justify-between items-center">
-            <div className="text-[24px] font-medium font-playfairDisplay text-[#101010]">
-              {courseData.title}
-            </div>
-            <div className="flex items-center space-x-[12px]">
-              <button
-                onClick={() => setIsReviewOpen(true)}
-                className="flex items-center space-x-2 font-sans"
-              >
-                <Star className="w-5 h-5 text-gray-500" />
-                <span className="text-gray-700 font-medium leading-[120%] cursor-pointer">
-                  Leave Review
-                </span>
-              </button>
-				{/* Course Page Header */}
 
-				<>
-					
+        <>
+          <div className="flex ">
+            <ul className="hidden md:flex items-center space-x-8 font-medium font-sans">
+              {navLinks.map(({ href, label }) => (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    className={`transition-colors duration-300 ${
+                      isActive(href)
+                        ? "text-[#3399CC] font-semibold"
+                        : "text-gray-800 hover:text-[#9191c4]"
+                    }`}
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
 
-						<div className="flex "> 
-						
-					
-						<ul className="hidden md:flex items-center space-x-8 font-medium font-sans">
-							{navLinks.map(({ href, label }) => (
-								<li key={href}>
-									<Link
-										href={href}
-										className={`transition-colors duration-300 ${
-											isActive(href)
-												? "text-[#3399CC] font-semibold"
-												: "text-gray-800 hover:text-[#9191c4]"
-										}`}
-									>
-										{label}
-									</Link>
-								</li>
-							))}
-						</ul>
+            {pathname === `/courses/${courseData?.id}` ||
+            pathname === `/courses/${courseData?.id}/progress` ? (
+              <div>
+                <div className="w-full px-4 flex justify-between items-center">
+                  {isLoadingCourse && (
+                    <Spin indicator={<LoadingOutlined spin />} size="large" />
+                  )}
 
-						{
-							pathname === `/courses/${courseData?.id}` || pathname === `/courses/${courseData?.id}/progress` ? (
-								<div >
-									<div className="w-full px-4 flex justify-between items-center">
-							{isLoadingCourse && (
-								<Spin indicator={<LoadingOutlined spin />} size="large" />
-							) }
+                  <div className="flex items-center space-x-[12px]">
+                    <button
+                      onClick={() => setIsReviewOpen(true)}
+                      className="flex items-center space-x-2 font-sans"
+                    >
+                      <Star className="w-5 h-5 text-gray-500" />
+                      <span className="text-gray-700 font-medium leading-[120%] cursor-pointer">
+                        Leave Review
+                      </span>
+                    </button>
 
-							<div className="flex items-center space-x-[12px]">
-								<button
-									onClick={() => setIsReviewOpen(true)}
-									className="flex items-center space-x-2 font-sans"
-								>
-									<Star className="w-5 h-5 text-gray-500" />
-									<span className="text-gray-700 font-medium leading-[120%] cursor-pointer">
-										Leave Review
-									</span>
-								</button>
-
-              <div
-                className="flex items-center space-x-2 font-sans cursor-pointer"
-                onClick={() => setIsProgressOpen(true)}
-              >
-                <span className="text-gray-700 font-medium leading-[120%]">
-                  Your Progress
-                </span>
-                <ChevronDown className="w-6 h-6 text-gray-500" />
+                    <div
+                      className="flex items-center space-x-2 font-sans cursor-pointer"
+                      onClick={() => setIsProgressOpen(true)}
+                    >
+                      <span className="text-gray-700 font-medium leading-[120%]">
+                        Your Progress
+                      </span>
+                      <ChevronDown className="w-6 h-6 text-gray-500" />
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : null}
           </div>
-        ) : (
-          <ul className="hidden md:flex items-center space-x-8 font-medium font-sans">
-            {navLinks.map(({ href, label }) => (
-              <li key={href}>
-                <Link
-                  href={href}
-                  className={`transition-colors duration-300 ${
-                    isActive(href)
-                      ? "text-[#3399CC] font-semibold"
-                      : "text-gray-800 hover:text-[#9191c4]"
-                  }`}
-                >
-                  {label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-								<div
-									className="flex items-center space-x-2 font-sans cursor-pointer"
-									onClick={() => setIsProgressOpen(true)}
-								>
-									<span className="text-gray-700 font-medium leading-[120%]">
-										Your Progress
-									</span>
-									<ChevronDown className="w-6 h-6 text-gray-500" />
-								</div>
-							</div>
-						</div>
-								</div>
-							) : null
-						}
-						
-
-					</div>
-				
-
-				</>
+        </>
 
         {/* Right Section */}
         <div className="hidden md:flex items-center space-x-5">
@@ -238,15 +155,18 @@ export default function Navbar() {
               <span className="absolute top-2 right-2 block w-2 h-2 bg-red-500 rounded-full"></span>
             )}
           </button>
-
-          <Image
-            src={userData?.profileImage || profile_dp}
-            alt="Profile"
-            width={40}
-            height={40}
-            className="rounded-full border border-gray-200 cursor-pointer"
-            onClick={() => setIsMenuOpen((prev) => !prev)}
-          />
+          {isLoadingUser || isLoadingCourse ? (
+            <Spin indicator={<LoadingOutlined spin />} size="large" />
+          ) : (
+            <Image
+              src={userData?.profileImage || profile_dp}
+              alt="Profile"
+              width={40}
+              height={40}
+              className="rounded-full border border-gray-200 cursor-pointer"
+              onClick={() => setIsMenuOpen((prev) => !prev)}
+            />
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -280,14 +200,25 @@ export default function Navbar() {
         <div className="fixed inset-0 bg-black/20" aria-hidden="true" />
         <Dialog.Panel className="fixed inset-y-0 right-0 w-64 bg-white p-6 space-y-6 shadow-lg">
           <div className="flex justify-between items-center">
-            <Image src={logo} alt="Logo" width={120} height={36} />
+            <Image
+              src={logo || "/placeholder.svg"}
+              alt="Logo"
+              width={120}
+              height={36}
+            />
             <button onClick={() => setIsOpen(false)} aria-label="Close menu">
               <X className="w-6 h-6" />
             </button>
           </div>
 
           {courseData ? (
-            <h1 className="text-lg font-semibold">{courseData.title}</h1>
+            <div>
+              {isLoadingCourse ? (
+                <Spin indicator={<LoadingOutlined spin />} size="large" />
+              ) : (
+                <h1 className="text-lg font-semibold">{courseData?.title}</h1>
+              )}
+            </div>
           ) : (
             <ul className="flex flex-col space-y-4 text-gray-800 font-medium">
               {navLinks.map(({ href, label }) => (
@@ -318,14 +249,18 @@ export default function Navbar() {
                 <span className="absolute top-2 right-2 block w-2 h-2 bg-red-500 rounded-full"></span>
               )}
             </button>
-            <Image
-              src={userData?.profileImage || profile_dp}
-              alt="Profile"
-              width={40}
-              height={40}
-              className="rounded-full border border-gray-200 cursor-pointer"
-              onClick={() => setIsMenuOpen((prev) => !prev)}
-            />
+            {isLoadingUser || isLoadingCourse ? (
+              <Spin indicator={<LoadingOutlined spin />} size="large" />
+            ) : (
+              <Image
+                src={userData?.profileImage || profile_dp}
+                alt="Profile"
+                width={40}
+                height={40}
+                className="rounded-full border border-gray-200 cursor-pointer"
+                onClick={() => setIsMenuOpen((prev) => !prev)}
+              />
+            )}
           </div>
         </Dialog.Panel>
       </Dialog>
@@ -335,27 +270,30 @@ export default function Navbar() {
         isOpen={isNotifOpen}
         onClose={() => setIsNotifOpen(false)}
         notifications={notificationsData}
+        isLoading={isLoading}
       />
       <ReviewModal
         isOpen={isReviewOpen}
         onClose={() => setIsReviewOpen(false)}
         courseId={courseData?.id || ""}
         canReview={
-          !!courseData &&
-          courseData.completedLessons === courseData.totalLessons
+          !!Progress?.data &&
+          Progress.data.completedLessons === Progress.data.totalLessons
         }
       />
 
       <CourseProgressModal
         isOpen={isProgressOpen}
         onClose={() => setIsProgressOpen(false)}
-        current={courseData?.completedLessons || 0}
-        total={courseData?.totalLessons || 0}
+        current={Progress?.data?.completedLessons || 0}
+        total={Progress?.data?.totalLessons || 0}
       />
+
       <MenuModal
         isOpen={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
         user={userData}
+        isLoading={isLoading}
       />
     </header>
   );
