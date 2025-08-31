@@ -1,9 +1,10 @@
+
+import { useAppDispatch } from "@/redux/hooks";
 import { logoutHandler } from "@/utils/handleLogout";
 import { LogOut, MoveUpRight, UserRound } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useDispatch } from "react-redux";
 
 interface MenuItem {
   label: string;
@@ -41,8 +42,9 @@ export default function Profile01({
     },
   ];
 
+
   const router = useRouter();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const handleLogout = () => {
     logoutHandler(dispatch, router);
     window.dispatchEvent(new Event("logout"));
