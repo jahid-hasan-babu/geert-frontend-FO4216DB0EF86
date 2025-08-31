@@ -17,8 +17,8 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useGetUserQuery } from "@/redux/features/users&category/usersCategoryApi";
-import { useAddCourseStudentMutation } from "@/redux/features/courses/coursesApi";
 import { toast } from "sonner";
+import { useAddCourseStudentMutation } from "@/redux/features/courses/coursesApi";
 // import { useAddCourseToStudentMutation, useGetStudentsQuery } from "@/lib/api"; // Adjust path to your RTK Query API slice
 
 interface AddMemberModalProps {

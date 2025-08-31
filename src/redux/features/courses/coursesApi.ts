@@ -83,7 +83,16 @@ const coursesApi = baseApi.injectEndpoints({
       }),
       providesTags: ["courses"],
     }),
+    addCourseStudent: builder.mutation({
+      query: ({ courseId, email }) => ({
+        url: `/courses/add-student`,
+        method: "POST",
+        body: { courseId, email },
+      }),
+      invalidatesTags: ["courses"],
   }),
+  }),
+ 
 });
 
 export const {
@@ -96,4 +105,5 @@ export const {
   useAddCourseModuleMutation,
   useAddCourseLessonMutation,
   useGetMyCourseProgressQuery,
+  useAddCourseStudentMutation,
 } = coursesApi;
