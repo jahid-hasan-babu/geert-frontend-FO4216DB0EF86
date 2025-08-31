@@ -12,6 +12,7 @@ import {
   LessonsItem,
 } from "@/components/ui/context/CourseContext";
 import axios, { AxiosError } from "axios";
+import { Spin } from "antd";
 
 // ---------------- Types ----------------
 export interface Instructor {
@@ -65,6 +66,17 @@ interface ModuleFromAPI {
   locked?: boolean;
 }
 
+interface ReviewFromCourse {
+  id: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  user?: {
+    id: string;
+    username: string;
+  };
+}
+
 interface CourseFromAPI {
   _id?: string;
   id?: string;
@@ -74,20 +86,7 @@ interface CourseFromAPI {
   isMicroLearning?: boolean;
   instructor?: Instructor;
   modules?: ModuleFromAPI[];
-}
-
-interface Review {
-  id: string;
-  rating: number;
-  comment: string;
-  createdAt: string;
-  course: {
-    id: string;
-    title: string;
-    coverImage: string;
-    avgRating: number;
-    totalRaters: number;
-  };
+  Review?: ReviewFromCourse[];
 }
 
 interface CourseDetailsPageProps {
@@ -96,9 +95,7 @@ interface CourseDetailsPageProps {
 
 export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
   const [course, setCourse] = useState<CourseFromAPI | null>(null);
-  const [reviews, setReviews] = useState<Review[]>([]);
   const [loadingCourse, setLoadingCourse] = useState(true);
-  const [loadingReviews, setLoadingReviews] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Fetch course
@@ -126,33 +123,12 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
     fetchCourse();
   }, [slug]);
 
-  // Fetch reviews
-  useEffect(() => {
-    const fetchReviews = async () => {
-      if (!course) return;
-
-      try {
-        setLoadingReviews(true);
-        const token = localStorage.getItem("token");
-        const { data } = await axios.get<{ data: Review[] }>(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/reviews/my-reviews`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        const courseId = course._id || course.id || "";
-        const filtered = data.data.filter((r) => r.course.id === courseId);
-        setReviews(filtered);
-      } catch (err) {
-        console.error("Error fetching reviews:", err);
-      } finally {
-        setLoadingReviews(false);
-      }
-    };
-
-    fetchReviews();
-  }, [course]);
-
-  if (loadingCourse) return <p className="text-center py-10">Loading course...</p>;
+  if (loadingCourse)
+  return (
+    <div className="flex justify-center items-center py-10">
+      <Spin size="large" tip="Loading course..." />
+    </div>
+  );
   if (error) return <p className="text-center py-10 text-red-500">{error}</p>;
   if (!course) return <p className="text-center py-10">Course not found</p>;
   if (!course.instructor) return <p className="text-center py-10">Instructor not found</p>;
@@ -160,6 +136,7 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
   const courseId = course._id || course.id || "";
 
   // ---------------- Modules Mapping ----------------
+  console.log("Course >><<", course);
   const modules: Module[] =
     course.modules?.map((m) => {
       const lessons: LessonsItem[] = m.lessons.map((l) => ({
@@ -195,6 +172,8 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
       };
     }) || [];
 
+    console.log("Modules >><<", modules);
+
   return (
     <CourseProvider modules={modules}>
       <div className="container">
@@ -219,7 +198,7 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
                       ))}
                     </div>
                     <span className="text-gray-700 font-medium text-[14px]">
-                      {course.rating} ({reviews.length})
+                      {course.rating} ({course.Review?.length || 0})
                     </span>
                   </div>
 
@@ -236,21 +215,17 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
                 </div>
               </div>
 
-              {loadingReviews ? (
-                <p className="text-center py-4">Loading reviews...</p>
-              ) : (
-                <CourseReviewAbout
-                  description={course.description}
-                  instructor={course.instructor}
-                  reviews={reviews.map((r) => ({
-                    id: r.id,
-                    text: r.comment,
-                    rating: r.rating,
-                    date: new Date(r.createdAt).toLocaleDateString(),
-                    author: "You",
-                  }))}
-                />
-              )}
+              <CourseReviewAbout
+                description={course.description}
+                instructor={course.instructor}
+                reviews={course.Review?.map((r) => ({
+                  id: r.id,
+                  text: r.comment,
+                  rating: r.rating,
+                  date: new Date(r.createdAt).toLocaleDateString(),
+                  author: r.user?.username || "Anonymous",
+                })) || []}
+              />
             </div>
 
             <div className="lg:col-span-1">

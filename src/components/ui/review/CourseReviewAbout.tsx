@@ -28,6 +28,11 @@ interface Props {
   reviews: Review[];
 }
 
+const stripHtml = (html: string) => {
+  if (!html) return "";
+  return html.replace(/<[^>]+>/g, ""); // remove all HTML tags
+};
+
 export default function CourseReviewAbout({
   description,
   instructor,
@@ -68,14 +73,17 @@ export default function CourseReviewAbout({
       {/* Tab Content */}
       {activeTab === "about" ? (
         <div>
-          {/* Course Description */}
           <div className="bg-white rounded-lg p-4">
             <p className="text-gray-700 leading-relaxed mb-2">
-              {showFullDescription ? description : shortDescription}
-              {description.length > 260 && (
+              <div>
+                {showFullDescription
+                  ? stripHtml(description)
+                  : stripHtml(shortDescription)}
+              </div>
+              {stripHtml(description).length > 260 && (
                 <button
                   onClick={() => setShowFullDescription(!showFullDescription)}
-                  className="text-sky-500 hover:text-sky-600 font-medium ml-1"
+                  className="text-sky-500 hover:text-sky-600 font-medium ml-1 cursor-pointer"
                 >
                   {showFullDescription ? " Read Less" : " ... Read More"}
                 </button>
@@ -98,7 +106,9 @@ export default function CourseReviewAbout({
             </div>
             <div>
               <p className="text-sm text-gray-600">Instructor</p>
-              <p className="font-semibold text-gray-900">{instructor?.username}</p>
+              <p className="font-semibold text-gray-900">
+                {instructor?.username}
+              </p>
             </div>
           </div>
         </div>
@@ -121,7 +131,9 @@ export default function CourseReviewAbout({
                         <span
                           key={i}
                           className={`text-sm ${
-                            i < review?.rating ? "text-yellow-400" : "text-gray-300"
+                            i < review?.rating
+                              ? "text-yellow-400"
+                              : "text-gray-300"
                           }`}
                         >
                           ★

@@ -80,6 +80,8 @@ const CourseDetailsPage = () => {
   const [editCourse, { isLoading: isEditing }] = useEditCourseMutation();
   console.log(course, "couser all data");
 
+  console.log("Cousers All", data)
+
   const courseModules = course?.modules;
   useEffect(() => {
     if (data?.data) {
