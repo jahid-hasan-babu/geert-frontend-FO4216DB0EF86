@@ -86,7 +86,7 @@ const CourseVideoPlayer: React.FC<CourseVideoPlayerProps> = ({ courseId }) => {
   if (!currentLesson) {
     return (
       <div className="w-full h-64 flex items-center justify-center border rounded-lg bg-gray-100 text-gray-500">
-        No lesson selected
+        To continue, please purchase this course! Contact Admin.
       </div>
     );
   }
