@@ -33,7 +33,7 @@ export default function Hero() {
             </Link>
 
             {/* Social Proof */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 mt-3">
               <div className="flex -space-x-2">
                 <Image src={hero_learners_1} alt="hero_trusted"></Image>
                 <Image src={hero_learners_2} alt="hero_trusted"></Image>
