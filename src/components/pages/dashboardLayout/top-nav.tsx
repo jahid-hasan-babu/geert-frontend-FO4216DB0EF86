@@ -2,7 +2,6 @@
 
 import { DropdownMenu, DropdownMenuTrigger } from "./dropdown-menu";
 import Image from "next/image";
-import NotificationDetails from "./NotificationDetails";
 import { usePathname } from "next/navigation";
 
 export default function TopNav() {
@@ -40,13 +39,13 @@ export default function TopNav() {
   };
 
   return (
-    <nav className="px-3 sm:px-6 flex items-center justify-between bg-white h-full">
+    <nav className="px-3 sm:px-12 flex items-center justify-between bg-white h-full">
       <div className="font-medium text-2xl hidden lg:flex truncate max-w-[300px]">
         {getPageTitle()}
       </div>
 
       <div className="flex items-center gap-2 ml-auto lg:ml-0">
-        <NotificationDetails />
+        {/* <NotificationDetails /> */}
 
         <DropdownMenu>
           <DropdownMenuTrigger className="focus:outline-none">

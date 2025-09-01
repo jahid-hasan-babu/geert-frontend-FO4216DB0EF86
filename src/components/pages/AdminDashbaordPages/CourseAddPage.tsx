@@ -28,6 +28,7 @@ import Editor from "../../ui/Editor/Editor";
 import CourseModuleAdd from "./CourseModuleAdd";
 import { Spin } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
+import { useRouter } from "next/navigation";
 
 type QuizOption = {
   text: string;
@@ -76,6 +77,7 @@ type Instructor = {
 };
 
 export default function CourseAddPage() {
+  const router = useRouter();
   const pathname = usePathname();
   const isMicroLearning =
     pathname === "/dashboard/micro-learning/add-microLearning";
@@ -195,7 +197,6 @@ export default function CourseAddPage() {
             ]);
             return false;
           }
-          
         }
       }
 
@@ -221,8 +222,21 @@ export default function CourseAddPage() {
 
       // Convert duration to seconds helper function
       const convertDurationToSeconds = (duration: string): number => {
-        const minutes = Number.parseInt(duration.replace(/\D/g, "")) || 2;
-        return minutes * 60;
+        const parts = duration.split(":").map((p) => parseInt(p, 10) || 0);
+        let seconds = 0;
+
+        if (parts.length === 3) {
+          // HH:MM:SS
+          seconds = parts[0] * 3600 + parts[1] * 60 + parts[2];
+        } else if (parts.length === 2) {
+          // MM:SS
+          seconds = parts[0] * 60 + parts[1];
+        } else if (parts.length === 1) {
+          // Only seconds
+          seconds = parts[0];
+        }
+
+        return seconds;
       };
 
       const bodyData = {
@@ -239,13 +253,15 @@ export default function CourseAddPage() {
             type: lesson.lessonType,
             title: lesson.lessonTitle,
             description: lesson.lessonDescription || lesson.lessonTitle,
-        duration: (lesson.lessonType === "video" ? lesson.lessonDuration : "00:00"),
-        durationSecs: (
-          lesson.lessonType === "video" ? convertDurationToSeconds(lesson.lessonDuration) : 0
-        ),
-      })),
-			quizzes: mod.quizzes.map((quiz) => ({
-				title: quiz.title,
+            duration:
+              lesson.lessonType === "video" ? lesson.lessonDuration : "00:00",
+            durationSecs:
+              lesson.lessonType === "video"
+                ? convertDurationToSeconds(lesson.lessonDuration)
+                : 0,
+          })),
+          quizzes: mod.quizzes.map((quiz) => ({
+            title: quiz.title,
             questions: quiz.questions.map((question) => ({
               text: question.text,
               type: question.type,
@@ -262,19 +278,14 @@ export default function CourseAddPage() {
         })),
       };
 
-      console.log(
-        "[v0] Course data structure:",
-        JSON.stringify(bodyData, null, 2)
-      );
       formData.append("bodyData", JSON.stringify(bodyData));
 
       // Add cover image
       if (coverImageFile) {
         formData.append("coverImage", coverImageFile);
-        console.log("[v0] Cover image added:", coverImageFile.name);
       }
 
-      // Collect all video files with metadata
+      // Collect all video files and metadata
       const videoFiles: File[] = [];
       const videoMetadata: any[] = [];
 
@@ -291,44 +302,30 @@ export default function CourseAddPage() {
               moduleTitle: module.moduleTitle,
               duration: lesson.lessonDuration,
             });
-            console.log("[v0] Adding video file:", lesson.lessonVideoFile.name);
           }
         });
       });
 
-      // Add all video files
-      videoFiles.forEach((file, index) => {
-        formData.append("videoUrl", file);
-        console.log(
-          "[v0] Video file",
-          index + 1,
-          ":",
-          file.name,
-          "size:",
-          file.size
-        );
-      });
+      // Add video files to FormData
+      videoFiles.forEach((file) => formData.append("videoUrl", file));
 
       // Add video metadata
       if (videoMetadata.length > 0) {
         formData.append("videoMetadata", JSON.stringify(videoMetadata));
-        console.log("[v0] Video metadata:", videoMetadata);
       }
 
-      console.log("[v0] Total files in FormData:");
-      console.log("[v0] - Cover image:", coverImageFile ? "Yes" : "No");
-      console.log("[v0] - Video files:", videoFiles.length);
-      console.log(
-        "[v0] - Total FormData entries:",
-        Array.from(formData.entries()).length
-      );
-
+      // Call API
       const result = await addMicroLearning({ formData }).unwrap();
-      console.log("[v0] Course creation successful:", result);
+      console.log("Course creation successful:", result);
 
-      toast("Success! Course created successfully!");
+      // ✅ Redirect to course details page
+      const createdCourseId = result?.data?.id; // adjust if your API returns ID differently
+      if (createdCourseId) {
+        router.push(`/dashboard/course/${createdCourseId}`);
+        return; // stop further execution
+      }
 
-      // Reset form
+      // Reset form (optional if redirect happens immediately)
       setCourseData({
         title: "",
         description: "",
@@ -357,11 +354,9 @@ export default function CourseAddPage() {
       setCoverImageName("");
       setValidationErrors([]);
     } catch (err: any) {
-      console.log("[v0] Error creating course:", err);
+      console.log("Error creating course:", err);
       const errorMessage =
         err?.data?.message || err?.message || "Unknown error occurred";
-      console.log(errorMessage);
-
       toast(`Error: Failed to create course: ${errorMessage}`);
     }
   };
@@ -488,19 +483,12 @@ export default function CourseAddPage() {
                   maxLength={5}
                   onChange={(e) => {
                     let value = e.target.value;
-
-                    // Allow only numbers and colon
                     value = value.replace(/[^\d:]/g, "");
-
-                    // Auto-add colon after 2 digits if missing
                     if (value.length === 2 && !value.includes(":")) {
                       value = value + ":";
                     }
-
-                    // Limit length to HH:MM
                     if (value.length > 5) value = value.slice(0, 5);
 
-                    // Update duration string
                     handleInputChange("duration", value);
 
                     // Convert to seconds
@@ -562,7 +550,7 @@ export default function CourseAddPage() {
               onValueChange={(value) => {
                 // Find the selected instructor
                 const selectedInstructor = instructors.find(
-                  (ins: { id: string; }) => ins.id === value
+                  (ins: { id: string }) => ins.id === value
                 );
 
                 // Update both instructor ID and email
@@ -597,7 +585,7 @@ export default function CourseAddPage() {
               Instructor Email *
             </label>
             <Input
-			disabled
+              disabled
               type="email"
               placeholder="Write here"
               value={courseData.instructorEmail}

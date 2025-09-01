@@ -68,11 +68,11 @@ export default function Profile01() {
               <Image
                 src={profile.avatar}
                 alt={profile.name}
-                width={72}
-                height={72}
-                className="rounded-full ring-4 ring-white object-cover"
+                width={28}
+                height={28}
+                className="rounded-full ring-2 ring-gray-200 dark:ring-[#2B2B30] sm:w-9 sm:h-9 cursor-pointer"
               />
-              <div className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-emerald-500 ring-2 ring-white" />
+              {/* <div className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-emerald-500 ring-2 ring-white" /> */}
             </div>
 
             {/* Profile Info */}

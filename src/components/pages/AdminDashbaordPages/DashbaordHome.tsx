@@ -162,7 +162,7 @@ export default function DashboardHome() {
             </div>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={chartConfig} className="h-[80%] w-full">
+            <ChartContainer config={chartConfig} className="h-96 w-full">
               <AreaChart data={performanceData}>
                 <defs>
                   <linearGradient id="fillArea" x1="0" y1="0" x2="0" y2="1">

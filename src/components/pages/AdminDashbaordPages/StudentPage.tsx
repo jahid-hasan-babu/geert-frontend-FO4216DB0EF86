@@ -5,8 +5,7 @@ import { Search, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { LoadingOutlined } from '@ant-design/icons';
-
+import { LoadingOutlined } from "@ant-design/icons";
 import {
   Table,
   TableBody,
@@ -51,7 +50,6 @@ export default function StudentsPage() {
       setStudents(res.data.data.data);
     } catch (error) {
       const err = error as AxiosError<{ message: string }>;
-      console.error(err);
       toast.error(err.response?.data?.message || "Failed to load students");
     } finally {
       setLoading(false);
@@ -64,21 +62,39 @@ export default function StudentsPage() {
 
   const filteredStudents = students.filter(
     (student) =>
-      (student.username || "")
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
+      (student.username || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
   const startIndex = (currentPage - 1) * studentsPerPage;
-  const currentStudents = filteredStudents.slice(
-    startIndex,
-    startIndex + studentsPerPage
-  );
+  const currentStudents = filteredStudents.slice(startIndex, startIndex + studentsPerPage);
 
   const formatSerialNo = (index: number) =>
     String(startIndex + index + 1).padStart(2, "0");
+
+  // **Parent handles adding student**
+  const handleAddStudent = async (data: { firstName: string; lastName: string; email: string }) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/users/add-student`,
+        data,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (res.data.success) {
+        toast.success("Student added successfully!");
+        fetchStudents(); // Refresh list
+      } else {
+        toast.error(res.data.message || "Failed to add student");
+      }
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>;
+      toast.error(err.response?.data?.message || "Failed to add student");
+      throw err; // rethrow to handle in modal
+    }
+  };
 
   const changeStatus = async (student: Student, status: "ACTIVE" | "BLOCKED") => {
     try {
@@ -117,7 +133,8 @@ export default function StudentsPage() {
               className="pl-10"
             />
           </div>
-          <AddStudentModal onAddSuccess={fetchStudents} />
+          {/* Pass parent handler */}
+          <AddStudentModal onAdd={handleAddStudent} />
         </div>
 
         <div className="bg-white rounded-lg border mb-3 lg:mb-10">
@@ -143,7 +160,6 @@ export default function StudentsPage() {
                 currentStudents.map((student, index) => (
                   <TableRow key={student.id} className="hover:bg-gray-50">
                     <TableCell className="font-medium">{formatSerialNo(index)}</TableCell>
-
                     <TableCell>
                       <div className="flex items-center space-x-3">
                         {student.profileImage ? (
@@ -162,10 +178,8 @@ export default function StudentsPage() {
                         <span className="font-medium">{student.username || "Unnamed"}</span>
                       </div>
                     </TableCell>
-
                     <TableCell className="text-gray-600">{student.email}</TableCell>
                     <TableCell className="text-gray-600">{student.phone || "—"}</TableCell>
-
                     <TableCell>
                       <Badge
                         className={
@@ -177,16 +191,10 @@ export default function StudentsPage() {
                         {student.status}
                       </Badge>
                     </TableCell>
-
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="w-8 h-8 cursor-pointer"
-                            title="Change Status"
-                          >
+                          <Button variant="ghost" size="icon" className="w-8 h-8 cursor-pointer" title="Change Status">
                             <MoreVertical className="w-4 h-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -218,11 +226,7 @@ export default function StudentsPage() {
         </div>
 
         {totalPages > 1 && (
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onChange={setCurrentPage}
-          />
+          <Pagination currentPage={currentPage} totalPages={totalPages} onChange={setCurrentPage} />
         )}
       </div>
     </div>

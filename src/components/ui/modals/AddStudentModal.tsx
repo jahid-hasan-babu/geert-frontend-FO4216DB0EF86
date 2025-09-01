@@ -1,67 +1,50 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
-import { useAddStudentMutation } from "@/redux/features/auth/authApi";
+import { Plus } from "lucide-react";
 
 interface AddStudentModalProps {
-  onAddSuccess: () => void;
+  onAdd: (student: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  }) => Promise<void>;
 }
 
-export default function AddStudentModal({ onAddSuccess }: AddStudentModalProps) {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
+export default function AddStudentModal({ onAdd }: AddStudentModalProps) {
+  const [open, setOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+  });
   const [loading, setLoading] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
 
-  const [addStudent, { isLoading, error }] = useAddStudentMutation();
-
-  const handleSave = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
     try {
-      const studentInfo = { firstName, lastName, email };
-      await addStudent(studentInfo).unwrap();
-      toast.success("Student added successfully!");
-      setFirstName("");
-      setLastName("");
-      setEmail("");
-      setIsOpen(false);
-      onAddSuccess();
+      await onAdd(formData);
+      setFormData({ firstName: "", lastName: "", email: "" });
+      setOpen(false);
     } catch {
-      let errorMessage = "Failed to add student.";
-      if (
-        error &&
-        typeof error === "object" &&
-        "data" in error &&
-        error.data &&
-        typeof error.data === "object" &&
-        "message" in error.data
-      ) {
-        errorMessage = (error.data as { message?: string }).message || errorMessage;
-      } else if (error && typeof error === "object" && "message" in error) {
-        errorMessage = (error as { message?: string }).message || errorMessage;
-      }
-      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="bg-[#3399CC] hover:bg-[#3399CC] text-white cursor-pointer">
           <Plus className="w-4 h-4 mr-2" />
@@ -72,25 +55,27 @@ export default function AddStudentModal({ onAddSuccess }: AddStudentModalProps) 
         <DialogHeader>
           <DialogTitle>Add Student</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
+        <form onSubmit={handleSubmit} className="grid gap-4 py-4">
           <div className="grid gap-2">
             <Label htmlFor="firstName">First Name</Label>
             <Input
               id="firstName"
-              type="text"
-              placeholder="Enter first name"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
+              value={formData.firstName}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, firstName: e.target.value }))
+              }
+              required
             />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="lastName">Last Name</Label>
             <Input
               id="lastName"
-              type="text"
-              placeholder="Enter last name"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
+              value={formData.lastName}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, lastName: e.target.value }))
+              }
+              required
             />
           </div>
           <div className="grid gap-2">
@@ -98,21 +83,21 @@ export default function AddStudentModal({ onAddSuccess }: AddStudentModalProps) 
             <Input
               id="email"
               type="email"
-              placeholder="student@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={formData.email}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, email: e.target.value }))
+              }
+              required
             />
           </div>
-        </div>
-        <DialogFooter>
           <Button
-            onClick={handleSave}
-            className="bg-sky-500 hover:bg-sky-600"
-            disabled={loading || isLoading}
+            type="submit"
+            className="w-full bg-sky-500 hover:bg-sky-600"
+            disabled={loading}
           >
-            {loading || isLoading ? "Saving..." : "Save"}
+            {loading ? "Saving..." : "Save"}
           </Button>
-        </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

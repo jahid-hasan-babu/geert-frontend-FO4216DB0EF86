@@ -17,8 +17,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Calendar, MapPin, Upload } from "lucide-react";
+import { MapPin, Upload } from "lucide-react";
 import axios from "axios";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 interface PersonalInfoModalProps {
   isOpen: boolean;
@@ -135,7 +137,10 @@ export function PersonalInfoModal({
 
           {/* Email */}
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+            <Label
+              htmlFor="email"
+              className="text-sm font-medium text-gray-700"
+            >
               Email
             </Label>
             <Input
@@ -149,7 +154,10 @@ export function PersonalInfoModal({
 
           {/* Phone */}
           <div className="space-y-2">
-            <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
+            <Label
+              htmlFor="phone"
+              className="text-sm font-medium text-gray-700"
+            >
               Phone
             </Label>
             <Input
@@ -162,7 +170,10 @@ export function PersonalInfoModal({
 
           {/* Address */}
           <div className="space-y-2">
-            <Label htmlFor="address" className="text-sm font-medium text-gray-700">
+            <Label
+              htmlFor="address"
+              className="text-sm font-medium text-gray-700"
+            >
               Address
             </Label>
             <div className="relative">
@@ -204,22 +215,35 @@ export function PersonalInfoModal({
           {/* Birth Date & Gender */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="birthDate" className="text-sm font-medium text-gray-700">
+              <Label
+                htmlFor="birthDate"
+                className="text-sm font-medium text-gray-700"
+              >
                 Date of Birth
               </Label>
-              <div className="relative">
-                <Input
-                  id="birthDate"
-                  placeholder="Select Date"
-                  value={formData.birthDate}
-                  onChange={(e) => handleInputChange("birthDate", e.target.value)}
-                  className="w-full pr-10"
-                />
-                <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              </div>
+              <DatePicker
+                selected={
+                  formData.birthDate ? new Date(formData.birthDate) : null
+                }
+                onChange={(date: Date | null) =>
+                  handleInputChange(
+                    "birthDate",
+                    date ? date.toISOString().split("T")[0] : ""
+                  )
+                }
+                dateFormat="yyyy-MM-dd"
+                placeholderText="Select Date"
+                className="w-full border rounded-lg px-3 py-2"
+                maxDate={new Date()}
+                showMonthDropdown
+                showYearDropdown
+                dropdownMode="select"
+              />
             </div>
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Gender</Label>
+              <Label className="text-sm font-medium text-gray-700">
+                Gender
+              </Label>
               <Select
                 value={formData.gender}
                 onValueChange={(value) => handleInputChange("gender", value)}
@@ -231,7 +255,9 @@ export function PersonalInfoModal({
                   <SelectItem value="Male">Male</SelectItem>
                   <SelectItem value="Female">Female</SelectItem>
                   <SelectItem value="Other">Other</SelectItem>
-                  <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
+                  <SelectItem value="Prefer not to say">
+                    Prefer not to say
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>

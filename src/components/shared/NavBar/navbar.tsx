@@ -6,7 +6,7 @@ import { Dialog } from "@headlessui/react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Bell, ChevronDown, Star, X } from "lucide-react";
+import { Bell,Star, X } from "lucide-react";
 import { LoadingOutlined } from "@ant-design/icons";
 
 import logo from "@/assets/images/logo.png";
@@ -109,15 +109,15 @@ export default function Navbar() {
             {pathname === `/courses/${courseData?.id}` ||
             pathname === `/courses/${courseData?.id}/progress` ? (
               <div>
-                <div className="w-full px-4 flex justify-between items-center">
+                <div className="w-full px-4 flex justify-between items-center ml-1">
                   {isLoadingCourse && (
                     <Spin indicator={<LoadingOutlined spin />} size="large" />
                   )}
 
-                  <div className="flex items-center space-x-[12px]">
+                  <div className="flex items-center space-x-[16px]">
                     <button
                       onClick={() => setIsReviewOpen(true)}
-                      className="flex items-center space-x-2 font-sans"
+                      className="flex items-center space-x-[2px] font-sans"
                     >
                       <Star className="w-5 h-5 text-gray-500" />
                       <span className="text-gray-700 font-medium leading-[120%] cursor-pointer">
@@ -126,13 +126,12 @@ export default function Navbar() {
                     </button>
 
                     <div
-                      className="flex items-center space-x-2 font-sans cursor-pointer"
+                      className="font-sans cursor-pointer"
                       onClick={() => setIsProgressOpen(true)}
                     >
                       <span className="text-gray-700 font-medium leading-[120%]">
                         Your Progress
                       </span>
-                      <ChevronDown className="w-6 h-6 text-gray-500" />
                     </div>
                   </div>
                 </div>

@@ -34,7 +34,7 @@ export default function AddInstructorModal({ onAdd }: AddInstructorModalProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onAdd(formData);
-    setOpen(false); // close modal
+    setOpen(false);
     setFormData({ username: "", email: "", designation: "", image: null });
   };
 
