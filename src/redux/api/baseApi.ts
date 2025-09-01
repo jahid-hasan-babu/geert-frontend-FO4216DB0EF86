@@ -10,8 +10,11 @@ import { logout, setUser } from "../features/auth/authSlice";
 import Swal from "sweetalert2";
 import { signOut } from "next-auth/react";
 
+// ✅ Define base URL once
+const BASE_URL = "https://api.mijnvmta.nl/api/v1";
+
 const baseQuery = fetchBaseQuery({
-  baseUrl: process.env.NEXT_PUBLIC_BASE_URL,
+  baseUrl: BASE_URL,
   // credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const access_token = (getState() as RootState).auth.access_token;
@@ -34,28 +37,14 @@ const baseQueryWithRefreshToken: BaseQueryFn<
     try {
       const refreshToken = (api.getState() as RootState).auth.refresh_token;
 
-      // if (!refreshToken) {
-      //   api.dispatch(logout());
-      //   Swal.fire({
-      //     icon: "error",
-      //     title: "Session Expired",
-      //     text: "Please login again to continue",
-      //   });
-      //   return result;
-      // }
-
-      // Make a request to refresh the token
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}refresh-token`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            authorization: `Bearer ${refreshToken}`,
-          },
-        }
-      );
+      const res = await fetch(`${BASE_URL}/refresh-token`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${refreshToken}`,
+        },
+      });
 
       const data = await res.json();
       if (data?.success) {
@@ -78,8 +67,7 @@ const baseQueryWithRefreshToken: BaseQueryFn<
           if (result.isConfirmed) {
             api.dispatch(logout());
             signOut();
-          }
-          else if (result.isDismissed) {
+          } else if (result.isDismissed) {
             api.dispatch(logout());
             signOut();
           }
@@ -96,8 +84,6 @@ const baseQueryWithRefreshToken: BaseQueryFn<
 export const baseApi = createApi({
   reducerPath: "baseApi",
   baseQuery: baseQueryWithRefreshToken,
-  tagTypes: [
-    "user", "courses", "category", "notification", "example"
-  ],
+  tagTypes: ["user", "courses", "category", "notification", "example"],
   endpoints: () => ({}),
 });
