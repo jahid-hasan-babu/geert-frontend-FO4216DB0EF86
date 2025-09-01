@@ -19,7 +19,7 @@ interface LanguageOption {
 
 const LANGUAGES: LanguageOption[] = [
 	{ code: "en", name: "English", nativeName: "English" },
-	{ code: "de", name: "German", nativeName: "Deutsch" },
+	{ code: "nl", name: "Dutch", nativeName: "Dutch" },
 ];
 
 export const LanguageSwitcher: React.FC = () => {
