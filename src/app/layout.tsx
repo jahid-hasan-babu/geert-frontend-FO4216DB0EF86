@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import MyContextProvider from "@/lib/MyContextProvider";
-import SessionProviderForNextAuth from "@/nextAuth/SessionProviderForNextAuth";
 import ReduxStoreProvider from "@/redux/ReduxStoreProvider";
 import { Toaster } from "sonner";
 
@@ -39,12 +38,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${playfairDisplay.variable} antialiased`}
       >
         <MyContextProvider>
-          <SessionProviderForNextAuth>
             <ReduxStoreProvider>
               <Toaster />
               {children}
             </ReduxStoreProvider>
-          </SessionProviderForNextAuth>
         </MyContextProvider>
       </body>
     </html>
