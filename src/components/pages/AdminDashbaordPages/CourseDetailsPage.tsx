@@ -414,7 +414,7 @@ const handleAddSuccess = () => {
             </AccordionItem>
           ))}
 
-          <AccordionItem
+          {/* <AccordionItem
             value="certification"
             className="border border-gray-200 rounded-lg"
           >
@@ -429,7 +429,7 @@ const handleAddSuccess = () => {
                 quizzes.
               </p>
             </AccordionContent>
-          </AccordionItem>
+          </AccordionItem> */}
         </Accordion>
       </div>
 

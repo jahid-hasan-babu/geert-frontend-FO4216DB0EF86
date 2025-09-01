@@ -8,65 +8,61 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { useGetUserQuery } from "@/redux/features/users&category/usersCategoryApi";
 import { toast } from "sonner";
 import { useAddCourseStudentMutation } from "@/redux/features/courses/coursesApi";
-// import { useAddCourseToStudentMutation, useGetStudentsQuery } from "@/lib/api"; // Adjust path to your RTK Query API slice
+import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 
 interface AddMemberModalProps {
   courseId: string;
   onAddSuccess: () => void;
 }
 
-interface Student {
-  name: string;
-  email: string;
+interface AddCourseStudentResponse {
+  success: boolean;
+  message?: string;
 }
 
 export default function AddMemberModal({ courseId, onAddSuccess }: AddMemberModalProps) {
   const [open, setOpen] = useState(false);
-  const [selectedEmail, setSelectedEmail] = useState("");
+  const [email, setEmail] = useState("");
   const [error, setError] = useState("");
 
-  // RTK Query hook to fetch students
-  const { data, isLoading: isStudentsLoading, error: studentsError } =
-      useGetUserQuery({ filter: "STUDENT" });
-      const students = data?.data?.data 
-  // RTK Query hook to add a student to a course
   const [addCourseToStudent, { isLoading: isAdding }] = useAddCourseStudentMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedEmail) {
-      setError("Please select a student");
+    if (!email) {
+      setError("Please enter a student email");
       return;
     }
+
     try {
-     const res =  await addCourseToStudent({
-        email: selectedEmail,
-        courseId,
-      }).unwrap();
+      const res: AddCourseStudentResponse = await addCourseToStudent({ email, courseId }).unwrap();
 
       if (res.success) {
-        toast.success("Student added to course successfully");
+        toast.success(res.message || "Student added to course successfully");
         setError("");
-        return;
+        setEmail("");
+        setOpen(false);
+        onAddSuccess?.();
       }
-      setSelectedEmail("");
-      setOpen(false);
-      onAddSuccess?.(); // Trigger success callback
     } catch (err) {
       console.error(err);
-      setError("Failed to add student to course");
-      toast.error("Failed to add student to course");
+
+      let message = "Failed to add student to course";
+
+      if ((err as FetchBaseQueryError)?.status) {
+        const fetchErr = err as FetchBaseQueryError;
+        if ("data" in fetchErr && fetchErr.data && typeof fetchErr.data === "object") {
+          message = (fetchErr.data as { message?: string }).message || message;
+        }
+      } else if (err instanceof Error) {
+        message = err.message;
+      }
+
+      setError(message);
+      toast.error(message);
     }
   };
 
@@ -82,44 +78,23 @@ export default function AddMemberModal({ courseId, onAddSuccess }: AddMemberModa
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="student" className="text-right">
-                Student
+              <Label htmlFor="email" className="text-right">
+                Student Email
               </Label>
-              <Select
-                value={selectedEmail}
-                onValueChange={setSelectedEmail}
-                disabled={isStudentsLoading || isAdding}
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select a student" />
-                </SelectTrigger>
-                <SelectContent>
-                  {isStudentsLoading ? (
-                    <SelectItem value="loading" disabled>
-                      Loading students...
-                    </SelectItem>
-                  ) : studentsError ? (
-                    <SelectItem value="error" disabled>
-                      Error loading students
-                    </SelectItem>
-                  ) : students && students.length > 0 ? (
-                    students.map((student: Student) => (
-                      <SelectItem key={student.email} value={student.email}>
-                        {student.name} ({student.email})
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="no-students" disabled>
-                      No students found
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter student email"
+                className="col-span-3 border rounded px-2 py-1"
+                disabled={isAdding}
+              />
             </div>
             {error && <p className="text-red-500 text-sm">{error}</p>}
           </div>
           <div className="flex justify-end">
-            <Button type="submit" disabled={isAdding || isStudentsLoading}>
+            <Button type="submit" disabled={isAdding}>
               {isAdding ? "Adding..." : "Add Member"}
             </Button>
           </div>

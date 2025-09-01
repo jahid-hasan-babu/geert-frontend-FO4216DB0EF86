@@ -10,7 +10,6 @@ import { Bell, ChevronDown, Star, X } from "lucide-react";
 import { LoadingOutlined } from "@ant-design/icons";
 
 import logo from "@/assets/images/logo.png";
-import profile_dp from "@/assets/images/profile_dp.png";
 import NotificationModal from "@/components/ui/modals/NotificationModal";
 import { ReviewModal } from "@/components/ui/modals/ReviewModal";
 import { CourseProgressModal } from "@/components/ui/modals/CourseProgressModal";
@@ -88,8 +87,6 @@ export default function Navbar() {
           <Image src={logo || "/placeholder.svg"} alt="Logo" />
         </Link>
 
-        {/* Course Page Header */}
-
         <>
           <div className="flex ">
             <ul className="hidden md:flex items-center space-x-8 font-medium font-sans">
@@ -159,7 +156,7 @@ export default function Navbar() {
             <Spin indicator={<LoadingOutlined spin />} size="large" />
           ) : (
             <Image
-              src={userData?.profileImage || profile_dp}
+              src={userData?.profileImage || `https://cdn-icons-png.flaticon.com/512/3135/3135715.png`}
               alt="Profile"
               width={40}
               height={40}
@@ -253,7 +250,7 @@ export default function Navbar() {
               <Spin indicator={<LoadingOutlined spin />} size="large" />
             ) : (
               <Image
-                src={userData?.profileImage || profile_dp}
+                src={userData?.profileImage || `https://cdn-icons-png.flaticon.com/512/3135/3135715.png`}
                 alt="Profile"
                 width={40}
                 height={40}

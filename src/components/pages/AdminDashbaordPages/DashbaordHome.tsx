@@ -143,7 +143,7 @@ export default function DashboardHome() {
         </div>
 
         {/* Performance Chart */}
-        <Card>
+        <Card className="bg-red-500">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-xl font-semibold text-gray-900">

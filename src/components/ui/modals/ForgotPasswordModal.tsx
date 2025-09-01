@@ -130,7 +130,7 @@ export default function ForgotPasswordModal({ open, onClose }: ForgotPasswordMod
             <button
               onClick={handleVerifyOtp}
               disabled={loading}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg"
+              className="w-full button-bg text-white py-2 rounded-lg"
             >
               {loading ? "Verifying..." : "Verify OTP"}
             </button>
@@ -150,7 +150,7 @@ export default function ForgotPasswordModal({ open, onClose }: ForgotPasswordMod
             <button
               onClick={handleResetPassword}
               disabled={loading}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg"
+              className="w-full button-bg text-white py-2 rounded-lg cursor-pointer"
             >
               {loading ? "Resetting..." : "Reset Password"}
             </button>
