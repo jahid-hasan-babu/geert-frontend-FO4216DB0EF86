@@ -191,7 +191,7 @@ export class GoogleTranslateManager {
 			new google.translate.TranslateElement(
 				{
 					pageLanguage: "en",
-					includedLanguages: "en,fr,es,de,ar,pt,hi,bn",
+					includedLanguages: "en,fr,es,de,ar,pt,hi,bn,nl",
 					layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
 					autoDisplay: false,
 					multilanguagePage: true,

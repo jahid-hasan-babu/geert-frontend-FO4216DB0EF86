@@ -44,7 +44,7 @@ export default function ForgotPasswordModal({ open, onClose }: ForgotPasswordMod
     try {
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BASE_URL}/auth/verify-reset-password-otp`,
-        { userId, otp: Number(otpCode) }
+        { userId, otpCode: Number(otpCode) }
       );
       setAccessToken(response.data.data.accessToken);
       toast.success("OTP verified! Reset your password now.");

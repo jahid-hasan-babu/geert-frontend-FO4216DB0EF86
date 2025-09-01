@@ -24,7 +24,8 @@ export default function TopNav() {
     if (pathname.startsWith("/dashboard/instructor")) return "Instructors";
     if (pathname.startsWith("/dashboard/course")) return "Courses";
     if (pathname.startsWith("/dashboard/students")) return "Students";
-    if (pathname.startsWith("/dashboard/micro-learning")) return "MicroLearning";
+    if (pathname.startsWith("/dashboard/micro-learning"))
+      return "MicroLearning";
 
     // Exact matches
     if (routeTitles[pathname]) return routeTitles[pathname];
@@ -51,7 +52,7 @@ export default function TopNav() {
           <DropdownMenuTrigger className="focus:outline-none">
             <div className="flex items-center gap-2">
               <Image
-                src="https://ferf1mheo22r9ira.public.blob.vercel-storage.com/avatar-02-albo9B0tWOSLXCVZh9rX9KFxXIVWMr.png"
+                src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
                 alt="User avatar"
                 width={28}
                 height={28}
