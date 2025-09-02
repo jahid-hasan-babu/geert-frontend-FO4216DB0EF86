@@ -114,12 +114,12 @@ export default function AddModuleModal({
     const { title, lesson, quiz, hasQuiz } = moduleData;
 
     if (!title.trim()) {
-      message.error("Module title is required");
+      message.error("Module title is required!");
       return false;
     }
 
     if (!lesson.title.trim() || !lesson.duration.trim()) {
-      message.error("Lesson title and duration are required");
+      message.error("Lesson title and duration are required!");
       return false;
     }
 
