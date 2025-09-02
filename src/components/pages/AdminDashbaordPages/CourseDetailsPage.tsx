@@ -368,13 +368,13 @@ const CourseDetailsPage = () => {
             <div className="flex gap-2">
               <Button
                 onClick={handleAddLesson}
-                className="bg-green-600 hover:bg-green-700 text-white"
+                className="bg-green-600 hover:bg-green-700 text-white cursor-pointer"
               >
                 Add Lesson
               </Button>
               <Button
                 onClick={handleAddModule}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
               >
                 Add Module
               </Button>
