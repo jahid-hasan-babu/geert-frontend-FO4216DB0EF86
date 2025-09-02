@@ -123,19 +123,26 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
   }, [slug]);
 
   if (loadingCourse)
-  return (
-    <div className="flex justify-center items-center py-10">
-      <Spin size="large" tip="Loading course..." />
-    </div>
-  );
+    return (
+      <div className="flex justify-center items-center py-10">
+        <Spin size="large" tip="Loading course..." />
+      </div>
+    );
   if (error) return <p className="text-center py-10 text-red-500">{error}</p>;
   if (!course) return <p className="text-center py-10">Course not found</p>;
-  if (!course.instructor) return <p className="text-center py-10">Instructor not found</p>;
+  if (!course.instructor)
+    return <p className="text-center py-10">Instructor not found</p>;
 
   const courseId = course._id || course.id || "";
 
+  // ---------------- Average Rating ----------------
+  const reviews = course.Review || [];
+  const averageRating =
+    reviews.length > 0
+      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+      : 0;
+
   // ---------------- Modules Mapping ----------------
-  console.log("Course >><<", course);
   const modules: Module[] =
     course.modules?.map((m) => {
       const lessons: LessonsItem[] = m.lessons.map((l) => ({
@@ -171,8 +178,6 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
       };
     }) || [];
 
-    console.log("Modules >><<", modules);
-
   return (
     <CourseProvider modules={modules}>
       <div className="container">
@@ -183,13 +188,16 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
 
               <div className="flex justify-between items-start">
                 <div>
+                  {/* Rating Section */}
                   <div className="flex items-center space-x-2">
                     <div className="flex space-x-1">
                       {[...Array(5)].map((_, i) => (
                         <span
                           key={i}
                           className={`text-lg ${
-                            i < Math.floor(course.rating) ? "text-yellow-400" : "text-gray-300"
+                            i < Math.round(averageRating)
+                              ? "text-yellow-400"
+                              : "text-gray-300"
                           }`}
                         >
                           ★
@@ -197,10 +205,11 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
                       ))}
                     </div>
                     <span className="text-gray-700 font-medium text-[14px]">
-                      {course.rating} ({course.Review?.length || 0})
+                      {averageRating.toFixed(1)} ({reviews.length})
                     </span>
                   </div>
 
+                  {/* Title + Microlearning badge */}
                   <div className="flex items-center space-x-4 mb-6">
                     <h1 className="text-3xl md:text-4xl lg:text-[24px] font-bold text-gray-900 font-playfairDisplay">
                       {course.title}
@@ -214,19 +223,23 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
                 </div>
               </div>
 
+              {/* Review Section */}
               <CourseReviewAbout
                 description={course.description}
                 instructor={course.instructor}
-                reviews={course.Review?.map((r) => ({
-                  id: r.id,
-                  text: r.comment,
-                  rating: r.rating,
-                  date: new Date(r.createdAt).toLocaleDateString(),
-                  author: r.user?.username || "Anonymous",
-                })) || []}
+                reviews={
+                  reviews.map((r) => ({
+                    id: r.id,
+                    text: r.comment,
+                    rating: r.rating,
+                    date: new Date(r.createdAt).toLocaleDateString(),
+                    author: r.user?.username || "Anonymous",
+                  })) || []
+                }
               />
             </div>
 
+            {/* Sidebar */}
             <div className="lg:col-span-1">
               <CourseSidebar modules={modules} courseId={courseId} />
             </div>
