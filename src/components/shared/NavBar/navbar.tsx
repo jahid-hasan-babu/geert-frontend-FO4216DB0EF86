@@ -113,7 +113,7 @@ export default function Navbar() {
           {/* Course-specific buttons */}
           {(pathname === `/courses/${courseData?.id}` ||
             pathname === `/courses/${courseData?.id}/progress`) && (
-            <div className="ml-4 flex items-center space-x-4">
+            <div className="ml-4 hidden lg:flex items-center space-x-4">
               {isLoadingCourse && <Spin indicator={<LoadingOutlined spin />} />}
               <button
                 onClick={() => setIsReviewOpen(true)}
@@ -197,44 +197,63 @@ export default function Navbar() {
       >
         <div className="fixed inset-0 bg-black/20" aria-hidden="true" />
         <Dialog.Panel className="fixed inset-y-0 right-0 w-64 bg-white p-6 space-y-6 shadow-lg">
+          {/* Top: Logo + Close */}
           <div className="flex justify-between items-center">
             <Image
               src={logo || "/placeholder.svg"}
               alt="Logo"
-              width={120}
-              height={36}
+              width={28}
+              height={28}
             />
             <button onClick={() => setIsOpen(false)} aria-label="Close menu">
               <X className="w-6 h-6" />
             </button>
           </div>
 
-          {courseData ? (
-            isLoadingCourse ? (
-              <Spin indicator={<LoadingOutlined spin />} size="large" />
-            ) : (
-              <h1 className="text-lg font-semibold">{courseData.title}</h1>
-            )
-          ) : (
-            <ul className="flex flex-col space-y-4 text-gray-800 font-medium">
-              {navLinks.map(({ href, label }) => (
-                <li key={href}>
-                  <Link
-                    href={href}
-                    className={`block ${
-                      isActive(href)
-                        ? "text-[#3399CC] font-semibold"
-                        : "hover:text-[#9191c4]"
-                    }`}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+          {/* Course Title */}
+          {courseData && !isLoadingCourse && (
+            <h1 className="text-lg font-semibold">{courseData.title}</h1>
           )}
 
+          {/* Nav Links */}
+          <ul className="flex flex-col space-y-4 text-gray-800 font-medium">
+            {navLinks.map(({ href, label }) => (
+              <li key={href}>
+                <Link
+                  href={href}
+                  className={`block ${
+                    isActive(href)
+                      ? "text-[#3399CC] font-semibold"
+                      : "hover:text-[#9191c4]"
+                  }`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  {label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+
+          {/* Course-specific buttons */}
+          {courseData && (
+            <div className="flex flex-col space-y-2 mt-4">
+              <button
+                onClick={() => setIsReviewOpen(true)}
+                className="flex items-center justify-center lg:justify-start space-x-1 font-sans text-gray-700"
+              >
+                <Star className="w-5 h-5 text-gray-500" />
+                <span className="font-medium cursor-pointer">Leave Review</span>
+              </button>
+              <button
+                onClick={() => setIsProgressOpen(true)}
+                className="font-medium text-gray-700 cursor-pointer"
+              >
+                Your Progress
+              </button>
+            </div>
+          )}
+
+          {/* Bottom: Notifications + User Avatar */}
           <div className="flex items-center space-x-4 pt-4 border-t">
             <button
               className="relative p-2 rounded-full hover:bg-gray-100 transition"
@@ -256,7 +275,7 @@ export default function Navbar() {
                 alt="Profile"
                 width={28}
                 height={28}
-                className="rounded-full border h-full w-full border-gray-200 cursor-pointer"
+                className="rounded-full border border-gray-200 cursor-pointer"
                 onClick={() => setIsMenuOpen((prev) => !prev)}
               />
             )}
