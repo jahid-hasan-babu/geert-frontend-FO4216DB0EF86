@@ -3,6 +3,8 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useCourse } from "@/components/ui/context/CourseContext";
 import axios from "axios";
+import DOMPurify from "isomorphic-dompurify";
+import { Spin } from "antd";
 
 interface CourseVideoPlayerProps {
   courseId: string;
@@ -14,8 +16,10 @@ const CourseVideoPlayer: React.FC<CourseVideoPlayerProps> = ({ courseId }) => {
   const [secondsWatched, setSecondsWatched] = useState(0);
   const lastTimeRef = useRef(0);
   const [isDocCompleted, setIsDocCompleted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // Track watched time (video only)
+  console.log("Current Lesson", currentLesson);
+
   const handleTimeUpdate = () => {
     if (!videoRef.current) return;
     const currentTime = videoRef.current.currentTime;
@@ -27,12 +31,12 @@ const CourseVideoPlayer: React.FC<CourseVideoPlayerProps> = ({ courseId }) => {
     lastTimeRef.current = currentTime;
   };
 
-  // Send progress for video
   const handleVideoEnd = async () => {
     if (!currentLesson || currentLesson.type !== "video") return;
     if (!currentLesson.durationSecs) return;
 
     try {
+      setLoading(true);
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No token found");
 
@@ -46,8 +50,11 @@ const CourseVideoPlayer: React.FC<CourseVideoPlayerProps> = ({ courseId }) => {
       );
 
       console.log("Video progress updated ✅", Math.floor(secondsWatched));
+      window.location.reload();
     } catch (err) {
       console.error("Failed to update video progress:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -56,22 +63,27 @@ const CourseVideoPlayer: React.FC<CourseVideoPlayerProps> = ({ courseId }) => {
     if (!currentLesson || currentLesson.type !== "doc") return;
 
     try {
+      setLoading(true);
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No token found");
 
       await axios.post(
         `${process.env.NEXT_PUBLIC_BASE_URL}/courses/upgrade-progress/${currentLesson.id}/${courseId}`,
         {
-          secondsWatched: 0,        // For doc, always 0
-          durationSecs: 0,          // For doc, always 0
+          secondsWatched: 0,
+          durationSecs: 0,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       console.log("Doc marked as completed ✅");
       setIsDocCompleted(true);
+      // 🔥 Reload the whole page after doc completion
+      window.location.reload();
     } catch (err) {
       console.error("Failed to mark doc as completed:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,6 +92,7 @@ const CourseVideoPlayer: React.FC<CourseVideoPlayerProps> = ({ courseId }) => {
     setSecondsWatched(0);
     lastTimeRef.current = 0;
     setIsDocCompleted(false);
+    setLoading(false);
   }, [currentLesson]);
 
   // No lesson selected
@@ -91,16 +104,28 @@ const CourseVideoPlayer: React.FC<CourseVideoPlayerProps> = ({ courseId }) => {
     );
   }
 
+  // Loader overlay
+  if (loading) {
+    return (
+      <div className="w-full h-64 flex items-center justify-center">
+        <Spin size="large" tip="Submitting..." />
+      </div>
+    );
+  }
+
   // Video lesson
   if (currentLesson.type === "video") {
     return (
-      <div>
+      <div
+        className="w-full rounded-lg overflow-hidden bg-black"
+        style={{ height: "400px" }}
+      >
         <video
           key={currentLesson.id}
           ref={videoRef}
           src={currentLesson.videoUrl}
           controls
-          className="w-full rounded-lg"
+          className="w-full h-full object-cover"
           onTimeUpdate={handleTimeUpdate}
           onEnded={handleVideoEnd}
         />
@@ -111,15 +136,25 @@ const CourseVideoPlayer: React.FC<CourseVideoPlayerProps> = ({ courseId }) => {
   // Doc lesson
   if (currentLesson.type === "doc") {
     return (
-      <div className="w-full h-64 flex flex-col items-center justify-center border rounded-lg bg-gray-50 p-4">
-        <p className="text-gray-700 mb-4">📄 Document: {currentLesson.title}</p>
+      <div className="w-full flex flex-col items-center justify-center border rounded-lg bg-gray-50 p-4 overflow-y-auto">
+        <p className="text-gray-700 text-xl mb-4 font-semibold">
+          📄 Document: {currentLesson.title}
+        </p>
+
+        <div
+          className="prose max-w-none text-gray-800 mb-4"
+          dangerouslySetInnerHTML={{
+            __html: DOMPurify.sanitize(currentLesson.description || ""),
+          }}
+        />
+
         <button
           onClick={handleDocComplete}
           disabled={isDocCompleted}
-          className={`px-6 py-2 rounded-full text-white font-medium transition ${
+          className={`px-6 py-2 rounded-full text-white font-medium transition cursor-pointer ${
             isDocCompleted
               ? "bg-green-400 cursor-not-allowed"
-              : "bg-blue-500 hover:bg-blue-600"
+              : "bg-[#3399CC] hover:bg-[#52b9ec]"
           }`}
         >
           {isDocCompleted ? "Completed ✅" : "Mark as Completed"}
@@ -131,8 +166,16 @@ const CourseVideoPlayer: React.FC<CourseVideoPlayerProps> = ({ courseId }) => {
   // Quiz lesson
   if (currentLesson.type === "quiz") {
     return (
-      <div className="w-full h-64 flex items-center justify-center border rounded-lg bg-yellow-50 p-4">
-        <p className="text-gray-700">📝 Quiz: {currentLesson.title}</p>
+      <div className="w-full h-64 flex flex-col items-center justify-center border rounded-lg bg-yellow-50 p-4 overflow-y-auto">
+        <p className="text-gray-700 mb-4">📝 Quiz: {currentLesson.title}</p>
+        {currentLesson.description && (
+          <div
+            className="prose max-w-none text-gray-800"
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(currentLesson.description),
+            }}
+          />
+        )}
       </div>
     );
   }

@@ -93,33 +93,135 @@ export default function CourseCertification({ courseId }: Props) {
 <head>
   <title>${certificate.courseTitle} Certificate</title>
   <style>
-    body { 
-      margin: 0; 
-      padding: 20px; 
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-      background: #f9fafb;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    .certificate-container { 
-      max-width: 768px; 
-      margin: 0 auto; 
-      padding: 40px; 
-      border: 8px solid #d1d5db; 
-      border-radius: 24px; 
-      background: white; 
-      text-align: center; 
+    
+    html, body {
+      width: 100%;
+      height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
-    .certificate-container > * { margin: 24px 0; }
-    .logo { max-width: 120px; margin: 0 auto; display: block; }
-    .title { font-size: 2.25rem; font-weight: bold; color: #1e40af; margin: 0; }
-    .subtitle { color: #374151; font-size: 1.125rem; margin-top: 8px; }
-    .student-name { font-size: 1.875rem; font-weight: 600; color: #111827; }
-    .course-title { font-size: 1.5rem; font-weight: 500; color: #1d4ed8; }
-    .details { color: #374151; margin-top: 16px; font-size: 1.125rem; }
-    .highlight { font-size: 1.5rem; font-weight: bold; color: #1d4ed8; text-align: center; }
-    .congratulations { color: #6b7280; margin-top: 24px; font-size: 0.875rem; }
-    @media print { 
-      body { margin: 0; padding: 0; } 
-      .certificate-container { border: 8px solid #000; } 
+    
+    .certificate-container {
+      width: 90%;
+      max-width: 800px;
+      padding: 60px 40px;
+      border: 8px solid #d1d5db;
+      border-radius: 24px;
+      background: white;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .certificate-container > * {
+      margin: 20px 0;
+    }
+    
+    .logo {
+      max-width: 120px;
+      height: auto;
+      margin: 0 auto 30px auto;
+      display: block;
+    }
+    
+    .title {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #1e40af;
+      margin: 0 0 20px 0;
+      line-height: 1.2;
+    }
+    
+    .subtitle {
+      color: #374151;
+      font-size: 1.25rem;
+      margin: 16px 0;
+      line-height: 1.4;
+    }
+    
+    .student-name {
+      font-size: 2.25rem;
+      font-weight: 600;
+      color: #111827;
+      margin: 30px 0;
+      line-height: 1.2;
+    }
+    
+    .course-title {
+      font-size: 1.75rem;
+      font-weight: 500;
+      color: #1d4ed8;
+      margin: 30px 0;
+      line-height: 1.3;
+    }
+    
+    .details {
+      color: #374151;
+      margin: 20px 0;
+      font-size: 1.125rem;
+      line-height: 1.4;
+    }
+    
+    .highlight {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #1d4ed8;
+      margin: 15px 0;
+      line-height: 1.3;
+    }
+    
+    .congratulations {
+      color: #6b7280;
+      margin-top: 40px;
+      font-size: 1rem;
+      font-style: italic;
+    }
+    
+    @media print {
+      html, body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background: white !important;
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+      }
+      
+      .certificate-container {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 40px 30px;
+        border: 6px solid #000;
+        border-radius: 20px;
+        box-shadow: none;
+        page-break-inside: avoid;
+      }
+      
+      .title {
+        font-size: 2.25rem;
+      }
+      
+      .student-name {
+        font-size: 2rem;
+      }
+      
+      .course-title {
+        font-size: 1.5rem;
+      }
+    }
+    
+    @page {
+      size: A4;
+      margin: 0.5in;
     }
   </style>
 </head>

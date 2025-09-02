@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useState } from "react";
 import Image from "next/image";
 import { InstructorModal } from "../modals/InstructorModal";
+import DOMPurify from "isomorphic-dompurify";
 
 interface Review {
   id: string;
@@ -27,11 +29,6 @@ interface Props {
   instructor: Instructor;
   reviews: Review[];
 }
-
-const stripHtml = (html: string) => {
-  if (!html) return "";
-  return html.replace(/<[^>]+>/g, ""); // remove all HTML tags
-};
 
 export default function CourseReviewAbout({
   description,
@@ -74,13 +71,15 @@ export default function CourseReviewAbout({
       {activeTab === "about" ? (
         <div>
           <div className="bg-white rounded-lg p-4">
-            <p className="text-gray-700 leading-relaxed mb-2">
-              <div>
-                {showFullDescription
-                  ? stripHtml(description)
-                  : stripHtml(shortDescription)}
-              </div>
-              {stripHtml(description).length > 260 && (
+            <div className="text-gray-700 leading-relaxed mb-2 prose max-w-none">
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(
+                    showFullDescription ? description : shortDescription
+                  ),
+                }}
+              />
+              {description.length > 260 && (
                 <button
                   onClick={() => setShowFullDescription(!showFullDescription)}
                   className="text-sky-500 hover:text-sky-600 font-medium ml-1 cursor-pointer"
@@ -88,7 +87,7 @@ export default function CourseReviewAbout({
                   {showFullDescription ? " Read Less" : " ... Read More"}
                 </button>
               )}
-            </p>
+            </div>
           </div>
 
           {/* Instructor */}

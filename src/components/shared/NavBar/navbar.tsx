@@ -6,8 +6,9 @@ import { Dialog } from "@headlessui/react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Bell,Star, X } from "lucide-react";
+import { Bell, Star, X } from "lucide-react";
 import { LoadingOutlined } from "@ant-design/icons";
+import { Spin } from "antd";
 
 import logo from "@/assets/images/logo.png";
 import NotificationModal from "@/components/ui/modals/NotificationModal";
@@ -20,7 +21,6 @@ import {
   useGetCourseByIdQuery,
   useGetMyCourseProgressQuery,
 } from "@/redux/features/courses/coursesApi";
-import { Spin } from "antd";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -51,35 +51,39 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [userData, setUserData] = useState<User | null>(null);
   const [courseData, setCourseData] = useState<Course | null>(null);
+
   const pathname = usePathname();
-  const { data, isLoading } = useGetNotificationsQuery({});
-  const { data: use, isLoading: isLoadingUser } = useGetMeQuery({});
+  const { data: notificationsRes, isLoading: isLoadingNotifications } =
+    useGetNotificationsQuery({});
+  const { data: userRes, isLoading: isLoadingUser } = useGetMeQuery({});
   const courseId = pathname.split("/")[2];
-  const { data: course, isLoading: isLoadingCourse } =
+  const { data: courseRes, isLoading: isLoadingCourse } =
     useGetCourseByIdQuery(courseId);
-  const id = courseData?.id;
-  const { data: Progress } = useGetMyCourseProgressQuery(id);
+  const courseIdForProgress = courseData?.id;
+  const { data: Progress } = useGetMyCourseProgressQuery(courseIdForProgress);
+
+  // Set user data
   useEffect(() => {
-    if (use?.data) {
-      setUserData(use.data);
+    if (userRes?.data) {
+      setUserData(userRes.data);
     }
-  }, [use?.data]);
+  }, [userRes?.data]);
 
+  // Set course data
   useEffect(() => {
-    if (course?.data) {
-      setCourseData(course.data);
+    if (courseRes?.data) {
+      setCourseData(courseRes.data);
     }
-  }, [course?.data]);
+  }, [courseRes?.data]);
 
-  console.log("<<Course Data>> +++", course);
-
-  const notificationsData = data?.data?.data || [];
+  const notificationsData = notificationsRes?.data?.data || [];
 
   const isActive = (href: string) => pathname === href;
 
   return (
     <header className="bg-white sticky top-0 z-50">
       <nav className="container mx-auto px-4 py-3 flex items-center justify-between">
+        {/* Logo */}
         <Link
           href="/"
           className="cursor-pointer flex items-center justify-center"
@@ -87,81 +91,79 @@ export default function Navbar() {
           <Image src={logo || "/placeholder.svg"} alt="Logo" />
         </Link>
 
-        <>
-          <div className="flex ">
-            <ul className="hidden md:flex items-center space-x-8 font-medium font-sans">
-              {navLinks.map(({ href, label }) => (
-                <li key={href}>
-                  <Link
-                    href={href}
-                    className={`transition-colors duration-300 ${
-                      isActive(href)
-                        ? "text-[#3399CC] font-semibold"
-                        : "text-gray-800 hover:text-[#9191c4]"
-                    }`}
-                  >
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+        {/* Desktop Nav */}
+        <div className="flex items-center">
+          <ul className="hidden md:flex items-center space-x-8 font-medium font-sans">
+            {navLinks.map(({ href, label }) => (
+              <li key={href}>
+                <Link
+                  href={href}
+                  className={`transition-colors duration-300 ${
+                    isActive(href)
+                      ? "text-[#3399CC] font-semibold"
+                      : "text-gray-800 hover:text-[#9191c4]"
+                  }`}
+                >
+                  {label}
+                </Link>
+              </li>
+            ))}
+          </ul>
 
-            {pathname === `/courses/${courseData?.id}` ||
-            pathname === `/courses/${courseData?.id}/progress` ? (
-              <div>
-                <div className="w-full px-4 flex justify-between items-center ml-1">
-                  {isLoadingCourse && (
-                    <Spin indicator={<LoadingOutlined spin />} size="large" />
-                  )}
-
-                  <div className="flex items-center space-x-[16px]">
-                    <button
-                      onClick={() => setIsReviewOpen(true)}
-                      className="flex items-center space-x-[2px] font-sans"
-                    >
-                      <Star className="w-5 h-5 text-gray-500" />
-                      <span className="text-gray-700 font-medium leading-[120%] cursor-pointer">
-                        Leave Review
-                      </span>
-                    </button>
-
-                    <div
-                      className="font-sans cursor-pointer"
-                      onClick={() => setIsProgressOpen(true)}
-                    >
-                      <span className="text-gray-700 font-medium leading-[120%]">
-                        Your Progress
-                      </span>
-                    </div>
-                  </div>
-                </div>
+          {/* Course-specific buttons */}
+          {(pathname === `/courses/${courseData?.id}` ||
+            pathname === `/courses/${courseData?.id}/progress`) && (
+            <div className="ml-4 flex items-center space-x-4">
+              {isLoadingCourse && <Spin indicator={<LoadingOutlined spin />} />}
+              <button
+                onClick={() => setIsReviewOpen(true)}
+                className="flex items-center space-x-1 font-sans text-gray-700"
+              >
+                <Star className="w-5 h-5 text-gray-500" />
+                <span className="font-medium cursor-pointer">Leave Review</span>
+              </button>
+              <div
+                className="cursor-pointer text-gray-700 font-medium"
+                onClick={() => setIsProgressOpen(true)}
+              >
+                Your Progress
               </div>
-            ) : null}
-          </div>
-        </>
+            </div>
+          )}
+        </div>
 
         {/* Right Section */}
         <div className="hidden md:flex items-center space-x-5">
+          {/* Notification Button */}
           <button
             className="relative p-2 rounded-full bg-[#EBF5FA] transition"
             onClick={() => setIsNotifOpen(true)}
           >
             <Bell className="w-6 h-6 text-[#5F5F5F] cursor-pointer" />
             {notificationsData.length > 0 && (
-              <span className="absolute top-2 right-2 block w-2 h-2 bg-red-500 rounded-full"></span>
+              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full" />
             )}
           </button>
+
+          {/* User Avatar */}
           {isLoadingUser || isLoadingCourse ? (
             <Spin indicator={<LoadingOutlined spin />} size="large" />
           ) : (
-            <Image
-              src={userData?.profileImage || `https://cdn-icons-png.flaticon.com/512/3135/3135715.png`}
-              alt="Profile"
-              width={40}
-              height={40}
-              className="rounded-full border border-gray-200 cursor-pointer"
+            <div
+              className="w-9 h-9 rounded-full overflow-hidden border border-gray-200 cursor-pointer"
               onClick={() => setIsMenuOpen((prev) => !prev)}
-            />
+            >
+              <Image
+                src={
+                  userData?.profileImage ||
+                  "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+                }
+                alt="Profile"
+                width={28}
+                height={28}
+                className="object-cover w-full h-full"
+              />
+            </div>
           )}
         </div>
 
@@ -208,13 +210,11 @@ export default function Navbar() {
           </div>
 
           {courseData ? (
-            <div>
-              {isLoadingCourse ? (
-                <Spin indicator={<LoadingOutlined spin />} size="large" />
-              ) : (
-                <h1 className="text-lg font-semibold">{courseData?.title}</h1>
-              )}
-            </div>
+            isLoadingCourse ? (
+              <Spin indicator={<LoadingOutlined spin />} size="large" />
+            ) : (
+              <h1 className="text-lg font-semibold">{courseData.title}</h1>
+            )
           ) : (
             <ul className="flex flex-col space-y-4 text-gray-800 font-medium">
               {navLinks.map(({ href, label }) => (
@@ -242,18 +242,21 @@ export default function Navbar() {
             >
               <Bell className="w-6 h-6 text-gray-600" />
               {notificationsData.length > 0 && (
-                <span className="absolute top-2 right-2 block w-2 h-2 bg-red-500 rounded-full"></span>
+                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full" />
               )}
             </button>
             {isLoadingUser || isLoadingCourse ? (
               <Spin indicator={<LoadingOutlined spin />} size="large" />
             ) : (
               <Image
-                src={userData?.profileImage || `https://cdn-icons-png.flaticon.com/512/3135/3135715.png`}
+                src={
+                  userData?.profileImage ||
+                  "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+                }
                 alt="Profile"
-                width={40}
-                height={40}
-                className="rounded-full border border-gray-200 cursor-pointer"
+                width={28}
+                height={28}
+                className="rounded-full border h-full w-full border-gray-200 cursor-pointer"
                 onClick={() => setIsMenuOpen((prev) => !prev)}
               />
             )}
@@ -266,7 +269,7 @@ export default function Navbar() {
         isOpen={isNotifOpen}
         onClose={() => setIsNotifOpen(false)}
         notifications={notificationsData}
-        isLoading={isLoading}
+        isLoading={isLoadingNotifications}
       />
       <ReviewModal
         isOpen={isReviewOpen}
@@ -277,19 +280,17 @@ export default function Navbar() {
           Progress.data.completedLessons === Progress.data.totalLessons
         }
       />
-
       <CourseProgressModal
         isOpen={isProgressOpen}
         onClose={() => setIsProgressOpen(false)}
         current={Progress?.data?.completedLessons || 0}
         total={Progress?.data?.totalLessons || 0}
       />
-
       <MenuModal
         isOpen={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
         user={userData}
-        isLoading={isLoading}
+        isLoading={isLoadingUser}
       />
     </header>
   );

@@ -34,6 +34,7 @@ interface LessonFromAPI {
   videoUrl?: string;
   quiz?: QuizFromAPI;
   locked?: boolean;
+  description?: string;
 }
 
 export type QuizQuestion = {
@@ -151,6 +152,7 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
         type: l.type || "doc",
         duration: l.duration,
         durationSecs: l.durationSecs,
+        description: l?.description,
         completed: l.completed,
         videoUrl: l.videoUrl,
         locked: l.locked ?? false,

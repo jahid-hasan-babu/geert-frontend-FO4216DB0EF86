@@ -80,7 +80,7 @@ const CourseDetailsPage = () => {
   const [editCourse, { isLoading: isEditing }] = useEditCourseMutation();
   console.log(course, "couser all data");
 
-  console.log("Cousers All", data)
+  console.log("Cousers All", data);
 
   const courseModules = course?.modules;
   useEffect(() => {
@@ -203,7 +203,7 @@ const CourseDetailsPage = () => {
     return <div className="text-center py-10">Course not found.</div>;
   }
 
-const handleAddSuccess = () => {
+  const handleAddSuccess = () => {
     console.log("Member added successfully!");
     // Add logic to refresh course data or update UI
   };
@@ -216,9 +216,12 @@ const handleAddSuccess = () => {
           <div>/</div>
           <div>Course Details</div>
         </div>
-<div>
-	<AddMemberModal courseId={course.id} onAddSuccess={handleAddSuccess} />
-</div>
+        <div>
+          <AddMemberModal
+            courseId={course.id}
+            onAddSuccess={handleAddSuccess}
+          />
+        </div>
       </div>
 
       <div className="w-full h-48 relative mb-8">
@@ -360,20 +363,23 @@ const handleAddSuccess = () => {
       <div className="mb-8">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-semibold">Module</h2>
-          <div className="flex gap-2">
-            <Button
-              onClick={handleAddLesson}
-              className="bg-green-600 hover:bg-green-700 text-white"
-            >
-              Add Lesson
-            </Button>
-            <Button
-              onClick={handleAddModule}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              Add Module
-            </Button>
-          </div>
+
+          {isEditMode && (
+            <div className="flex gap-2">
+              <Button
+                onClick={handleAddLesson}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                Add Lesson
+              </Button>
+              <Button
+                onClick={handleAddModule}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Add Module
+              </Button>
+            </div>
+          )}
         </div>
         <Accordion type="single" collapsible className="space-y-2 pb-5">
           {course?.modules?.map((module, index) => (
@@ -413,23 +419,6 @@ const handleAddSuccess = () => {
               </AccordionContent>
             </AccordionItem>
           ))}
-
-          {/* <AccordionItem
-            value="certification"
-            className="border border-gray-200 rounded-lg"
-          >
-            <AccordionTrigger className="px-4 py-3 text-left hover:no-underline cursor-pointer">
-              <span className="text-gray-700 font-medium font-sans">
-                Certification
-              </span>
-            </AccordionTrigger>
-            <AccordionContent className="px-4 pb-3">
-              <p className="text-gray-600">
-                You’ll receive a certificate after completing all lessons and
-                quizzes.
-              </p>
-            </AccordionContent>
-          </AccordionItem> */}
         </Accordion>
       </div>
 

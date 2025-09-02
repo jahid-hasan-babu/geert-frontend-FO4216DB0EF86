@@ -6,12 +6,13 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Star } from "lucide-react";
 import axios from "axios";
+import { toast } from "sonner";
 
 interface ReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   courseId: string;
-  canReview: boolean; // true if course is finished
+  canReview: boolean;
 }
 
 export function ReviewModal({
@@ -30,18 +31,30 @@ export function ReviewModal({
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
+
       await axios.post(
         `${process.env.NEXT_PUBLIC_BASE_URL}/reviews/make-review/${courseId}`,
         { rating, comment: feedback },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert("Review submitted successfully!");
+
+      toast.success("Review submitted!");
+
       setRating(0);
       setFeedback("");
       onClose();
     } catch (err) {
       console.error("Failed to submit review:", err);
-      alert("Something went wrong. Please try again.");
+
+      let errorMessage = "Something went wrong. Please try again.";
+
+      if (axios.isAxiosError(err)) {
+        if (err.response?.data?.message === "You can't review this course") {
+          errorMessage = "Review already submitted";
+        }
+      }
+
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
