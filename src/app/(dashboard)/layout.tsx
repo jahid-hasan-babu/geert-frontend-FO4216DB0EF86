@@ -14,7 +14,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const user = localStorage.getItem("user");
 
     if (!token) {
-      router.replace("/auth/login"); // no token → login
+      router.replace("/auth/login");
       return;
     }
 

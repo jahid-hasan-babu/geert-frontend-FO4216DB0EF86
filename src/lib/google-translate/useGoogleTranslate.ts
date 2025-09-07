@@ -4,50 +4,52 @@ import { useState, useEffect } from "react";
 import { GoogleTranslateManager } from "./googleTranslate";
 
 export const useGoogleTranslate = () => {
-	const [currentLanguage, setCurrentLanguage] = useState("en");
-	const [isReady, setIsReady] = useState(false);
-	const [isLoading, setIsLoading] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState("nl");
+  const [isReady, setIsReady] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-	useEffect(() => {
-		const manager = GoogleTranslateManager.getInstance();
+  useEffect(() => {
+    const manager = GoogleTranslateManager.getInstance();
 
-		// Subscribe to language changes
-		const unsubscribe = manager.subscribe((lang) => {
-			setCurrentLanguage(lang);
-		});
+    const unsubscribe = manager.subscribe((lang) => {
+      setCurrentLanguage(lang);
+    });
 
-		// Initialize
-		const initializeManager = async () => {
-			setIsLoading(true);
-			try {
-				await manager.initialize();
-				setCurrentLanguage(manager.getCurrentLanguage());
-				setIsReady(true);
-			} catch (error) {
-				console.error("Failed to initialize Google Translate:", error);
-			} finally {
-				setIsLoading(false);
-			}
-		};
+    const initializeManager = async () => {
+      setIsLoading(true);
+      try {
+        await manager.initialize();
 
-		if (typeof window !== "undefined") {
-			initializeManager();
-		}
+        // Automatically translate to Dutch if first load
+        if (!localStorage.getItem("preferred-language") && manager.getCurrentLanguage() !== "nl") {
+          manager.translateTo("nl");
+        }
 
-		return () => {
-			unsubscribe();
-		};
-	}, []);
+        setCurrentLanguage(manager.getCurrentLanguage());
+        setIsReady(true);
+      } catch (error) {
+        console.error("Failed to initialize Google Translate:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-	const translateTo = (languageCode: string) => {
-		const manager = GoogleTranslateManager.getInstance();
-		return manager.translateTo(languageCode);
-	};
+    if (typeof window !== "undefined") {
+      initializeManager();
+    }
 
-	return {
-		currentLanguage,
-		translateTo,
-		isReady,
-		isLoading,
-	};
+    return () => { unsubscribe(); };
+  }, []);
+
+  const translateTo = (languageCode: string) => {
+    const manager = GoogleTranslateManager.getInstance();
+    return manager.translateTo(languageCode);
+  };
+
+  return {
+    currentLanguage,
+    translateTo,
+    isReady,
+    isLoading,
+  };
 };

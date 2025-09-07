@@ -28,12 +28,12 @@ interface Course {
   coverImage?: string;
   lessons?: number;
   courseContexts?: LessonsItem[];
-  isFavorite?: boolean; // ✅ comes directly from API
+  isFavorite?: boolean; 
 }
 
 export default function CourseCard({
   course,
-  isLoading = false, // ✅ new prop to show spinner
+  isLoading = false,
 }: {
   course: Course;
   isLoading?: boolean;
@@ -75,6 +75,8 @@ export default function CourseCard({
       toast.error("Failed to update favorites. Please try again.");
     }
   };
+
+  console.log("Course", course)
 
   return (
     <div

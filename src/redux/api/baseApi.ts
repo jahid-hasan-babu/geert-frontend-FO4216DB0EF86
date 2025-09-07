@@ -11,7 +11,8 @@ import Swal from "sweetalert2";
 import { signOut } from "next-auth/react";
 
 // ✅ Define base URL once
-const BASE_URL = "https://api.mijnvmta.nl/api/v1";
+// const BASE_URL = "https://api.mijnvmta.nl/api/v1";
+const BASE_URL = "http://10.0.20.36:5013/api/v1";
 
 const baseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,

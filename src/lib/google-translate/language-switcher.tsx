@@ -18,8 +18,8 @@ interface LanguageOption {
 }
 
 const LANGUAGES: LanguageOption[] = [
-  { code: "en", name: "English", nativeName: "English" },
   { code: "nl", name: "Dutch", nativeName: "Netherlands" },
+  { code: "en", name: "English", nativeName: "English" },
 ];
 
 export const LanguageSwitcher: React.FC = () => {
@@ -32,22 +32,18 @@ export const LanguageSwitcher: React.FC = () => {
   }, []);
 
   const handleLanguageChange = async (newLanguage: string) => {
-    if (newLanguage === currentLanguage || isChanging) {
-      return;
-    }
+    if (newLanguage === currentLanguage || isChanging) return;
 
     setIsChanging(true);
 
     try {
       translateTo(newLanguage);
-      // The page will reload, so we don't need to reset isChanging
     } catch (error) {
       console.error("Error changing language:", error);
       setIsChanging(false);
     }
   };
 
-  // Show loading state until mounted and ready
   if (!mounted || !isReady) {
     return (
       <div className="flex items-center gap-2 opacity-50">
@@ -65,7 +61,7 @@ export const LanguageSwitcher: React.FC = () => {
         onValueChange={handleLanguageChange}
         disabled={isChanging}
       >
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-[180px] cursor-pointer">
           {isChanging ? (
             <div className="flex items-center gap-2">
               <Loader2 className="h-3 w-3 animate-spin" />

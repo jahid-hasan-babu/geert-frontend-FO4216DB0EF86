@@ -1,32 +1,39 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Eye, EyeOff } from "lucide-react"
-import Image from "next/image"
-import { z } from "zod"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
+import Image from "next/image";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import login_banner from "@/assets/images/login_banner.png";
 import logo from "@/assets/images/logo.png";
-import ForgotPasswordModal from "@/components/ui/modals/ForgotPasswordModal"
-import { useDispatch } from "react-redux"
-import { setUser } from "@/redux/features/auth/authSlice"
-import { toast } from "sonner"
-import { useLoginMutation } from "@/redux/features/auth/authApi"
+import ForgotPasswordModal from "@/components/ui/modals/ForgotPasswordModal";
+import { useDispatch } from "react-redux";
+import { setUser } from "@/redux/features/auth/authSlice";
+import { toast } from "sonner";
+import { useLoginMutation } from "@/redux/features/auth/authApi";
+import { LanguageSwitcher } from "@/lib/google-translate/language-switcher";
 
 const loginSchema = z.object({
-  email: z.string().min(1, "Email is required").email("Please enter a valid email address"),
-  password: z.string().min(1, "Password is required").min(6, "Password must be at least 6 characters long"),
-})
+  email: z
+    .string()
+    .min(1, "Email is required")
+    .email("Please enter a valid email address"),
+  password: z
+    .string()
+    .min(1, "Password is required")
+    .min(6, "Password must be at least 6 characters long"),
+});
 
-type LoginFormData = z.infer<typeof loginSchema>
+type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const router = useRouter()
-  const dispatch = useDispatch()
-  const [login, { isLoading }] = useLoginMutation()
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const [login, { isLoading }] = useLoginMutation();
 
   const {
     register,
@@ -34,33 +41,36 @@ export default function LoginPage() {
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
-  })
+  });
 
-  const [showPassword, setShowPassword] = useState(false)
-  const [modalOpen, setModalOpen] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      const responseData = await login({ email: data.email, password: data.password }).unwrap()
+      const responseData = await login({
+        email: data.email,
+        password: data.password,
+      }).unwrap();
 
       dispatch(
         setUser({
           user: responseData?.data,
           access_token: responseData?.data?.accessToken,
-        }),
-      )
+        })
+      );
 
-      const { accessToken: token, ...user } = responseData.data
-      localStorage.setItem("token", token)
-      localStorage.setItem("user", JSON.stringify(user))
+      const { accessToken: token, ...user } = responseData.data;
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
 
-      toast.success("Logged in successfully!")
-      if (user?.role === "SUPERADMIN") router.push("/dashboard")
-      else router.push("/")
-    } catch (error:any) {
-      toast.error(error?.data?.message || "Invalid email or password")
+      toast.success("Logged in successfully!");
+      if (user?.role === "SUPERADMIN") router.push("/dashboard");
+      else router.push("/");
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Invalid email or password");
     }
-  }
+  };
 
   return (
     <div className="container min-h-screen flex bg-white">
@@ -83,13 +93,20 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-2">
-            <h1 className="text-[28px] text-center text-black font-medium leading-[120%] font-sans">Welcome Back</h1>
-            <p className="text-[#5C5C5C] text-center text-[16px] font-sans">Enter your email & password to login</p>
+            <h1 className="text-[28px] text-center text-black font-medium leading-[120%] font-sans">
+              Welcome Back
+            </h1>
+            <p className="text-[#5C5C5C] text-center text-[16px] font-sans">
+              Enter your email & password to login
+            </p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-gray-700 text-sm font-medium mb-2">
+              <label
+                htmlFor="email"
+                className="block text-gray-700 text-sm font-medium mb-2"
+              >
                 Email
               </label>
               <input
@@ -101,11 +118,18 @@ export default function LoginPage() {
                   errors.email ? "border-red-500" : "border-gray-200"
                 }`}
               />
-              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-gray-700 text-sm font-medium mb-2">
+              <label
+                htmlFor="password"
+                className="block text-gray-700 text-sm font-medium mb-2"
+              >
                 Password
               </label>
               <div className="relative">
@@ -124,10 +148,18 @@ export default function LoginPage() {
                   className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
                 </button>
               </div>
-              {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.password.message}
+                </p>
+              )}
 
               <div className="text-right mt-2">
                 <button
@@ -139,7 +171,6 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
-
             <button
               type="submit"
               disabled={isLoading}
@@ -148,10 +179,16 @@ export default function LoginPage() {
               {isLoading ? "Logging in..." : "Log in"}
             </button>
           </form>
+          <div className="flex justify-end">
+            <LanguageSwitcher />
+          </div>
         </div>
       </div>
 
-      <ForgotPasswordModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      <ForgotPasswordModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+      />
     </div>
-  )
+  );
 }

@@ -18,9 +18,21 @@ import Pagination from "@/components/ui/pagination/Pagination";
 import AddStudentModal from "@/components/ui/modals/AddStudentModal";
 import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import Image from "next/image";
 import { Spin } from "antd";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 type Student = {
   id: string;
@@ -36,6 +48,9 @@ export default function StudentsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
 
   const studentsPerPage = 15;
 
@@ -62,19 +77,28 @@ export default function StudentsPage() {
 
   const filteredStudents = students.filter(
     (student) =>
-      (student.username || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (student.username || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
       student.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
   const startIndex = (currentPage - 1) * studentsPerPage;
-  const currentStudents = filteredStudents.slice(startIndex, startIndex + studentsPerPage);
+  const currentStudents = filteredStudents.slice(
+    startIndex,
+    startIndex + studentsPerPage
+  );
 
   const formatSerialNo = (index: number) =>
     String(startIndex + index + 1).padStart(2, "0");
 
-  // **Parent handles adding student**
-  const handleAddStudent = async (data: { firstName: string; lastName: string; email: string }) => {
+  // Add student handler
+  const handleAddStudent = async (data: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  }) => {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
@@ -85,17 +109,18 @@ export default function StudentsPage() {
 
       if (res.data.success) {
         toast.success("Student added successfully!");
-        fetchStudents(); // Refresh list
+        fetchStudents();
       } else {
         toast.error(res.data.message || "Failed to add student");
       }
     } catch (error) {
       const err = error as AxiosError<{ message: string }>;
       toast.error(err.response?.data?.message || "Failed to add student");
-      throw err; // rethrow to handle in modal
+      throw err;
     }
   };
 
+  // Change status
   const changeStatus = async (student: Student, status: "ACTIVE" | "BLOCKED") => {
     try {
       const token = localStorage.getItem("token");
@@ -116,6 +141,32 @@ export default function StudentsPage() {
     }
   };
 
+  // Delete student handlers
+  const handleDeleteClick = (student: Student) => {
+    setSelectedStudent(student);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedStudent) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/users/remove-student/${selectedStudent.id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success("Student removed successfully!");
+      fetchStudents();
+    } catch (err) {
+      const error = err as AxiosError<{ message: string }>;
+      toast.error(error.response?.data?.message || "Failed to remove student");
+    } finally {
+      setDeleteDialogOpen(false);
+      setSelectedStudent(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white p-6">
       <div className="mx-auto">
@@ -133,7 +184,6 @@ export default function StudentsPage() {
               className="pl-10"
             />
           </div>
-          {/* Pass parent handler */}
           <AddStudentModal onAdd={handleAddStudent} />
         </div>
 
@@ -152,22 +202,31 @@ export default function StudentsPage() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-6 text-gray-500">
-                    <Spin indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />} />
+                  <TableCell
+                    colSpan={6}
+                    className="text-center py-6 text-gray-500"
+                  >
+                    <Spin
+                      indicator={
+                        <LoadingOutlined style={{ fontSize: 48 }} spin />
+                      }
+                    />
                   </TableCell>
                 </TableRow>
               ) : currentStudents.length > 0 ? (
                 currentStudents.map((student, index) => (
                   <TableRow key={student.id} className="hover:bg-gray-50">
-                    <TableCell className="font-medium">{formatSerialNo(index)}</TableCell>
+                    <TableCell className="font-medium">
+                      {formatSerialNo(index)}
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-3">
                         {student.profileImage ? (
                           <Image
                             src={student.profileImage}
                             alt="avatar"
-                            width={20}
-                            height={20}
+                            width={32}
+                            height={32}
                             className="rounded-full object-cover bg-blue-500"
                           />
                         ) : (
@@ -175,7 +234,9 @@ export default function StudentsPage() {
                             {(student.username || student.email).charAt(0)}
                           </div>
                         )}
-                        <span className="font-medium">{student.username || "Unnamed"}</span>
+                        <span className="font-medium">
+                          {student.username || "Unnamed"}
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell className="text-gray-600">{student.email}</TableCell>
@@ -194,21 +255,36 @@ export default function StudentsPage() {
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="w-8 h-8 cursor-pointer" title="Change Status">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="w-8 h-8 cursor-pointer"
+                            title="Options"
+                          >
                             <MoreVertical className="w-4 h-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           {student.status !== "ACTIVE" && (
-                            <DropdownMenuItem onClick={() => changeStatus(student, "ACTIVE")}>
+                            <DropdownMenuItem
+                              onClick={() => changeStatus(student, "ACTIVE")}
+                            >
                               Change to Active
                             </DropdownMenuItem>
                           )}
                           {student.status !== "BLOCKED" && (
-                            <DropdownMenuItem onClick={() => changeStatus(student, "BLOCKED")}>
+                            <DropdownMenuItem
+                              onClick={() => changeStatus(student, "BLOCKED")}
+                            >
                               Change to Blocked
                             </DropdownMenuItem>
                           )}
+                          <DropdownMenuItem
+                            className="text-red-600"
+                            onClick={() => handleDeleteClick(student)}
+                          >
+                            Remove Student
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -226,9 +302,42 @@ export default function StudentsPage() {
         </div>
 
         {totalPages > 1 && (
-          <Pagination currentPage={currentPage} totalPages={totalPages} onChange={setCurrentPage} />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onChange={setCurrentPage}
+          />
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {deleteDialogOpen && (
+        <Dialog
+          open={deleteDialogOpen}
+          onOpenChange={() => setDeleteDialogOpen(false)}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Remove Student</DialogTitle>
+            </DialogHeader>
+            <p>
+              Are you sure you want to remove{" "}
+              {selectedStudent?.username || "this student"}?
+            </p>
+            <DialogFooter className="flex justify-end gap-2">
+              <Button
+                variant="secondary"
+                onClick={() => setDeleteDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleConfirmDelete}>
+                Remove
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

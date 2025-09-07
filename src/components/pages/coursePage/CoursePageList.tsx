@@ -30,7 +30,7 @@ interface Course {
   isMicroLearning?: boolean;
   description: string;
   coverImage: string;
-  isFavorite?: boolean; // optional if fetched from API
+  isFavorite?: boolean;
 }
 
 export default function CoursesPageList() {
@@ -45,7 +45,8 @@ export default function CoursesPageList() {
   const coursesPerPage = 9;
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-  // Fetch categories
+  console.log("Courses:", courses);
+
   useEffect(() => {
     const fetchCategories = async () => {
       if (!token) return;
@@ -62,7 +63,6 @@ export default function CoursesPageList() {
     fetchCategories();
   }, [token]);
 
-  // Fetch courses
   useEffect(() => {
     const fetchCourses = async () => {
       if (!token) return;
@@ -72,7 +72,6 @@ export default function CoursesPageList() {
         let url = `${process.env.NEXT_PUBLIC_BASE_URL}/courses/all-course`;
         const queryParams: string[] = [];
 
-        // Determine search term: searchQuery or activeFilter
         let searchParam = searchQuery;
         if (activeFilter !== "All") {
           searchParam = activeFilter;

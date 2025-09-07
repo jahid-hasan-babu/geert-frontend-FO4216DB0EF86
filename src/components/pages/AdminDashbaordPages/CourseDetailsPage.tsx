@@ -2,7 +2,6 @@
 "use client";
 
 import type React from "react";
-
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
@@ -20,10 +19,12 @@ import { Loader2 } from "lucide-react";
 import {
   useGetCourseByIdQuery,
   useEditCourseMutation,
+  useDeleteCourseMutation,
+  useEditModuleMutation,
+  useEditLessonMutation,
 } from "@/redux/features/courses/coursesApi";
 import AddModuleModal from "@/components/ui/modal/add-module-modal";
 import { AddLessonModal } from "@/components/ui/modal/add-lesson-modal";
-
 // Use shared types from add-lesson-modal to ensure compatibility
 import type {
   Module,
@@ -34,6 +35,7 @@ import type {
 } from "@/components/ui/modal/add-lesson-modal";
 import Editor from "@/components/ui/Editor/Editor";
 import AddMemberModal from "@/components/ui/modals/AddMemberModal";
+import { Dialog } from "@headlessui/react";
 
 interface Instructor {
   id: string;
@@ -67,6 +69,7 @@ const CourseDetailsPage = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [isModuleModalVisible, setIsModuleModalVisible] = useState(false);
   const [isLessonModalVisible, setIsLessonModalVisible] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -78,11 +81,30 @@ const CourseDetailsPage = () => {
 
   const { data, isLoading } = useGetCourseByIdQuery(id);
   const [editCourse, { isLoading: isEditing }] = useEditCourseMutation();
-  console.log(course, "couser all data");
+  const [deleteCourse, { isLoading: isDeleting }] = useDeleteCourseMutation();
+  const [editModule] = useEditModuleMutation();
+  const [editLesson] = useEditLessonMutation();
+
+  const [editingModule, setEditingModule] = useState<{
+    moduleId: string;
+    title: string;
+  } | null>(null);
+  const [editingLesson, setEditingLesson] = useState<{
+    moduleId: string;
+    lesson: Lesson;
+  } | null>(null);
+
+  const [editModuleTitle, setEditModuleTitle] = useState("");
+  const [editLessonData, setEditLessonData] = useState({
+    title: "",
+    description: "",
+    duration: "",
+    videoFile: null as File | null,
+  });
 
   console.log("Cousers All", data);
-
   const courseModules = course?.modules;
+
   useEffect(() => {
     if (data?.data) {
       const courseData = data?.data;
@@ -144,17 +166,16 @@ const CourseDetailsPage = () => {
       }
 
       // toast({
-      // 	title: "Success",
-      // 	description: "Course updated successfully!",
+      //   title: "Success",
+      //   description: "Course updated successfully!",
       // });
-
       setIsEditMode(false);
     } catch (error) {
       console.log(error);
       // toast({
-      // 	title: "Error",
-      // 	description: "Failed to update course. Please try again.",
-      // 	variant: "destructive",
+      //   title: "Error",
+      //   description: "Failed to update course. Please try again.",
+      //   variant: "destructive",
       // });
     }
   };
@@ -191,6 +212,76 @@ const CourseDetailsPage = () => {
     window.location.reload(); // Simple refresh, could be optimized with RTK Query refetch
   };
 
+  const handleDeleteCourse = async () => {
+    if (!course?.id) return;
+
+    try {
+      await deleteCourse(course.id).unwrap();
+      setIsDeleteModalOpen(false);
+      window.location.href = "/dashboard/course";
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleEditModuleClick = (moduleId: string, currentTitle: string) => {
+    setEditingModule({ moduleId, title: currentTitle });
+    setEditModuleTitle(currentTitle);
+  };
+
+  const handleEditModuleSubmit = async () => {
+    if (!editingModule) return;
+
+    try {
+      await editModule({
+        moduleId: editingModule.moduleId,
+        title: editModuleTitle,
+      }).unwrap();
+
+      setEditingModule(null);
+      window.location.reload();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleEditLessonClick = (moduleId: string, lesson: Lesson) => {
+    setEditingLesson({ moduleId, lesson });
+    setEditLessonData({
+      title: lesson?.title,
+      description: lesson?.description,
+      duration: lesson?.duration,
+      videoFile: null,
+    });
+  };
+
+  const handleEditLessonSubmit = async () => {
+    if (!editingLesson) return;
+
+    try {
+      const formData = new FormData();
+      const { title, description, duration, videoFile } = editLessonData;
+
+      formData.append(
+        "bodyData",
+        JSON.stringify({ title, description, duration })
+      );
+
+      if (videoFile) formData.append("videoURL", videoFile);
+
+      await editLesson({
+        moduleId: editingLesson.moduleId,
+        lessonId: editingLesson.lesson.id,
+        formData,
+      }).unwrap();
+
+      setEditingLesson(null);
+      window.location.reload();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -205,7 +296,6 @@ const CourseDetailsPage = () => {
 
   const handleAddSuccess = () => {
     console.log("Member added successfully!");
-    // Add logic to refresh course data or update UI
   };
 
   return (
@@ -280,18 +370,19 @@ const CourseDetailsPage = () => {
               onChange={(e) => handleInputChange("title", e.target.value)}
             />
           </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Description
             </label>
             {/* <Textarea
-							value={isEditMode ? formData.description : course.description}
-							className={`${
-								isEditMode ? "bg-white" : "bg-gray-50"
-							} min-h-[80px]`}
-							readOnly={!isEditMode}
-							onChange={(e) => handleInputChange("description", e.target.value)}
-						/> */}
+              value={isEditMode ? formData.description : course.description}
+              className={`${
+                isEditMode ? "bg-white" : "bg-gray-50"
+              } min-h-[80px]`}
+              readOnly={!isEditMode}
+              onChange={(e) => handleInputChange("description", e.target.value)}
+            /> */}
             {isEditMode ? (
               <Editor
                 contents={formData.description}
@@ -303,7 +394,9 @@ const CourseDetailsPage = () => {
             ) : (
               <div
                 className="bg-gray-50 min-h-[80px] p-2 rounded"
-                dangerouslySetInnerHTML={{ __html: course.description || "" }}
+                dangerouslySetInnerHTML={{
+                  __html: course?.description || "",
+                }}
               />
             )}
           </div>
@@ -319,6 +412,7 @@ const CourseDetailsPage = () => {
                 readOnly
               />
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Course Duration
@@ -341,7 +435,7 @@ const CourseDetailsPage = () => {
           {isEditMode && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Course Price ($)
+                Course Price (€)
               </label>
               <Input
                 type="number"
@@ -363,7 +457,6 @@ const CourseDetailsPage = () => {
       <div className="mb-8">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-semibold">Module</h2>
-
           {isEditMode && (
             <div className="flex gap-2">
               <Button
@@ -381,6 +474,7 @@ const CourseDetailsPage = () => {
             </div>
           )}
         </div>
+
         <Accordion type="single" collapsible className="space-y-2 pb-5">
           {course?.modules?.map((module, index) => (
             <AccordionItem
@@ -398,21 +492,129 @@ const CourseDetailsPage = () => {
                   {module?.lessons?.map((lesson, idx) => (
                     <div
                       key={lesson.id}
-                      className="p-2 border rounded-md bg-gray-50"
+                      className="p-2 border rounded-md bg-gray-50 flex justify-between items-center"
                     >
-                      <p className="text-gray-800 font-medium">
-                        {index + 1}.{idx + 1} {lesson.title}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {lesson.type === "video"
-                          ? `🎥 ${lesson?.duration}`
-                          : `📝 ${lesson?.duration}`}
-                      </p>
+                      <div>
+                        <p className="text-gray-800 font-medium">
+                          {index + 1}.{idx + 1} {lesson.title}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {lesson.type === "video"
+                            ? `🎥 ${lesson?.duration}`
+                            : `📝 ${lesson?.duration}`}
+                        </p>
+                      </div>
+                      {isEditMode && (
+                        <div>
+                          {editingLesson?.lesson.id === lesson.id ? (
+                            <div className="flex flex-col gap-2 w-full">
+                              <Input
+                                value={editLessonData.title}
+                                onChange={(e) =>
+                                  setEditLessonData((prev) => ({
+                                    ...prev,
+                                    title: e.target.value,
+                                  }))
+                                }
+                                placeholder="Lesson Title"
+                              />
+                              <Textarea
+                                value={editLessonData.description}
+                                onChange={(e) =>
+                                  setEditLessonData((prev) => ({
+                                    ...prev,
+                                    description: e.target.value,
+                                  }))
+                                }
+                                placeholder="Lesson Description"
+                                className="min-h-[60px]"
+                              />
+                              <Input
+                                value={editLessonData.duration}
+                                onChange={(e) =>
+                                  setEditLessonData((prev) => ({
+                                    ...prev,
+                                    duration: e.target.value,
+                                  }))
+                                }
+                                placeholder="Duration"
+                              />
+                              <Input
+                                type="file"
+                                onChange={(e) =>
+                                  setEditLessonData((prev) => ({
+                                    ...prev,
+                                    videoFile: e.target.files?.[0] || null,
+                                  }))
+                                }
+                              />
+                              <div className="flex gap-2">
+                                <Button
+                                  size="sm"
+                                  onClick={handleEditLessonSubmit}
+                                  className="bg-green-500 hover:bg-green-600 text-white"
+                                >
+                                  Save
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setEditingLesson(null)}
+                                >
+                                  Cancel
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <Button
+                              size="sm"
+                              onClick={() =>
+                                handleEditLessonClick(module.id, lesson)
+                              }
+                              className="bg-orange-500 hover:bg-orange-600 text-white"
+                            >
+                              Edit Lesson
+                            </Button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   ))}
-                  {module?.quizzes?.length > 0 && (
-                    <div className="p-2 border rounded-md bg-yellow-50">
-                      Quiz Available: {module?.quizzes?.length}
+
+                  {isEditMode && (
+                    <div className="mt-2">
+                      {editingModule?.moduleId === module.id ? (
+                        <div className="flex gap-2 mt-2">
+                          <Input
+                            value={editModuleTitle}
+                            onChange={(e) => setEditModuleTitle(e.target.value)}
+                          />
+                          <Button
+                            size="sm"
+                            onClick={handleEditModuleSubmit}
+                            className="bg-green-500 hover:bg-green-600 text-white"
+                          >
+                            Save
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setEditingModule(null)}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          size="sm"
+                          onClick={() =>
+                            handleEditModuleClick(module.id, module.title)
+                          }
+                          className="bg-yellow-500 hover:bg-yellow-600 text-white"
+                        >
+                          Edit Module
+                        </Button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -480,14 +682,55 @@ const CourseDetailsPage = () => {
             </Button>
           </div>
         ) : (
-          <Button
-            onClick={() => setIsEditMode(true)}
-            className="w-full bg-[#3399CC] hover:bg-[#52b9ec] text-white py-3 rounded-lg cursor-pointer"
-          >
-            Edit Course
-          </Button>
+          <div className="flex flex-col space-y-4">
+            <Button
+              onClick={() => setIsEditMode(true)}
+              className="w-full bg-[#3399CC] hover:bg-[#52b9ec] text-white py-3 rounded-lg cursor-pointer"
+            >
+              Edit Course
+            </Button>
+            <Button
+              onClick={() => setIsDeleteModalOpen(true)}
+              className="w-full bg-red-500 hover:bg-red-700 text-white py-3 rounded-lg cursor-pointer"
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete Course"}
+            </Button>
+          </div>
         )}
       </div>
+
+      <Dialog
+        open={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        className="fixed inset-0 z-50 flex items-center justify-center"
+      >
+        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+        <div className="bg-white p-6 rounded-lg z-10 max-w-md mx-auto">
+          <Dialog.Title className="text-lg font-semibold mb-4">
+            Confirm Delete
+          </Dialog.Title>
+          <p className="text-gray-600 mb-6">
+            Are you sure you want to delete this course? This action cannot be
+            undone.
+          </p>
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="bg-red-500 hover:bg-red-700 text-white"
+              onClick={handleDeleteCourse}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </Button>
+          </div>
+        </div>
+      </Dialog>
 
       <AddModuleModal
         visible={isModuleModalVisible}

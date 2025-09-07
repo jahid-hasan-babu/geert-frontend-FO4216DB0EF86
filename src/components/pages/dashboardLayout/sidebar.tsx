@@ -10,6 +10,7 @@ import {
   Bell,
   LayoutDashboard,
   Layers,
+  Podcast,
 } from "lucide-react";
 
 import Link from "next/link";
@@ -111,6 +112,9 @@ export default function Sidebar() {
                 </NavItem>
                 <NavItem href="/dashboard/instructor" icon={UserCog}>
                   Instructor
+                </NavItem>
+                <NavItem href="/dashboard/subscriber" icon={Podcast}>
+                  Subscribers
                 </NavItem>
                 <NavItem href="/dashboard/notifications" icon={Bell}>
                   Notification

@@ -1,4 +1,3 @@
-
 import { baseApi } from "../../api/baseApi";
 
 const coursesApi = baseApi.injectEndpoints({
@@ -12,10 +11,10 @@ const coursesApi = baseApi.injectEndpoints({
       invalidatesTags: ["courses"],
     }),
     getAllCourses: builder.query({
-      query: (search: string) => ({
+      query: ({ search = "", page = 1, limit }) => ({
         url: "/courses/all-course",
         method: "GET",
-        params: { search },
+        params: { search, page, limit },
       }),
       providesTags: ["courses"],
     }),
@@ -76,6 +75,26 @@ const coursesApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["courses"],
     }),
+    editModule: builder.mutation({
+      query: ({ moduleId, title }: { moduleId: string; title: string }) => ({
+        url: `/courses/update-module/${moduleId}`,
+        method: "PATCH",
+        body: { title },
+        headers: { "Content-Type": "application/json" },
+      }),
+      invalidatesTags: ["courses"],
+    }),
+    editLesson: builder.mutation<
+      { success: boolean; message?: string },
+      { moduleId: string; lessonId: string; formData: FormData }
+    >({
+      query: ({ moduleId, lessonId, formData }) => ({
+        url: `/courses/update-lesson/${moduleId}/${lessonId}`,
+        method: "PUT",
+        body: formData,
+      }),
+      invalidatesTags: ["courses"],
+    }),
     getMyCourseProgress: builder.query({
       query: (id) => ({
         url: `/courses/my-single-course-progress/${id}`,
@@ -90,9 +109,15 @@ const coursesApi = baseApi.injectEndpoints({
         body: { courseId, email },
       }),
       invalidatesTags: ["courses"],
+    }),
+    deleteCourse: builder.mutation({
+      query: (courseId: string) => ({
+        url: `/courses/delete-course/${courseId}`,
+        method: "POST",
+      }),
+      invalidatesTags: ["courses"],
+    }),
   }),
-  }),
- 
 });
 
 export const {
@@ -104,6 +129,9 @@ export const {
   useGetMicroLearningQuery,
   useAddCourseModuleMutation,
   useAddCourseLessonMutation,
+  useEditModuleMutation,
+  useEditLessonMutation,
   useGetMyCourseProgressQuery,
   useAddCourseStudentMutation,
+  useDeleteCourseMutation,
 } = coursesApi;

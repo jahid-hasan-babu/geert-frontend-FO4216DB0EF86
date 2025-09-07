@@ -5,8 +5,7 @@ import { Search, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { LoadingOutlined } from '@ant-design/icons';
-
+import { LoadingOutlined } from "@ant-design/icons";
 import {
   Table,
   TableBody,
@@ -28,6 +27,13 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { Spin } from "antd";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 export interface Instructor {
   id: string;
@@ -45,6 +51,10 @@ export default function InstructorPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [instructors, setInstructors] = useState<Instructor[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedInstructor, setSelectedInstructor] =
+    useState<Instructor | null>(null);
 
   const instructorsPerPage = 15;
 
@@ -70,7 +80,6 @@ export default function InstructorPage() {
     fetchInstructors();
   }, []);
 
-  // Filter + pagination
   const filteredInstructors = instructors.filter(
     (instructor) =>
       (instructor.username || "")
@@ -89,7 +98,6 @@ export default function InstructorPage() {
   const formatSerialNo = (index: number) =>
     String(startIndex + index + 1).padStart(2, "0");
 
-  // Handle add instructor
   const handleAddInstructor = async (data: {
     username: string;
     email: string;
@@ -128,7 +136,10 @@ export default function InstructorPage() {
     }
   };
 
-  const handleStatusChange = async (instructorId: string, status: "ACTIVE" | "INACTIVE") => {
+  const handleStatusChange = async (
+    instructorId: string,
+    status: "ACTIVE" | "INACTIVE"
+  ) => {
     try {
       const token = localStorage.getItem("token");
       await axios.patch(
@@ -142,6 +153,37 @@ export default function InstructorPage() {
       const err = error as AxiosError<{ message: string }>;
       console.error(err);
       toast.error(err.response?.data?.message || "Failed to change status");
+    }
+  };
+
+  const handleDeleteClick = (instructor: Instructor) => {
+    setSelectedInstructor(instructor);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedInstructor) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/users/remove-instructor/${selectedInstructor.id}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      toast.success("Instructor removed successfully!");
+      fetchInstructors();
+    } catch (err) {
+      const error = err as AxiosError<{ message: string }>;
+      toast.error(
+        error.response?.data?.message || "Failed to remove instructor"
+      );
+    } finally {
+      setDeleteDialogOpen(false);
+      setSelectedInstructor(null);
     }
   };
 
@@ -165,7 +207,6 @@ export default function InstructorPage() {
           <AddInstructorModal onAdd={handleAddInstructor} />
         </div>
 
-        {/* Table */}
         <div className="bg-white rounded-lg border mb-3 lg:mb-10">
           <Table>
             <TableHeader>
@@ -186,8 +227,11 @@ export default function InstructorPage() {
                     colSpan={7}
                     className="text-center py-6 text-gray-500"
                   >
-                        <Spin indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />} />
-
+                    <Spin
+                      indicator={
+                        <LoadingOutlined style={{ fontSize: 48 }} spin />
+                      }
+                    />
                   </TableCell>
                 </TableRow>
               ) : currentInstructors.length > 0 ? (
@@ -245,7 +289,11 @@ export default function InstructorPage() {
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="w-8 h-8 cursor-pointer">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="w-8 h-8 cursor-pointer"
+                          >
                             <MoreVertical className="w-4 h-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -268,6 +316,12 @@ export default function InstructorPage() {
                               Change to block
                             </DropdownMenuItem>
                           )}
+                          <DropdownMenuItem
+                            className="text-red-600"
+                            onClick={() => handleDeleteClick(instructor)}
+                          >
+                            Remove Instructor
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -295,6 +349,33 @@ export default function InstructorPage() {
           />
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onOpenChange={() => setDeleteDialogOpen(false)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Remove Instructor</DialogTitle>
+          </DialogHeader>
+          <p className="my-4">
+            Are you sure you want to remove{" "}
+            {selectedInstructor?.username || "this instructor"}?
+          </p>
+          <DialogFooter className="flex justify-end gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmDelete}>
+              Remove
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
