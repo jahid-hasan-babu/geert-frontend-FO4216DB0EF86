@@ -1,11 +1,11 @@
 "use client";
 
 import React from "react";
-import { useGetHelpSupportQuery } from "@/redux/features/legal/legalApi";
+import { useGetLegalDataQuery } from "@/redux/features/legal/legalApi";
 import { Spin } from "antd";
 
-const HelpSupport = () => {
-  const { data, isLoading } = useGetHelpSupportQuery(undefined);
+const RegulatoryInfo = () => {
+  const { data, isLoading } = useGetLegalDataQuery(undefined);
 
   if (isLoading) {
     return (
@@ -21,26 +21,22 @@ const HelpSupport = () => {
     <section className="relative py-16 lg:py-24 text-white overflow-hidden">
       <div className="container mx-auto px-6 text-center relative z-10">
         <h2 className="text-4xl md:text-5xl lg:text-[64px] font-bold text-[#101010] mb-4 font-playfairDisplay">
-          Help & Support
+          Regulatory Info
         </h2>
-        <p className="text-md md:text-lg text-gray-400 mb-10 mx-auto lg:w-1/4">
-          Quick solutions, helpful resources, and dedicated support all in one
-          place.
-        </p>
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <span className="text-[15rem] md:text-[20rem] lg:text-[248px] font-medium leading-[120%] text-[#2CA2D1]/[0.04] select-none font-playfairDisplay">
-            HELP
+            REGULATORY
           </span>
         </div>
 
         {/* ✅ Render HTML safely */}
         <div
           className="max-w-3xl text-base md:text-lg text-[#5F5F5F] leading-[160%] mx-auto relative z-10 font-medium"
-          dangerouslySetInnerHTML={{ __html: data?.data[0]?.description || "" }}
+          dangerouslySetInnerHTML={{ __html: data?.regularityInfo || "" }}
         />
       </div>
     </section>
   );
 };
 
-export default HelpSupport;
+export default RegulatoryInfo;

@@ -84,6 +84,8 @@ const CourseDetailsPage = () => {
   const [deleteCourse, { isLoading: isDeleting }] = useDeleteCourseMutation();
   const [editModule] = useEditModuleMutation();
   const [editLesson] = useEditLessonMutation();
+  const [isEditingLesson, setIsEditingLesson] = useState(false);
+  const [isEditingModule, setIsEditingModule] = useState(false);
 
   const [editingModule, setEditingModule] = useState<{
     moduleId: string;
@@ -232,6 +234,7 @@ const CourseDetailsPage = () => {
   const handleEditModuleSubmit = async () => {
     if (!editingModule) return;
 
+    setIsEditingModule(true);
     try {
       await editModule({
         moduleId: editingModule.moduleId,
@@ -239,9 +242,11 @@ const CourseDetailsPage = () => {
       }).unwrap();
 
       setEditingModule(null);
-      window.location.reload();
+      window.location.reload(); // optional: can be replaced later with state update
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsEditingModule(false);
     }
   };
 
@@ -257,7 +262,7 @@ const CourseDetailsPage = () => {
 
   const handleEditLessonSubmit = async () => {
     if (!editingLesson) return;
-
+    setIsEditingLesson(true);
     try {
       const formData = new FormData();
       const { title, description, duration, videoFile } = editLessonData;
@@ -279,6 +284,8 @@ const CourseDetailsPage = () => {
       window.location.reload();
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsEditingLesson(false);
     }
   };
 
@@ -552,10 +559,19 @@ const CourseDetailsPage = () => {
                                 <Button
                                   size="sm"
                                   onClick={handleEditLessonSubmit}
-                                  className="bg-green-500 hover:bg-green-600 text-white"
+                                  className="bg-green-500 hover:bg-green-600 text-white flex items-center gap-2"
+                                  disabled={false} // We’ll set a loading state
                                 >
-                                  Save
+                                  {isEditingLesson ? (
+                                    <>
+                                      <Loader2 className="w-4 h-4 animate-spin" />
+                                      Saving...
+                                    </>
+                                  ) : (
+                                    "Save"
+                                  )}
                                 </Button>
+
                                 <Button
                                   size="sm"
                                   variant="outline"
@@ -592,10 +608,19 @@ const CourseDetailsPage = () => {
                           <Button
                             size="sm"
                             onClick={handleEditModuleSubmit}
-                            className="bg-green-500 hover:bg-green-600 text-white"
+                            className="bg-green-500 hover:bg-green-600 text-white flex items-center gap-2"
+                            disabled={isEditingModule}
                           >
-                            Save
+                            {isEditingModule ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Saving...
+                              </>
+                            ) : (
+                              "Save"
+                            )}
                           </Button>
+
                           <Button
                             size="sm"
                             variant="outline"

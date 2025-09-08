@@ -7,6 +7,7 @@ import { FaXTwitter, FaWhatsapp, FaFacebook } from "react-icons/fa6";
 import PrimaryButton from "@/components/ui/buttons/PrimaryButton/PrimaryButton";
 import { LanguageSwitcher } from "@/lib/google-translate/language-switcher";
 import axios from "axios";
+import Link from "next/link";
 
 export default function Footer() {
   const [email, setEmail] = useState("");
@@ -69,24 +70,24 @@ export default function Footer() {
             </h4>
             <ul className="space-y-4">
               <li>
-                <a href="#" className="text-gray-300 hover:text-white">
+                <Link href="/" className="text-gray-300 hover:text-white">
                   Home
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-white">
-                  Feature
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-gray-300 hover:text-white">
+                <Link href="/courses" className="text-gray-300 hover:text-white">
                   Course
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-white">
+                <Link href="/contact" className="text-gray-300 hover:text-white">
                   Contact
-                </a>
+                </Link>
+              </li>
+              <li>
+                <Link href="/help-support" className="text-gray-300 hover:text-white">
+                  Support
+                </Link>
               </li>
             </ul>
           </div>
@@ -96,24 +97,24 @@ export default function Footer() {
             <h4 className="text-lg font-semibold mb-6 text-gray-300">Legal</h4>
             <ul className="space-y-4">
               <li>
-                <a href="#" className="text-gray-300 hover:text-white">
+                <Link href="/privacy-policy" className="text-gray-300 hover:text-white">
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-white">
+                <Link href="terms-service" className="text-gray-300 hover:text-white">
                   Terms of Service
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-white">
+                <Link href="cookies-policy" className="text-gray-300 hover:text-white">
                   Cookies Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-white">
+                <Link href="regulatory-info" className="text-gray-300 hover:text-white">
                   Regulatory Info
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

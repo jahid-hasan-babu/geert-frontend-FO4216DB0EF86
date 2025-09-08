@@ -1,5 +1,5 @@
-// import { images } from "@/utils/images";
 import Image from "next/image";
+import { Spin } from "antd";
 import hero_learners_1 from "@/assets/images/hero_learners_1.png";
 import hero_learners_2 from "@/assets/images/hero_learners_2.png";
 import hero_learners_3 from "@/assets/images/hero_learners_4.png";
@@ -8,8 +8,21 @@ import heroBanner from "@/assets/images/hero_banner.png";
 import PrimaryButton from "@/components/ui/buttons/PrimaryButton/PrimaryButton";
 import Partners from "@/components/common/Partners";
 import Link from "next/link";
+import { useGetHomeDataQuery } from "@/redux/features/legal/legalApi";
 
 export default function Hero() {
+  const { data, isLoading } = useGetHomeDataQuery(undefined);
+
+  if (isLoading) {
+    return (
+      <section className="container bg-white">
+        <div className="mx-auto px-2 md:px-4 lg:px-6 py-12 text-center">
+          <Spin size="large" tip="Loading hero content..." />
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="container bg-white">
       <div className="mx-auto px-2 md:px-4 lg:px-6 py-2 md:py-12 lg:py-24">
@@ -18,12 +31,10 @@ export default function Hero() {
           <div className="space-y-8 lg:col-span-3">
             <div className="space-y-6 text-center lg:text-left">
               <h1 className="text-2xl md:text-5xl lg:text-[64px] font-bold text-gray-900 font-playfairDisplay">
-                Unlock Your Potential with Expert Courses
+                {data?.header}
               </h1>
               <p className="text-md md:text-lg text-gray-500 leading-relaxed lg:w-[75%]">
-                Start your learning journey today with courses designed for
-                real-world success. Gain practical skills, earn certificates,
-                and stand out in your career.
+                {data?.title}
               </p>
             </div>
 
@@ -35,10 +46,10 @@ export default function Hero() {
             {/* Social Proof */}
             <div className="flex items-center space-x-4 mt-3">
               <div className="flex -space-x-2">
-                <Image src={hero_learners_1} alt="hero_trusted"></Image>
-                <Image src={hero_learners_2} alt="hero_trusted"></Image>
-                <Image src={hero_learners_3} alt="hero_trusted"></Image>
-                <Image src={hero_learners_4} alt="hero_trusted"></Image>
+                <Image src={hero_learners_1} alt="hero_trusted" />
+                <Image src={hero_learners_2} alt="hero_trusted" />
+                <Image src={hero_learners_3} alt="hero_trusted" />
+                <Image src={hero_learners_4} alt="hero_trusted" />
               </div>
               <p className="text-gray-600 font-medium text-xs md:text-base">
                 Trusted by 5,000+ learners
