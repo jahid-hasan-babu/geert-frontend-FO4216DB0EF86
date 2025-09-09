@@ -4,7 +4,6 @@ import { logoutHandler } from "@/utils/handleLogout";
 import { LogOut, MoveUpRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 
@@ -23,39 +22,45 @@ interface Profile01Props {
   subscription?: string;
 }
 
-const defaultProfile = {
+interface StoredUser {
+  username?: string;
+  email?: string;
+  profileImage?: string;
+}
+
+const defaultProfile: Required<Profile01Props> = {
   name: "Name",
   email: "example@email.com",
   avatar: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
   subscription: "Free Trial",
-} satisfies Required<Profile01Props>;
+};
 
 export default function Profile01() {
   const [profile, setProfile] = useState<Profile01Props>(defaultProfile);
 
   const menuItems: MenuItem[] = [];
 
-  const router = useRouter();
+  // const router = useRouter();
   const dispatch = useDispatch();
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       try {
-        const parsed = JSON.parse(storedUser);
+        const parsed: StoredUser = JSON.parse(storedUser);
         setProfile({
           name: parsed.username || defaultProfile.name,
           email: parsed.email || defaultProfile.email,
           avatar: parsed.profileImage || defaultProfile.avatar,
         });
-      } catch (e) {
-        console.error("Error parsing user from localStorage:", e);
+      } catch {
+        console.error("Error parsing user from localStorage");
       }
     }
   }, []);
 
-  const handleLogout = () => {
-    logoutHandler(dispatch, router);
+  const handleLogout = (): void => {
+    logoutHandler(dispatch);
     window.dispatchEvent(new Event("logout"));
   };
 
@@ -72,10 +77,8 @@ export default function Profile01() {
                 height={28}
                 className="rounded-full ring-2 ring-gray-200 dark:ring-[#2B2B30] sm:w-9 sm:h-9 cursor-pointer"
               />
-              {/* <div className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-emerald-500 ring-2 ring-white" /> */}
             </div>
 
-            {/* Profile Info */}
             <div className="flex-1">
               <h2 className="text-xl font-semibold text-zinc-900">
                 {profile.name}

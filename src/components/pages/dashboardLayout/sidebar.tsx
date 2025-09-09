@@ -19,7 +19,7 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 import { logoutHandler } from "@/utils/handleLogout";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useDispatch } from "react-redux";
 import Image from "next/image";
 import logo from "@/assets/images/logo.png";
@@ -43,7 +43,7 @@ export default function Sidebar() {
     onClick,
     isDropdown = false,
     isOpen = false,
-    activeOverride = false, // ✅ new prop
+    activeOverride = false,
   }: {
     href?: string;
     icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
@@ -51,7 +51,7 @@ export default function Sidebar() {
     onClick?: () => void;
     isDropdown?: boolean;
     isOpen?: boolean;
-    activeOverride?: boolean; // ✅ allow manual active state
+    activeOverride?: boolean;
   }) {
     const active = activeOverride || (href ? isActive(href) : false);
 
@@ -93,10 +93,10 @@ export default function Sidebar() {
     );
   }
 
-  const router = useRouter();
+  // const router = useRouter();
   const dispatch = useDispatch();
   const handleLogout = () => {
-    logoutHandler(dispatch, router);
+    logoutHandler(dispatch);
     window.dispatchEvent(new Event("logout"));
   };
 
@@ -229,11 +229,9 @@ export default function Sidebar() {
                 </Link>
               </div>
 
-              <Link href="/dashboard/notifications">
-                <NavItem href="/dashboard/notifications" icon={Bell}>
-                  Notification
-                </NavItem>
-              </Link>
+              <NavItem href="/dashboard/notifications" icon={Bell}>
+                Notification
+              </NavItem>
             </div>
           </div>
 

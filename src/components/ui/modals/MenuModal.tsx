@@ -47,7 +47,7 @@ export function MenuModal({
 	const router = useRouter();
 
 	const handleLogout = () => {
-		logoutHandler(dispatch, router);
+		logoutHandler(dispatch);
 		window.dispatchEvent(new Event("logout"));
 	};
 
