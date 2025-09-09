@@ -104,7 +104,7 @@ export default function DashboardHome() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-x-[30]">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-[28px] font-medium text-[#4D5154]">
+              <CardTitle className="text-[28px] font-medium text-[#4D5154]" data-translate>
                 Total Course
               </CardTitle>
             </CardHeader>
@@ -117,12 +117,12 @@ export default function DashboardHome() {
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-[28px] font-medium text-[#4D5154]">
+              <CardTitle className="text-[28px] font-medium text-[#4D5154]" data-translate>
                 Total Students
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-[48px] font-medium text-gray-900">
+              <div className="text-[48px] font-medium text-gray-900" data-translate>
                 {totals.totalStudents}
               </div>
             </CardContent>
@@ -130,7 +130,7 @@ export default function DashboardHome() {
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-[28px] font-medium text-[#4D5154]">
+              <CardTitle className="text-[28px] font-medium text-[#4D5154]" data-translate>
                 Total Tutors
               </CardTitle>
             </CardHeader>
@@ -146,7 +146,7 @@ export default function DashboardHome() {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-xl font-semibold text-gray-900">
+              <CardTitle className="text-xl font-semibold text-gray-900" data-translate>
                 Performance
               </CardTitle>
               <Select value={selectedYear} onValueChange={setSelectedYear}>

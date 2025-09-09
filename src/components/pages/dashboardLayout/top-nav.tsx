@@ -1,6 +1,9 @@
 "use client";
 
-import { LanguageSwitcher } from "@/lib/google-translate/language-switcher";
+import {
+  LanguageSwitcher,
+  TranslateInitializer,
+} from "@/lib/language-translate/LanguageSwitcher";
 import { DropdownMenu, DropdownMenuTrigger } from "./dropdown-menu";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -46,6 +49,7 @@ export default function TopNav() {
       </div>
 
       <div className="flex items-center gap-2 ml-auto lg:ml-0">
+        <TranslateInitializer />
         <LanguageSwitcher />
         <DropdownMenu>
           <DropdownMenuTrigger className="focus:outline-none">

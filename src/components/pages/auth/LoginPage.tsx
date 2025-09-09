@@ -15,7 +15,10 @@ import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/features/auth/authSlice";
 import { toast } from "sonner";
 import { useLoginMutation } from "@/redux/features/auth/authApi";
-import { LanguageSwitcher } from "@/lib/google-translate/language-switcher";
+import {
+  LanguageSwitcher,
+  TranslateInitializer,
+} from "@/lib/language-translate/LanguageSwitcher";
 
 const loginSchema = z.object({
   email: z
@@ -93,10 +96,10 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-2">
-            <h1 className="text-[28px] text-center text-black font-medium leading-[120%] font-sans">
+            <h1 className="text-[28px] text-center text-black font-medium leading-[120%] font-sans" data-translate>
               Welcome Back
             </h1>
-            <p className="text-[#5C5C5C] text-center text-[16px] font-sans">
+            <p className="text-[#5C5C5C] text-center text-[16px] font-sans" data-translate>
               Enter your email & password to login
             </p>
           </div>
@@ -106,6 +109,7 @@ export default function LoginPage() {
               <label
                 htmlFor="email"
                 className="block text-gray-700 text-sm font-medium mb-2"
+                data-translate
               >
                 Email
               </label>
@@ -129,6 +133,7 @@ export default function LoginPage() {
               <label
                 htmlFor="password"
                 className="block text-gray-700 text-sm font-medium mb-2"
+                data-translate
               >
                 Password
               </label>
@@ -166,6 +171,7 @@ export default function LoginPage() {
                   type="button"
                   onClick={() => setModalOpen(true)}
                   className="text-sm text-blue-500 hover:underline focus:outline-none cursor-pointer"
+                  data-translate
                 >
                   Forgot Password?
                 </button>
@@ -175,11 +181,14 @@ export default function LoginPage() {
               type="submit"
               disabled={isLoading}
               className="w-full button-bg text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 cursor-pointer disabled:opacity-50"
+              data-translate
             >
               {isLoading ? "Logging in..." : "Log in"}
             </button>
           </form>
           <div className="flex justify-end">
+            {/* <LanguageSwitcher /> */}
+            <TranslateInitializer />
             <LanguageSwitcher />
           </div>
         </div>

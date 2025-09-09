@@ -9,6 +9,7 @@ import CourseSearch from "@/components/ui/search/CourseSearch";
 import Pagination from "@/components/ui/pagination/Pagination";
 import axios from "axios";
 import { LessonsItem } from "@/components/ui/context/CourseContext";
+import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
 
 interface Category {
   id: string;
@@ -45,8 +46,6 @@ export default function CoursesPageList() {
   const coursesPerPage = 9;
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-  console.log("Courses:", courses);
-
   useEffect(() => {
     const fetchCategories = async () => {
       if (!token) return;
@@ -73,21 +72,16 @@ export default function CoursesPageList() {
         const queryParams: string[] = [];
 
         let searchParam = searchQuery;
-        if (activeFilter !== "All") {
-          searchParam = activeFilter;
-        }
+        if (activeFilter !== "All") searchParam = activeFilter;
 
         if (searchParam) queryParams.push(`search=${encodeURIComponent(searchParam)}`);
 
-        // Pagination
         queryParams.push(`page=${currentPage}`);
         queryParams.push(`limit=${coursesPerPage}`);
 
         if (queryParams.length > 0) url += `?${queryParams.join("&")}`;
 
-        const res = await axios.get(url, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } });
 
         setCourses(res.data.data.data || []);
         setTotalPages(res.data.data.meta?.totalPage || 1);
@@ -103,12 +97,18 @@ export default function CoursesPageList() {
 
   return (
     <div className="container mx-auto px-3 lg:px-6 py-5 lg:py-[80px]">
+      {/* Initialize Google Translate */}
+      <TranslateInitializer />
+
       {/* Header */}
       <div className="text-center mb-12 lg:max-w-1/2 mx-auto">
-        <h1 className="text-2xl md:text-5xl lg:text-[64px] font-semibold text-gray-900 mb-6 font-playfairDisplay">
+        <h1
+          data-translate
+          className="text-2xl md:text-5xl lg:text-[64px] font-semibold text-gray-900 mb-6 font-playfairDisplay"
+        >
           Start Learning Something Today
         </h1>
-        <p className="text-lg text-gray-600">
+        <p data-translate className="text-lg text-gray-600">
           Explore high-quality courses that help you grow.
         </p>
       </div>
@@ -146,7 +146,9 @@ export default function CoursesPageList() {
               </Link>
             ))
           ) : (
-            <p className="text-center text-gray-500 col-span-3">No courses found.</p>
+            <p data-translate className="text-center text-gray-500 col-span-3">
+              No courses found.
+            </p>
           )}
         </div>
       )}

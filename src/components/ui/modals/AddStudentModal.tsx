@@ -12,6 +12,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
+import {
+  TranslateInitializer,
+} from "@/lib/language-translate/LanguageSwitcher";
 
 interface AddStudentModalProps {
   onAdd: (student: {
@@ -46,18 +49,24 @@ export default function AddStudentModal({ onAdd }: AddStudentModalProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-[#3399CC] hover:bg-[#3399CC] text-white cursor-pointer">
+        <Button
+          className="bg-[#3399CC] hover:bg-[#3399CC] text-white cursor-pointer"
+          data-translate
+        >
           <Plus className="w-4 h-4 mr-2" />
           Add Student
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
+        <TranslateInitializer />
         <DialogHeader>
-          <DialogTitle>Add Student</DialogTitle>
+          <DialogTitle data-translate>Add Student</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="firstName">First Name</Label>
+            <Label htmlFor="firstName">
+              <span data-translate>First Name</span>
+            </Label>
             <Input
               id="firstName"
               value={formData.firstName}
@@ -68,7 +77,7 @@ export default function AddStudentModal({ onAdd }: AddStudentModalProps) {
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="lastName">Last Name</Label>
+            <Label htmlFor="lastName" data-translate>Last Name</Label>
             <Input
               id="lastName"
               value={formData.lastName}
@@ -79,7 +88,9 @@ export default function AddStudentModal({ onAdd }: AddStudentModalProps) {
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email" data-translate>
+              Email
+            </Label>
             <Input
               id="email"
               type="email"
@@ -94,6 +105,7 @@ export default function AddStudentModal({ onAdd }: AddStudentModalProps) {
             type="submit"
             className="w-full bg-sky-500 hover:bg-sky-600"
             disabled={loading}
+            data-translate
           >
             {loading ? "Saving..." : "Save"}
           </Button>

@@ -7,6 +7,7 @@ import { useSendContactFormMutation } from "@/redux/features/contact/contactApi"
 import { contactFormSchema } from "@/lib/validations/contact";
 import { toast } from "sonner";
 import { Spin } from "antd";
+import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({
@@ -23,13 +24,8 @@ export default function ContactForm() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    }
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,9 +44,7 @@ export default function ContactForm() {
     if (!validation.success) {
       const fieldErrors: Record<string, string> = {};
       validation.error.errors.forEach((error) => {
-        if (error.path[0]) {
-          fieldErrors[String(error.path[0])] = error.message;
-        }
+        if (error.path[0]) fieldErrors[String(error.path[0])] = error.message;
       });
       setErrors(fieldErrors);
       return;
@@ -59,12 +53,7 @@ export default function ContactForm() {
     try {
       await sendContactForm(validation.data).unwrap();
       toast("Your message has been sent successfully.");
-      setFormData({
-        fullName: "",
-        email: "",
-        question: "",
-        description: "",
-      });
+      setFormData({ fullName: "", email: "", question: "", description: "" });
     } catch {
       toast("Failed to send message. Please try again.");
     }
@@ -72,19 +61,30 @@ export default function ContactForm() {
 
   return (
     <>
+      <TranslateInitializer />
+
       <section className="py-16 lg:py-[80px]">
         <div className="container mx-auto px-6">
           <div className="relative text-center mb-16">
             <div className="absolute inset-0 flex justify-center pointer-events-none z-0">
-              <span className="text-[15rem] md:text-[20rem] lg:text-[248px] font-medium leading-[120%] text-[#2CA2D1]/[0.04] select-none font-playfairDisplay">
+              <span
+                data-translate
+                className="text-[15rem] md:text-[20rem] lg:text-[248px] font-medium leading-[120%] text-[#2CA2D1]/[0.04] select-none font-playfairDisplay"
+              >
                 CONTACT
               </span>
             </div>
             <div className="relative z-10">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 font-playfairDisplay">
+              <h1
+                data-translate
+                className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 font-playfairDisplay"
+              >
                 Contact
               </h1>
-              <p className="text-lg text-gray-600 mx-auto max-w-2xl">
+              <p
+                data-translate
+                className="text-lg text-gray-600 mx-auto max-w-2xl"
+              >
                 Have questions or need help? Reach out — we&apos;re here to
                 support you.
               </p>
@@ -101,6 +101,7 @@ export default function ContactForm() {
                         type="text"
                         name="fullName"
                         placeholder="Full Name"
+                        data-translate
                         value={formData.fullName}
                         onChange={handleInputChange}
                         className={`w-full px-4 py-4 bg-[#EBF5FA] border rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent ${
@@ -109,9 +110,7 @@ export default function ContactForm() {
                         required
                       />
                       {errors.name && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.name}
-                        </p>
+                        <p className="text-red-500 text-sm mt-1">{errors.name}</p>
                       )}
                     </div>
 
@@ -120,6 +119,7 @@ export default function ContactForm() {
                         type="email"
                         name="email"
                         placeholder="Email Address"
+                        data-translate
                         value={formData.email}
                         onChange={handleInputChange}
                         className={`w-full px-4 py-4 bg-[#EBF5FA] border rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent ${
@@ -128,9 +128,7 @@ export default function ContactForm() {
                         required
                       />
                       {errors.email && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.email}
-                        </p>
+                        <p className="text-red-500 text-sm mt-1">{errors.email}</p>
                       )}
                     </div>
                   </div>
@@ -140,6 +138,7 @@ export default function ContactForm() {
                       type="text"
                       name="question"
                       placeholder="What's your question?"
+                      data-translate
                       value={formData.question}
                       onChange={handleInputChange}
                       className={`w-full px-4 py-4 bg-[#EBF5FA] border rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent ${
@@ -148,9 +147,7 @@ export default function ContactForm() {
                       required
                     />
                     {errors.questions && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {errors.questions}
-                      </p>
+                      <p className="text-red-500 text-sm mt-1">{errors.questions}</p>
                     )}
                   </div>
 
@@ -158,6 +155,7 @@ export default function ContactForm() {
                     <textarea
                       name="description"
                       placeholder="Describe your issue"
+                      data-translate
                       value={formData.description}
                       onChange={handleInputChange}
                       rows={8}
@@ -167,15 +165,14 @@ export default function ContactForm() {
                       required
                     />
                     {errors.message && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {errors.message}
-                      </p>
+                      <p className="text-red-500 text-sm mt-1">{errors.message}</p>
                     )}
                   </div>
 
                   <button
                     type="submit"
                     disabled={isLoading}
+                    data-translate
                     className="w-full bg-[#3399CC] hover:bg-sky-600 disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 px-8 rounded-full font-semibold text-lg transition-colors duration-200 cursor-pointer"
                   >
                     Submit
@@ -185,7 +182,7 @@ export default function ContactForm() {
             </div>
 
             <div className="lg:col-span-1 relative z-10">
-              <h2 className="text-2xl md:text-4xl text-gray-900 mb-[18px] font-playfairDisplay">
+              <h2 data-translate className="text-2xl md:text-4xl text-gray-900 mb-[18px] font-playfairDisplay">
                 Get in touch with our experts team
               </h2>
 
@@ -194,37 +191,37 @@ export default function ContactForm() {
                   <div className="space-y-[12px]">
                     <div className="flex items-center space-x-[6px]">
                       <Mail className="w-6 h-5 text-[#404040]" />
-                      <p className="text-[#404040]">Email</p>
+                      <p data-translate className="text-[#404040]">Email</p>
                     </div>
                     <div className="border-b-[0.5px] border-[#76BBDD]"></div>
-                    <div className="">
+                    <div>
                       <p className="text-[#404040] text-sm">vmta@gmail.com</p>
                     </div>
                   </div>
                 </div>
+
                 <div className="bg-[#EBF5FA] p-6 rounded-xl">
                   <div className="space-y-[12px]">
                     <div className="flex items-center space-x-[6px]">
                       <Phone className="w-6 h-5 text-[#404040]" />
-                      <p className="text-[#404040]">Phone</p>
+                      <p data-translate className="text-[#404040]">Phone</p>
                     </div>
                     <div className="border-b-[0.5px] border-[#76BBDD]"></div>
-                    <div className="">
-                      <p className="text-[#404040] text-sm">
-                        +1 (354) 456-1565
-                      </p>
+                    <div>
+                      <p className="text-[#404040] text-sm">+1 (354) 456-1565</p>
                     </div>
                   </div>
                 </div>
+
                 <div className="bg-[#EBF5FA] p-6 rounded-xl">
                   <div className="space-y-[12px]">
                     <div className="flex items-center space-x-[6px]">
                       <MapPin className="w-6 h-5 text-[#404040]" />
-                      <p className="text-[#404040]">Location</p>
+                      <p data-translate className="text-[#404040]">Location</p>
                     </div>
                     <div className="border-b-[0.5px] border-[#76BBDD]"></div>
-                    <div className="">
-                      <p className="text-[#404040] text-sm">
+                    <div>
+                      <p className="text-[#404040] text-sm" data-translate>
                         California [CA], 90011 49th St, Los Angeles, United
                         States
                       </p>

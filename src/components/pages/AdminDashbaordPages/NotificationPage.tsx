@@ -72,13 +72,13 @@ export default function NotificationPage() {
 
   return (
     <div className="mx-auto p-6 bg-white">
-      <h1 className="text-2xl font-semibold text-gray-900 mb-8">Make Notification</h1>
+      <h1 className="text-2xl font-semibold text-gray-900 mb-8" data-translate>Make Notification</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium text-gray-600">Send To</label>
+              <label className="text-sm font-medium text-gray-600" data-translate>Send To</label>
               <Select value={sendTo} onValueChange={setSendTo}>
                 <SelectTrigger className="w-full h-12 border-gray-200 rounded-lg cursor-pointer">
                   <SelectValue placeholder="Select recipients" />
@@ -96,7 +96,7 @@ export default function NotificationPage() {
 
             {/* Title Input */}
             <div>
-              <label className="text-sm font-medium text-gray-600">Title</label>
+              <label className="text-sm font-medium text-gray-600" data-translate>Title</label>
               <Input
                 placeholder="Write title..."
                 value={title}
@@ -109,7 +109,7 @@ export default function NotificationPage() {
 
           {/* Message */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-600">Send Message</label>
+            <label className="text-sm font-medium text-gray-600" data-translate>Send Message</label>
             <Textarea
               placeholder="Write here..."
               value={message}
@@ -125,6 +125,7 @@ export default function NotificationPage() {
           type="submit"
           disabled={isCreating}
           className="w-full h-14 bg-[#3399CC] hover:bg-[#61b1da] text-white font-medium rounded-full text-lg cursor-pointer disabled:opacity-50"
+          data-translate
         >
           {isCreating ? "Sending..." : "Make Notification"}
         </Button>

@@ -36,29 +36,31 @@ const HomePage = () => {
       {/* Sonner Toaster */}
       <Toaster position="top-right" richColors />
 
-      <h2 className="text-xl font-semibold">Home Page Header and Title Management</h2>
+      <h2 className="text-xl font-semibold" data-translate>
+        Home Page Header and Title Management
+      </h2>
 
       <div>
-        <label className="block font-medium mb-1">Header</label>
+        <label className="block font-medium mb-1" data-translate>
+          Header
+        </label>
         <input
           type="text"
           className="border p-2 w-full rounded"
           value={formData.header}
-          onChange={(e) =>
-            setFormData({ ...formData, header: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, header: e.target.value })}
         />
       </div>
 
       <div>
-        <label className="block font-medium mb-1">Title</label>
+        <label className="block font-medium mb-1" data-translate>
+          Title
+        </label>
         <input
           type="text"
           className="border p-2 w-full rounded"
           value={formData.title}
-          onChange={(e) =>
-            setFormData({ ...formData, title: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
         />
       </div>
 
@@ -68,6 +70,7 @@ const HomePage = () => {
         }`}
         onClick={handleSubmit}
         disabled={isPosting}
+        data-translate
       >
         {isPosting ? "Saving..." : "Save"}
       </button>

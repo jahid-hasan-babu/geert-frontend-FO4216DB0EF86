@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
+import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
 
 interface MenuItem {
   label: string;
@@ -66,6 +67,7 @@ export default function Profile01() {
 
   return (
     <div className="relative w-full max-w-sm mx-auto z-[100000]">
+      <TranslateInitializer/>
       <div className="relative overflow-hidden rounded-lg border border-zinc-200">
         <div className="relative px-6 pt-6 pb-6 z-[999999]">
           <div className="flex items-center gap-4 mb-6">
@@ -121,7 +123,7 @@ export default function Profile01() {
             >
               <div className="flex items-center gap-2">
                 <LogOut className="w-4 h-4" />
-                <span className="text-sm lg:text-base font-medium text-zinc-700">
+                <span className="text-sm lg:text-base font-medium text-zinc-700" data-translate>
                   Logout
                 </span>
               </div>

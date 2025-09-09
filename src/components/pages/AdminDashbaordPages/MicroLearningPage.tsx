@@ -33,7 +33,7 @@ const MicroLearningPage = () => {
 							/>
 						</div>
 						<Link href="/dashboard/micro-learning/add-microLearning">
-							<button className="bg-[#3399CC] text-white px-2 lg:px-4 py-[5px] lg:py-[10px] text-xs lg:text-sm rounded-full font-semibold transition-colors duration-200 shadow-lg cursor-pointer font-sans">
+							<button className="bg-[#3399CC] text-white px-2 lg:px-4 py-[5px] lg:py-[10px] text-xs lg:text-sm rounded-full font-semibold transition-colors duration-200 shadow-lg cursor-pointer font-sans" data-translate>
 								+ Add Microlearning
 							</button>
 						</Link>

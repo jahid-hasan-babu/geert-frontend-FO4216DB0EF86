@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Info, Upload } from "lucide-react";
+import { Info, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import {
@@ -22,6 +22,7 @@ import {
   useDeleteCourseMutation,
   useEditModuleMutation,
   useEditLessonMutation,
+  useDeleteLessonMutation,
 } from "@/redux/features/courses/coursesApi";
 import AddModuleModal from "@/components/ui/modal/add-module-modal";
 import { AddLessonModal } from "@/components/ui/modal/add-lesson-modal";
@@ -104,7 +105,36 @@ const CourseDetailsPage = () => {
     videoFile: null as File | null,
   });
 
-  console.log("Cousers All", data);
+  const [deleteLesson] = useDeleteLessonMutation();
+  const [deletingLessonId, setDeletingLessonId] = useState<string | null>(null);
+  const [deleteLessonModalOpen, setDeleteLessonModalOpen] = useState(false);
+  const [lessonToDelete, setLessonToDelete] = useState<{
+    lessonId: string;
+    lessonTitle: string;
+  } | null>(null);
+
+  // Add these two functions
+  const handleDeleteLessonClick = (lessonId: string, lessonTitle: string) => {
+    setLessonToDelete({ lessonId, lessonTitle });
+    setDeleteLessonModalOpen(true);
+  };
+
+  const handleDeleteLessonSubmit = async () => {
+    if (!lessonToDelete) return;
+
+    setDeletingLessonId(lessonToDelete.lessonId);
+    try {
+      await deleteLesson({ lessonId: lessonToDelete.lessonId }).unwrap();
+      setDeleteLessonModalOpen(false);
+      setLessonToDelete(null);
+      window.location.reload();
+    } catch (error) {
+      console.error("Failed to delete lesson:", error);
+    } finally {
+      setDeletingLessonId(null);
+    }
+  };
+
   const courseModules = course?.modules;
 
   useEffect(() => {
@@ -582,15 +612,40 @@ const CourseDetailsPage = () => {
                               </div>
                             </div>
                           ) : (
-                            <Button
-                              size="sm"
-                              onClick={() =>
-                                handleEditLessonClick(module.id, lesson)
-                              }
-                              className="bg-orange-500 hover:bg-orange-600 text-white"
-                            >
-                              Edit Lesson
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                onClick={() =>
+                                  handleEditLessonClick(module.id, lesson)
+                                }
+                                className="bg-orange-500 hover:bg-orange-600 text-white cursor-pointer"
+                              >
+                                Edit Lesson
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={() =>
+                                  handleDeleteLessonClick(
+                                    lesson.id,
+                                    lesson.title
+                                  )
+                                }
+                                className="bg-red-500 hover:bg-red-600 text-white flex items-center gap-1 cursor-pointer"
+                                disabled={deletingLessonId === lesson.id}
+                              >
+                                {deletingLessonId === lesson.id ? (
+                                  <>
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                    Deleting...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Trash2 className="w-3 h-3" />
+                                    Delete
+                                  </>
+                                )}
+                              </Button>
+                            </div>
                           )}
                         </div>
                       )}
@@ -726,32 +781,50 @@ const CourseDetailsPage = () => {
       </div>
 
       <Dialog
-        open={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
+        open={deleteLessonModalOpen}
+        onClose={() => setDeleteLessonModalOpen(false)}
         className="fixed inset-0 z-50 flex items-center justify-center"
       >
         <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
         <div className="bg-white p-6 rounded-lg z-10 max-w-md mx-auto">
-          <Dialog.Title className="text-lg font-semibold mb-4">
-            Confirm Delete
+          <Dialog.Title className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Trash2 className="w-5 h-5 text-red-500" />
+            Confirm Delete Lesson
           </Dialog.Title>
           <p className="text-gray-600 mb-6">
-            Are you sure you want to delete this course? This action cannot be
-            undone.
+            Are you sure you want to delete the lesson &quot;
+            <span className="font-semibold text-gray-800">
+              {lessonToDelete?.lessonTitle}
+            </span>
+            &quot;? This action cannot be undone.
           </p>
           <div className="flex justify-end gap-3">
             <Button
               variant="outline"
-              onClick={() => setIsDeleteModalOpen(false)}
+              onClick={() => {
+                setDeleteLessonModalOpen(false);
+                setLessonToDelete(null);
+              }}
+              disabled={!!deletingLessonId}
             >
               Cancel
             </Button>
             <Button
-              className="bg-red-500 hover:bg-red-700 text-white"
-              onClick={handleDeleteCourse}
-              disabled={isDeleting}
+              className="bg-red-500 hover:bg-red-700 text-white flex items-center gap-2"
+              onClick={handleDeleteLessonSubmit}
+              disabled={!!deletingLessonId}
             >
-              {isDeleting ? "Deleting..." : "Delete"}
+              {deletingLessonId ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-4 h-4" />
+                  Delete Lesson
+                </>
+              )}
             </Button>
           </div>
         </div>

@@ -116,7 +116,7 @@ export default function CourseCard({
       {/* Course Details */}
       <div className="flex flex-col p-4 h-full space-y-4">
         <div className="flex text-2xl font-bold text-gray-900 font-playfairDisplay justify-between items-start">
-          <div className="flex-1 truncate">{course.title}</div>
+          <div className="flex-1 truncate" data-translate>{course.title}</div>
           {course.isMicroLearning && (
             <div className="ml-2 mt-1 bg-[#3399CC] text-white py-1 px-2 rounded-full text-[10px] font-sans whitespace-nowrap self-start">
               Microlearning
@@ -127,7 +127,7 @@ export default function CourseCard({
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-green-500 rounded-full" />
-            <span className="text-gray-600">
+            <span className="text-gray-600" data-translate>
               {course.totalLessons} Lessons, {course.duration}
             </span>
           </div>

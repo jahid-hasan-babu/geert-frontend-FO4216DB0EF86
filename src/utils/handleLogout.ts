@@ -9,32 +9,49 @@ const cleanupGoogleTranslate = (): void => {
     const googleElements = document.querySelectorAll(
       '.goog-te-banner-frame, .goog-te-ftab, .goog-te-balloon-frame, iframe[src*="translate.googleapis.com"]'
     );
-    
+
     googleElements.forEach((element: Element) => {
       try {
         const htmlElement = element as HTMLElement;
-        if (htmlElement.parentNode) {
-          htmlElement.parentNode.removeChild(htmlElement);
-        }
+        if (htmlElement.parentNode) htmlElement.parentNode.removeChild(htmlElement);
       } catch {
-        // Silently ignore removal errors
+        // silently ignore
       }
     });
 
-    // Reset body styles that Google Translate might have modified
     document.body.style.top = '';
     document.body.style.position = '';
   } catch {
-    // Silently handle any cleanup errors
+    // silently ignore
   }
 };
 
-export const logoutHandler = async (
-  dispatch: Dispatch
-): Promise<void> => {
+export const logoutHandler = async (dispatch: Dispatch): Promise<void> => {
   try {
-    // Clean up Google Translate elements before showing SweetAlert
     cleanupGoogleTranslate();
+
+    // Get selected language from localStorage
+    const selectedLanguage = localStorage.getItem("selectedLanguage") || "en";
+
+    // Set text manually based on language
+    const texts = {
+      en: {
+        title: "Ready to Log Out?",
+        message: "You've been signed out safely. See you again soon!",
+        confirm: "Yes",
+        cancel: "No",
+        success: "Logged Out Successfully!",
+      },
+      nl: {
+        title: "Klaar om uit te loggen?",
+        message: "U bent veilig uitgelogd. Tot ziens!",
+        confirm: "Ja",
+        cancel: "Nee",
+        success: "Succesvol uitgelogd!",
+      },
+    };
+
+    const t = texts[selectedLanguage as keyof typeof texts] || texts.en;
 
     const result = await Swal.fire({
       html: `
@@ -49,14 +66,14 @@ export const logoutHandler = async (
                      d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h2 class="text-lg font-semibold text-gray-800 mb-2">Ready to Log Out?</h2>
-          <p class="text-sm text-gray-500">You've been signed out safely. See you again soon!</p>
+          <h2 class="text-lg font-semibold text-gray-800 mb-2">${t.title}</h2>
+          <p class="text-sm text-gray-500">${t.message}</p>
         </div>
       `,
       showCancelButton: true,
       focusConfirm: false,
-      confirmButtonText: "Yes",
-      cancelButtonText: "No",
+      confirmButtonText: t.confirm,
+      cancelButtonText: t.cancel,
       customClass: {
         popup: "rounded-2xl p-6 shadow-md ml-2",
         confirmButton:
@@ -65,59 +82,50 @@ export const logoutHandler = async (
           "bg-[#E5F3FC] hover:bg-[#C1E2F7] text-gray-700 px-6 py-2 rounded-full font-medium cursor-pointer",
       },
       buttonsStyling: false,
-      // Prevent DOM issues with Google Translate
       allowOutsideClick: false,
       allowEscapeKey: false,
     });
 
     if (result.isConfirmed) {
-      // Clean up again before proceeding
       cleanupGoogleTranslate();
 
       // Clear storage
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-      localStorage.removeItem("preferred-language"); // Also clear language preference
+      localStorage.removeItem("preferred-language");
+      localStorage.removeItem("selectedLanguage");
 
       // Dispatch logout
       await dispatch(logout());
 
-      // Clear Google Translate cookies to prevent issues on next login
+      // Clear Google Translate cookies
       document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
       if (window.location.hostname !== "localhost") {
         document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.${window.location.hostname}`;
       }
 
-      // Show success message with shorter timer to prevent DOM conflicts
+      // Show success message
       await Swal.fire({
-        title: "Logged Out Successfully!",
+        title: t.success,
         icon: "success",
-        timer: 1000, // Reduced timer
+        timer: 1000,
         showConfirmButton: false,
-        customClass: {
-          popup: "rounded-2xl p-6 shadow-md",
-        },
+        customClass: { popup: "rounded-2xl p-6 shadow-md" },
         allowOutsideClick: false,
       });
 
-      // Force page refresh to clear any Google Translate DOM modifications
-      // then redirect to login
       window.location.href = "/auth/login";
     }
   } catch {
     console.error("Logout error occurred");
-    
-    // Even if there's an error, try to complete the logout
     try {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       localStorage.removeItem("preferred-language");
+      localStorage.removeItem("selectedLanguage");
       await dispatch(logout());
-      
-      // Force redirect even if SweetAlert fails
       window.location.href = "/auth/login";
     } catch {
-      // Last resort: just reload the page
       window.location.reload();
     }
   }

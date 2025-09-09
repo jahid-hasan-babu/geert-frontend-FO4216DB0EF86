@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Upload } from "lucide-react";
+import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
 
 interface AddInstructorModalProps {
   onAdd: (instructor: {
@@ -46,14 +47,15 @@ export default function AddInstructorModal({ onAdd }: AddInstructorModalProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-[#3399CC] hover:bg-[#3399CC] text-white cursor-pointer">
+        <Button className="bg-[#3399CC] hover:bg-[#3399CC] text-white cursor-pointer" data-translate>
           + Add Instructor
         </Button>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-md">
+        <TranslateInitializer></TranslateInitializer>
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">
+          <DialogTitle className="text-xl font-semibold" data-translate>
             Add New Instructor
           </DialogTitle>
         </DialogHeader>
@@ -73,7 +75,7 @@ export default function AddInstructorModal({ onAdd }: AddInstructorModalProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email" data-translate>Email</Label>
             <Input
               id="email"
               type="email"
@@ -87,7 +89,7 @@ export default function AddInstructorModal({ onAdd }: AddInstructorModalProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="designation">Designation</Label>
+            <Label htmlFor="designation" data-translate>Designation</Label>
             <Input
               id="designation"
               placeholder="Enter designation"
@@ -100,7 +102,7 @@ export default function AddInstructorModal({ onAdd }: AddInstructorModalProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="image">Profile Image</Label>
+            <Label htmlFor="image" data-translate>Profile Image</Label>
             <div className="relative">
               <input
                 id="image"
@@ -111,7 +113,7 @@ export default function AddInstructorModal({ onAdd }: AddInstructorModalProps) {
               />
               <div className="border-2 border-dashed border-blue-300 rounded-lg p-8 text-center bg-blue-50/30 hover:bg-blue-50/50 transition-colors">
                 <Upload className="mx-auto h-6 w-6 text-gray-400 mb-2" />
-                <p className="text-gray-600 font-medium">
+                <p className="text-gray-600 font-medium" data-translate>
                   {formData.image ? formData.image.name : "Upload Image"}
                 </p>
               </div>
@@ -121,6 +123,7 @@ export default function AddInstructorModal({ onAdd }: AddInstructorModalProps) {
           <Button
             type="submit"
             className="w-full bg-[#3399CC] hover:bg-[#3399CC] text-white py-3 rounded-lg font-medium cursor-pointer"
+            data-translate
           >
             Add Instructor
           </Button>

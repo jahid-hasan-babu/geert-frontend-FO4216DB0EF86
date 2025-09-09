@@ -69,9 +69,9 @@ const SubscriberPage: React.FC = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-20">Serial No</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Subscribed At</TableHead>
+              <TableHead className="w-20" data-translate>Serial No</TableHead>
+              <TableHead data-translate>Email</TableHead>
+              <TableHead data-translate>Subscribed At</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

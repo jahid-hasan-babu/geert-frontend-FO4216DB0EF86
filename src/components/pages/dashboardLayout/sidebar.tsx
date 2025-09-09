@@ -17,12 +17,13 @@ import {
 } from "lucide-react";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, memo } from "react";
 import { logoutHandler } from "@/utils/handleLogout";
 import { usePathname } from "next/navigation";
 import { useDispatch } from "react-redux";
 import Image from "next/image";
 import logo from "@/assets/images/logo.png";
+import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
 
 export default function Sidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -36,15 +37,7 @@ export default function Sidebar() {
     return pathname.startsWith(href);
   };
 
-  function NavItem({
-    href,
-    icon: Icon,
-    children,
-    onClick,
-    isDropdown = false,
-    isOpen = false,
-    activeOverride = false,
-  }: {
+  type NavItemProps = {
     href?: string;
     icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
     children: React.ReactNode;
@@ -52,7 +45,17 @@ export default function Sidebar() {
     isDropdown?: boolean;
     isOpen?: boolean;
     activeOverride?: boolean;
-  }) {
+  };
+
+  const NavItem = memo(function NavItem({
+    href,
+    icon: Icon,
+    children,
+    onClick,
+    isDropdown = false,
+    isOpen = false,
+    activeOverride = false,
+  }: NavItemProps) {
     const active = activeOverride || (href ? isActive(href) : false);
 
     const content = (
@@ -91,9 +94,8 @@ export default function Sidebar() {
         {content}
       </div>
     );
-  }
+  });
 
-  // const router = useRouter();
   const dispatch = useDispatch();
   const handleLogout = () => {
     logoutHandler(dispatch);
@@ -102,6 +104,8 @@ export default function Sidebar() {
 
   return (
     <>
+      {/* Mobile toggle button */}
+      <TranslateInitializer/>
       <button
         type="button"
         className="lg:hidden fixed top-4 left-4 z-[70] p-2 rounded-lg bg-white shadow-md"
@@ -109,12 +113,15 @@ export default function Sidebar() {
       >
         <Menu className="h-5 w-5 text-gray-600" />
       </button>
+
+      {/* Sidebar */}
       <nav
         className={`fixed inset-y-0 left-0 z-[70] w-64 bg-white transform transition-transform duration-200 ease-in-out
                 lg:translate-x-0 lg:static lg:w-64 border-r border-gray-200
                 ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         <div className="h-full flex flex-col">
+          {/* Logo */}
           <Link
             href="/dashboard"
             className="h-16 px-6 flex items-center justify-center"
@@ -123,35 +130,37 @@ export default function Sidebar() {
               <Image
                 src={logo}
                 alt="Logo"
-                className="flex-shrink-0 w-[150px] "
+                className="flex-shrink-0 w-[150px]"
               />
             </div>
           </Link>
 
+          {/* Nav items */}
           <div className="flex-1 overflow-y-auto py-4 px-4">
             <div className="space-y-1">
               <NavItem href="/dashboard" icon={LayoutDashboard}>
-                Dashboard
+                <div data-translate>Dashboard</div>
               </NavItem>
               <NavItem href="/dashboard/course" icon={Contact}>
-                Course
+                <div data-translate>Course</div>
               </NavItem>
               <NavItem href="/dashboard/category" icon={Layers}>
-                Category
+                <div data-translate>Category</div>
               </NavItem>
               <NavItem href="/dashboard/micro-learning" icon={CircleUserRound}>
-                MicroLearning
+                <div data-translate>MicroLearning</div>
               </NavItem>
               <NavItem href="/dashboard/students" icon={Users}>
-                Students
+                <div data-translate>Students</div>
               </NavItem>
               <NavItem href="/dashboard/instructor" icon={UserCog}>
-                Instructor
+                <div data-translate>Instructor</div>
               </NavItem>
               <NavItem href="/dashboard/subscriber" icon={Podcast}>
-                Subscribers
+                <div data-translate>Subscribers</div>
               </NavItem>
 
+              {/* Dropdown */}
               <NavItem
                 icon={BookOpenCheck}
                 isDropdown
@@ -159,12 +168,14 @@ export default function Sidebar() {
                 onClick={() => setIsPageContentsOpen(!isPageContentsOpen)}
                 activeOverride={pathname.startsWith("/dashboard/page-contents")}
               >
-                Page Contents
+                <div data-translate>Page Contents</div>
               </NavItem>
 
+              {/* Dropdown links */}
               <div
-                className={`ml-8 overflow-hidden transition-all duration-300 ease-in-out space-y-3 ${
-                  isPageContentsOpen ? "max-h-60" : "max-h-0"
+                key="page-contents-dropdown"
+                className={`ml-8 overflow-hidden transition-all duration-300 ease-in-out ${
+                  isPageContentsOpen ? "max-h-60 space-y-3" : "max-h-0"
                 }`}
               >
                 <Link
@@ -175,7 +186,7 @@ export default function Sidebar() {
                       : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                   }`}
                 >
-                  Home Page
+                  <div data-translate>Home Page</div>
                 </Link>
                 <Link
                   href="/dashboard/page-contents/privacy-policy"
@@ -185,7 +196,7 @@ export default function Sidebar() {
                       : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                   }`}
                 >
-                  Privacy Policy
+                  <div data-translate>Privacy Policy</div>
                 </Link>
                 <Link
                   href="/dashboard/page-contents/terms-service"
@@ -195,7 +206,7 @@ export default function Sidebar() {
                       : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                   }`}
                 >
-                  Terms of Service
+                  <div data-translate>Terms of Service</div>
                 </Link>
                 <Link
                   href="/dashboard/page-contents/cookie-policy"
@@ -205,7 +216,7 @@ export default function Sidebar() {
                       : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                   }`}
                 >
-                  Cookie Policy
+                  <div data-translate>Cookie Policy</div>
                 </Link>
                 <Link
                   href="/dashboard/page-contents/regulatory-information"
@@ -215,7 +226,7 @@ export default function Sidebar() {
                       : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                   }`}
                 >
-                  Regulatory Information
+                  <div data-translate>Regulatory Information</div>
                 </Link>
                 <Link
                   href="/dashboard/page-contents/help-support"
@@ -225,16 +236,17 @@ export default function Sidebar() {
                       : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                   }`}
                 >
-                  Help & Support
+                  <div data-translate>Help & Support</div>
                 </Link>
               </div>
 
               <NavItem href="/dashboard/notifications" icon={Bell}>
-                Notification
+                <div data-translate>Notification</div>
               </NavItem>
             </div>
           </div>
 
+          {/* Logout */}
           <div className="px-4 py-4 border-t border-gray-200">
             <div className="space-y-1">
               <NavItem>
@@ -243,7 +255,7 @@ export default function Sidebar() {
                   className="w-full flex items-center cursor-pointer"
                 >
                   <LogOut size={35} className="h-5 w-5 mr-3" />
-                  <span className="text-sm md:text-base text-gray-600">
+                  <span className="text-sm md:text-base text-gray-600" data-translate>
                     Logout
                   </span>
                 </button>
@@ -253,6 +265,7 @@ export default function Sidebar() {
         </div>
       </nav>
 
+      {/* Overlay for mobile */}
       {isMobileMenuOpen && (
         <div
           className="fixed inset-0 bg-black/30 z-[65] lg:hidden"

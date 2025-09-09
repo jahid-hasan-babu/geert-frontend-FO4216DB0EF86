@@ -95,6 +95,17 @@ const coursesApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["courses"],
     }),
+    // NEW: Delete Lesson endpoint
+    deleteLesson: builder.mutation<
+      { success: boolean; message?: string },
+      { lessonId: string }
+    >({
+      query: ({ lessonId }) => ({
+        url: `/courses/delete-lesson/${lessonId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["courses"],
+    }),
     getMyCourseProgress: builder.query({
       query: (id) => ({
         url: `/courses/my-single-course-progress/${id}`,
@@ -131,6 +142,7 @@ export const {
   useAddCourseLessonMutation,
   useEditModuleMutation,
   useEditLessonMutation,
+  useDeleteLessonMutation, // NEW: Export the delete lesson hook
   useGetMyCourseProgressQuery,
   useAddCourseStudentMutation,
   useDeleteCourseMutation,

@@ -5,7 +5,6 @@ import Image from "next/image";
 import Logo from "@/assets/images/logo.png";
 import { FaXTwitter, FaWhatsapp, FaFacebook } from "react-icons/fa6";
 import PrimaryButton from "@/components/ui/buttons/PrimaryButton/PrimaryButton";
-import { LanguageSwitcher } from "@/lib/google-translate/language-switcher";
 import axios from "axios";
 import Link from "next/link";
 
@@ -24,7 +23,10 @@ export default function Footer() {
       setLoading(true);
       setMessage("");
 
-      await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/users/make-subscribe`, { email });
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/users/make-subscribe`,
+        { email }
+      );
 
       setMessage("✅ You have successfully subscribed!");
       setEmail("");
@@ -42,8 +44,6 @@ export default function Footer() {
           {/* Left Column - Logo and Newsletter */}
           <div className="lg:col-span-2 space-y-8">
             <Image src={Logo} alt="Logo" />
-
-            <LanguageSwitcher />
 
             {/* Newsletter Signup */}
             <div className="flex flex-col sm:flex-row gap-3 max-w-md">
@@ -75,17 +75,26 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/courses" className="text-gray-300 hover:text-white">
+                <Link
+                  href="/courses"
+                  className="text-gray-300 hover:text-white"
+                >
                   Course
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-gray-300 hover:text-white">
+                <Link
+                  href="/contact"
+                  className="text-gray-300 hover:text-white"
+                >
                   Contact
                 </Link>
               </li>
               <li>
-                <Link href="/help-support" className="text-gray-300 hover:text-white">
+                <Link
+                  href="/help-support"
+                  className="text-gray-300 hover:text-white"
+                >
                   Support
                 </Link>
               </li>
@@ -97,22 +106,34 @@ export default function Footer() {
             <h4 className="text-lg font-semibold mb-6 text-gray-300">Legal</h4>
             <ul className="space-y-4">
               <li>
-                <Link href="/privacy-policy" className="text-gray-300 hover:text-white">
+                <Link
+                  href="/privacy-policy"
+                  className="text-gray-300 hover:text-white"
+                >
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="terms-service" className="text-gray-300 hover:text-white">
+                <Link
+                  href="terms-service"
+                  className="text-gray-300 hover:text-white"
+                >
                   Terms of Service
                 </Link>
               </li>
               <li>
-                <Link href="cookies-policy" className="text-gray-300 hover:text-white">
+                <Link
+                  href="cookies-policy"
+                  className="text-gray-300 hover:text-white"
+                >
                   Cookies Policy
                 </Link>
               </li>
               <li>
-                <Link href="regulatory-info" className="text-gray-300 hover:text-white">
+                <Link
+                  href="regulatory-info"
+                  className="text-gray-300 hover:text-white"
+                >
                   Regulatory Info
                 </Link>
               </li>

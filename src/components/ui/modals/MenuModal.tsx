@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Dialog, Transition } from "@headlessui/react";
@@ -12,6 +13,7 @@ import { logoutHandler } from "@/utils/handleLogout";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "antd";
+import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
 
 interface User {
 	username: string | null;
@@ -66,6 +68,9 @@ export function MenuModal({
 
 	return (
 		<>
+			{/* Initialize translator */}
+			<TranslateInitializer />
+
 			<Transition appear show={isOpen} as={Fragment}>
 				<Dialog as="div" className="relative z-50" onClose={onClose}>
 					<Transition.Child
@@ -114,10 +119,16 @@ export function MenuModal({
 														</AvatarFallback>
 													</Avatar>
 													<div className="flex-1 min-w-0">
-														<p className="text-sm font-medium text-foreground truncate">
+														<p
+															data-translate
+															className="text-sm font-medium text-foreground truncate"
+														>
 															{user?.username || "No Name"}
 														</p>
-														<p className="text-xs text-muted-foreground truncate">
+														<p
+															data-translate
+															className="text-xs text-muted-foreground truncate"
+														>
 															{user?.email || "No Email"}
 														</p>
 													</div>
@@ -139,7 +150,7 @@ export function MenuModal({
 														if (item.closeOnClick !== false) onClose();
 													}}
 												>
-													{item.label}
+													<span data-translate>{item.label}</span>
 												</Button>
 											))}
 										</div>
@@ -151,7 +162,7 @@ export function MenuModal({
 				</Dialog>
 			</Transition>
 
-			{/* Pass the user correctly */}
+			{/* Personal Info Modal */}
 			{user && (
 				<PersonalInfoModal
 					isOpen={isProfileInfo}
@@ -160,6 +171,7 @@ export function MenuModal({
 				/>
 			)}
 
+			{/* Password Modal */}
 			<PasswordModal
 				isOpen={isPasswordOpen}
 				onClose={() => setIsPasswordOpen(false)}

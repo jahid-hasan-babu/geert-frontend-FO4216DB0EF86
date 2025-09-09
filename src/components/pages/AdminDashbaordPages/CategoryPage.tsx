@@ -99,7 +99,9 @@ const CategoryPage = () => {
 
   return (
     <div className="p-6 bg-white min-h-screen">
-      <h1 className="text-2xl font-bold mb-6">Category Management</h1>
+      <h1 className="text-2xl font-bold mb-6" data-translate>
+        Category Management
+      </h1>
 
       {/* Add new category */}
       <div className="flex gap-2 mb-6">
@@ -113,6 +115,7 @@ const CategoryPage = () => {
           onClick={handleAddCategory}
           disabled={isAdding}
           className="bg-[#3399CC] hover:bg-[#52b9ec] cursor-pointer"
+          data-translate
         >
           {isAdding ? <Loader2 className="w-4 h-4 animate-spin" /> : "Add"}
         </Button>
@@ -133,6 +136,7 @@ const CategoryPage = () => {
               {editCategoryId === category.id ? (
                 <>
                   <Input
+                    data-translate
                     value={editCategoryName}
                     onChange={(e) => setEditCategoryName(e.target.value)}
                     onKeyDown={(e) =>
@@ -146,6 +150,7 @@ const CategoryPage = () => {
                       onClick={handleUpdateCategory}
                       disabled={isEditing}
                       className="bg-[#3399CC] hover:bg-[#52b9ec]"
+                      data-translate
                     >
                       {isEditing ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -158,6 +163,7 @@ const CategoryPage = () => {
                       variant="outline"
                       onClick={() => setEditCategoryId(null)}
                       disabled={isEditing}
+                      data-translate
                     >
                       Cancel
                     </Button>
@@ -178,7 +184,7 @@ const CategoryPage = () => {
                       size="sm"
                       variant="destructive"
                       onClick={() => setDeleteConfirmId(category.id)}
-					  className="cursor-pointer"
+                      className="cursor-pointer"
                     >
                       <Trash className="w-4 h-4" />
                     </Button>
@@ -194,9 +200,7 @@ const CategoryPage = () => {
       {deleteConfirmId && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-80">
-            <h2 className="text-lg font-semibold mb-4">
-              Confirm Delete
-            </h2>
+            <h2 className="text-lg font-semibold mb-4">Confirm Delete</h2>
             <p className="text-sm mb-6">
               Are you sure you want to delete this category? This action cannot
               be undone.

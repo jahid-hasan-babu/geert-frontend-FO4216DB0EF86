@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
 
 interface TestimonialType {
   id: string;
@@ -117,10 +118,15 @@ const Testimonial = () => {
 
   return (
     <section ref={sectionRef} className="py-16 lg:py-24 bg-[#F4FAFD]">
+      <TranslateInitializer />
+
       <div className="container mx-auto px-6">
         {/* Header */}
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-8 font-playfairDisplay">
+          <h2
+            className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-8 font-playfairDisplay"
+            data-translate
+          >
             Words from Our Community
           </h2>
         </div>
@@ -129,7 +135,7 @@ const Testimonial = () => {
         <div className="grid md:grid-cols-3 gap-8 lg:gap-12 mb-20">
           {testimonialsData.map((testimonial) => (
             <div key={testimonial.id} className="text-center space-y-[20px]">
-              <p className="text-[#404040] leading-[120%] text-lg">
+              <p className="text-[#404040] leading-[120%] text-lg" data-translate>
                 {testimonial.text}
               </p>
 
@@ -143,8 +149,12 @@ const Testimonial = () => {
                 </div>
 
                 <div>
-                  <h4 className="text-gray-600 text-lg">{testimonial.name}</h4>
-                  <p className="text-black font-medium">{testimonial.role}</p>
+                  <h4 className="text-gray-600 text-lg" data-translate>
+                    {testimonial.name}
+                  </h4>
+                  <p className="text-black font-medium" data-translate>
+                    {testimonial.role}
+                  </p>
                 </div>
               </div>
             </div>
@@ -159,7 +169,9 @@ const Testimonial = () => {
                 <div className="text-5xl lg:text-7xl font-medium text-gray-900">
                   {displayStats.totalTutorials}+
                 </div>
-                <p className="text-gray-600 text-xl">Tutorials</p>
+                <p className="text-gray-600 text-xl" data-translate>
+                  Tutorials
+                </p>
                 <div className="hidden md:block absolute right-0 top-1/2 transform -translate-y-1/2 w-px h-16 bg-gray-300"></div>
               </div>
 
@@ -167,7 +179,9 @@ const Testimonial = () => {
                 <div className="text-5xl lg:text-7xl font-medium text-gray-900">
                   {displayStats.totalHours}+
                 </div>
-                <p className="text-gray-600 text-xl">Hours</p>
+                <p className="text-gray-600 text-xl" data-translate>
+                  Hours
+                </p>
                 <div className="hidden md:block absolute right-0 top-1/2 transform -translate-y-1/2 w-px h-16 bg-gray-300"></div>
               </div>
 
@@ -175,7 +189,9 @@ const Testimonial = () => {
                 <div className="text-5xl lg:text-7xl font-medium text-gray-900">
                   {displayStats.satisfactionRate}%
                 </div>
-                <p className="text-gray-600 text-xl">Satisfaction</p>
+                <p className="text-gray-600 text-xl" data-translate>
+                  Satisfaction
+                </p>
               </div>
             </div>
           </div>

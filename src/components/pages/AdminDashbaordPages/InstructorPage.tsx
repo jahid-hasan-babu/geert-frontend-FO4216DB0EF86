@@ -211,12 +211,12 @@ export default function InstructorPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-20">Serial No</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Courses</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead className="w-20" data-translate>Serial No</TableHead>
+                <TableHead data-translate>Name</TableHead>
+                <TableHead data-translate>Email</TableHead>
+                <TableHead data-translate>Phone</TableHead>
+                <TableHead data-translate>Courses</TableHead>
+                <TableHead data-translate>Status</TableHead>
                 <TableHead className="w-12"></TableHead>
               </TableRow>
             </TableHeader>

@@ -21,6 +21,10 @@ import {
   useGetCourseByIdQuery,
   useGetMyCourseProgressQuery,
 } from "@/redux/features/courses/coursesApi";
+import {
+  LanguageSwitcher,
+  TranslateInitializer,
+} from "@/lib/language-translate/LanguageSwitcher";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -54,8 +58,8 @@ export default function Navbar() {
 
   const pathname = usePathname();
   const { data: notificationsRes, isLoading: isLoadingNotifications } =
-    useGetNotificationsQuery({});
-  const { data: userRes, isLoading: isLoadingUser } = useGetMeQuery({});
+    useGetNotificationsQuery(undefined);
+  const { data: userRes, isLoading: isLoadingUser } = useGetMeQuery(undefined);
   const courseId = pathname.split("/")[2];
   const { data: courseRes, isLoading: isLoadingCourse } =
     useGetCourseByIdQuery(courseId);
@@ -104,7 +108,7 @@ export default function Navbar() {
                       : "text-gray-800 hover:text-[#9191c4]"
                   }`}
                 >
-                  {label}
+                  <span data-translate>{label}</span>
                 </Link>
               </li>
             ))}
@@ -120,11 +124,14 @@ export default function Navbar() {
                 className="flex items-center space-x-1 font-sans text-gray-700"
               >
                 <Star className="w-5 h-5 text-gray-500" />
-                <span className="font-medium cursor-pointer">Leave Review</span>
+                <span className="font-medium cursor-pointer" data-translate>
+                  Leave Review
+                </span>
               </button>
               <div
                 className="cursor-pointer text-gray-700 font-medium"
                 onClick={() => setIsProgressOpen(true)}
+                data-translate
               >
                 Your Progress
               </div>
@@ -134,6 +141,12 @@ export default function Navbar() {
 
         {/* Right Section */}
         <div className="hidden md:flex items-center space-x-5">
+          {/* Translation */}
+          <div>
+            <TranslateInitializer />
+            <LanguageSwitcher />
+          </div>
+
           {/* Notification Button */}
           <button
             className="relative p-2 rounded-full bg-[#EBF5FA] transition"
@@ -212,7 +225,9 @@ export default function Navbar() {
 
           {/* Course Title */}
           {courseData && !isLoadingCourse && (
-            <h1 className="text-lg font-semibold">{courseData.title}</h1>
+            <h1 className="text-lg font-semibold" data-translate>
+              {courseData.title}
+            </h1>
           )}
 
           {/* Nav Links */}
@@ -228,7 +243,7 @@ export default function Navbar() {
                   }`}
                   onClick={() => setIsOpen(false)}
                 >
-                  {label}
+                  <span data-translate>{label}</span>
                 </Link>
               </li>
             ))}
@@ -242,11 +257,14 @@ export default function Navbar() {
                 className="flex items-center justify-center lg:justify-start space-x-1 font-sans text-gray-700"
               >
                 <Star className="w-5 h-5 text-gray-500" />
-                <span className="font-medium cursor-pointer">Leave Review</span>
+                <span className="font-medium cursor-pointer" data-translate>
+                  Leave Review
+                </span>
               </button>
               <button
                 onClick={() => setIsProgressOpen(true)}
                 className="font-medium text-gray-700 cursor-pointer"
+                data-translate
               >
                 Your Progress
               </button>

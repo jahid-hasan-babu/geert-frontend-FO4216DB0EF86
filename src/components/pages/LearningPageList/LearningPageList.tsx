@@ -8,6 +8,7 @@ import CourseFilter from "@/components/ui/filter/CourseFilter";
 import LearningCard from "@/components/ui/card/LearningCard";
 import Pagination from "@/components/ui/pagination/Pagination";
 import { Spin } from "antd";
+import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
 
 export default function LearningPageList() {
   const [activeFilter, setActiveFilter] = useState("inprogress");
@@ -42,7 +43,7 @@ export default function LearningPageList() {
     return (
       <div className="container mx-auto px-6 lg:pb-[80px]">
         <div className="text-center">
-          <p className="text-red-600">
+          <p data-translate className="text-red-600">
             Error loading courses. Please try again.
           </p>
         </div>
@@ -52,11 +53,20 @@ export default function LearningPageList() {
 
   return (
     <div className="container mx-auto px-6 lg:pb-[80px]">
+      {/* Initialize translator */}
+      <TranslateInitializer />
+
       <div className="text-center mb-3 lg:mb-12 max-w-4xl mx-auto">
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 font-playfairDisplay">
+        <h1
+          data-translate
+          className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 font-playfairDisplay"
+        >
           My Learning
         </h1>
-        <p className="text-sm lg:text-lg text-gray-600">
+        <p
+          data-translate
+          className="text-sm lg:text-lg text-gray-600"
+        >
           Access all your courses, track progress, and unlock new skills in one
           place.
         </p>
@@ -73,13 +83,16 @@ export default function LearningPageList() {
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mb-12">
         {currentCourses.length > 0 ? (
           currentCourses.map((course: any) => (
-            <Link href={`/courses/${course.slug || course.id}`} key={course.id}>
+            <Link
+              href={`/courses/${course.slug || course.id}`}
+              key={course.id}
+            >
               <LearningCard course={course} isLoading={isLoading} />
             </Link>
           ))
         ) : (
           <div className="col-span-full text-center py-12">
-            <p className="text-gray-600">
+            <p data-translate className="text-gray-600">
               No courses enrolled. Please contact admin.
             </p>
           </div>

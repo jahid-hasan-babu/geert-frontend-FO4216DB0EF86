@@ -9,6 +9,7 @@ import PrimaryButton from "@/components/ui/buttons/PrimaryButton/PrimaryButton";
 import Partners from "@/components/common/Partners";
 import Link from "next/link";
 import { useGetHomeDataQuery } from "@/redux/features/legal/legalApi";
+import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
 
 export default function Hero() {
   const { data, isLoading } = useGetHomeDataQuery(undefined);
@@ -25,22 +26,31 @@ export default function Hero() {
 
   return (
     <section className="container bg-white">
+      {/* Initialize translation */}
+      <TranslateInitializer />
+
       <div className="mx-auto px-2 md:px-4 lg:px-6 py-2 md:py-12 lg:py-24">
         <div className="grid lg:grid-cols-5 gap-8 items-center">
           {/* Left Content */}
           <div className="space-y-8 lg:col-span-3">
             <div className="space-y-6 text-center lg:text-left">
-              <h1 className="text-2xl md:text-5xl lg:text-[64px] font-bold text-gray-900 font-playfairDisplay">
+              <h1
+                className="text-2xl md:text-5xl lg:text-[64px] font-bold text-gray-900 font-playfairDisplay"
+                data-translate
+              >
                 {data?.header}
               </h1>
-              <p className="text-md md:text-lg text-gray-500 leading-relaxed lg:w-[75%]">
+              <p
+                className="text-md md:text-lg text-gray-500 leading-relaxed lg:w-[75%]"
+                data-translate
+              >
                 {data?.title}
               </p>
             </div>
 
             {/* Updated Button */}
             <Link href="/courses">
-              <PrimaryButton label="Get Start" />
+              <PrimaryButton label="Get Start" translate />
             </Link>
 
             {/* Social Proof */}
@@ -51,7 +61,10 @@ export default function Hero() {
                 <Image src={hero_learners_3} alt="hero_trusted" />
                 <Image src={hero_learners_4} alt="hero_trusted" />
               </div>
-              <p className="text-gray-600 font-medium text-xs md:text-base">
+              <p
+                className="text-gray-600 font-medium text-xs md:text-base"
+                data-translate
+              >
                 Trusted by 5,000+ learners
               </p>
             </div>

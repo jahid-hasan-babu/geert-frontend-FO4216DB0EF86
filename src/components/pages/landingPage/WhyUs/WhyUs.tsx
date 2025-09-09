@@ -1,6 +1,10 @@
+"use client";
+
 import React from "react";
 import Image from "next/image";
 import { StaticImageData } from "next/image";
+import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
+
 import WhyUs_1 from "@/assets/images/WhyUs_1.png";
 import WhyUs_2 from "@/assets/images/WhyUs_2.png";
 import WhyUs_3 from "@/assets/images/WhyUs_3.png";
@@ -10,14 +14,18 @@ import WhyUs_Banner from "@/assets/images/WhyUs_Banner.png";
 const WhyUs = () => {
   return (
     <section className="py-16 lg:py-24">
+      <TranslateInitializer />
       <div className="container">
         <div className="text-center mb-16 max-w-4xl mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-gray-900 mb-6 leading-tight font-playfairDisplay">
+          <h2
+            className="text-3xl md:text-4xl lg:text-5xl font-semibold text-gray-900 mb-6 leading-tight font-playfairDisplay"
+            data-translate
+          >
             Built for Learners.
             <br />
             Backed by Results.
           </h2>
-          <p className="text-lg text-gray-600 leading-relaxed">
+          <p className="text-lg text-gray-600 leading-relaxed" data-translate>
             Our platform combines expert instruction, practical skills, and
             learner support that sets you up for success.
           </p>
@@ -105,7 +113,9 @@ const FeatureBlock = ({ image, text }: { image: StaticImageData; text: string })
     <div className="w-16 h-16 bg-sky-100 rounded-full flex items-center justify-center">
       <Image src={image} alt="Feature Icon" width={32} height={32} />
     </div>
-    <p className="text-gray-700 leading-relaxed text-lg">{text}</p>
+    <p className="text-gray-700 leading-relaxed text-lg" data-translate>
+      {text}
+    </p>
   </div>
 );
 
@@ -115,6 +125,8 @@ const MobileFeature = ({ image, text }: { image: StaticImageData; text: string }
     <div className="w-16 h-16 bg-sky-100 rounded-full flex items-center justify-center">
       <Image src={image} alt="Feature Icon" width={32} height={32} />
     </div>
-    <p className="text-gray-700 leading-relaxed text-base">{text}</p>
+    <p className="text-gray-700 leading-relaxed text-base" data-translate>
+      {text}
+    </p>
   </div>
 );
