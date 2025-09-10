@@ -33,6 +33,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { useTranslate } from "@/hooks/useTranslate";
 
 type Student = {
   id: string;
@@ -44,6 +45,8 @@ type Student = {
 };
 
 export default function StudentsPage() {
+  const { translateBatch } = useTranslate();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [students, setStudents] = useState<Student[]>([]);
@@ -65,7 +68,11 @@ export default function StudentsPage() {
       setStudents(res.data.data.data);
     } catch (error) {
       const err = error as AxiosError<{ message: string }>;
-      toast.error(err.response?.data?.message || "Failed to load students");
+      const [msg] = await translateBatch(
+        [err.response?.data?.message || "Failed to load students"],
+        localStorage.getItem("selectedLanguage") || "nl"
+      );
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -108,20 +115,35 @@ export default function StudentsPage() {
       );
 
       if (res.data.success) {
-        toast.success("Student added successfully!");
+        const [msg] = await translateBatch(
+          ["Student added successfully!"],
+          localStorage.getItem("selectedLanguage") || "nl"
+        );
+        toast.success(msg);
         fetchStudents();
       } else {
-        toast.error(res.data.message || "Failed to add student");
+        const [msg] = await translateBatch(
+          [res.data.message || "Failed to add student"],
+          localStorage.getItem("selectedLanguage") || "nl"
+        );
+        toast.error(msg);
       }
     } catch (error) {
       const err = error as AxiosError<{ message: string }>;
-      toast.error(err.response?.data?.message || "Failed to add student");
+      const [msg] = await translateBatch(
+        [err.response?.data?.message || "Failed to add student"],
+        localStorage.getItem("selectedLanguage") || "nl"
+      );
+      toast.error(msg);
       throw err;
     }
   };
 
   // Change status
-  const changeStatus = async (student: Student, status: "ACTIVE" | "BLOCKED") => {
+  const changeStatus = async (
+    student: Student,
+    status: "ACTIVE" | "BLOCKED"
+  ) => {
     try {
       const token = localStorage.getItem("token");
       await axios.patch(
@@ -134,10 +156,18 @@ export default function StudentsPage() {
         prev.map((s) => (s.id === student.id ? { ...s, status } : s))
       );
 
-      toast.success(`Status updated to ${status}`);
+      const [msg] = await translateBatch(
+        [`Status updated to ${status}`],
+        localStorage.getItem("selectedLanguage") || "nl"
+      );
+      toast.success(msg);
     } catch (err) {
       const error = err as AxiosError<{ message: string }>;
-      toast.error(error.response?.data?.message || "Failed to update status");
+      const [msg] = await translateBatch(
+        [error.response?.data?.message || "Failed to update status"],
+        localStorage.getItem("selectedLanguage") || "nl"
+      );
+      toast.error(msg);
     }
   };
 
@@ -156,11 +186,20 @@ export default function StudentsPage() {
         `${process.env.NEXT_PUBLIC_BASE_URL}/users/remove-student/${selectedStudent.id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.success("Student removed successfully!");
+
+      const [msg] = await translateBatch(
+        ["Student removed successfully!"],
+        localStorage.getItem("selectedLanguage") || "nl"
+      );
+      toast.success(msg);
       fetchStudents();
     } catch (err) {
       const error = err as AxiosError<{ message: string }>;
-      toast.error(error.response?.data?.message || "Failed to remove student");
+      const [msg] = await translateBatch(
+        [error.response?.data?.message || "Failed to remove student"],
+        localStorage.getItem("selectedLanguage") || "nl"
+      );
+      toast.error(msg);
     } finally {
       setDeleteDialogOpen(false);
       setSelectedStudent(null);
@@ -191,7 +230,9 @@ export default function StudentsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-20" data-translate>Serial No</TableHead>
+                <TableHead className="w-20" data-translate>
+                  Serial No
+                </TableHead>
                 <TableHead data-translate>Name</TableHead>
                 <TableHead data-translate>Email</TableHead>
                 <TableHead data-translate>Phone</TableHead>
@@ -239,8 +280,12 @@ export default function StudentsPage() {
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-gray-600">{student.email}</TableCell>
-                    <TableCell className="text-gray-600">{student.phone || "—"}</TableCell>
+                    <TableCell className="text-gray-600">
+                      {student.email}
+                    </TableCell>
+                    <TableCell className="text-gray-600">
+                      {student.phone || "—"}
+                    </TableCell>
                     <TableCell>
                       <Badge
                         className={
@@ -292,7 +337,10 @@ export default function StudentsPage() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-6 text-gray-500">
+                  <TableCell
+                    colSpan={6}
+                    className="text-center py-6 text-gray-500"
+                  >
                     No students found
                   </TableCell>
                 </TableRow>

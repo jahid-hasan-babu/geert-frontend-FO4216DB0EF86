@@ -7,8 +7,10 @@ import {
 } from "@/redux/features/legal/legalApi";
 import { Toaster, toast } from "sonner";
 import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
+import { useTranslate } from "@/hooks/useTranslate";
 
 const HomePage = () => {
+  const { translateBatch } = useTranslate();
   const { data, isLoading } = useGetHomeDataQuery(undefined);
   const [postHomeData, { isLoading: isPosting }] = usePostHomeDataMutation();
 
@@ -23,10 +25,22 @@ const HomePage = () => {
   const handleSubmit = async () => {
     try {
       await postHomeData(formData).unwrap();
-      toast.success("Home data saved successfully!");
+
+      // Translate success message
+      const [successMsg] = await translateBatch(
+        ["Home data saved successfully!"],
+        localStorage.getItem("selectedLanguage") || "nl"
+      );
+      toast.success(successMsg);
     } catch (error) {
       console.error(error);
-      toast.error("Failed to save data.");
+
+      // Translate error message
+      const [errorMsg] = await translateBatch(
+        ["Failed to save data."],
+        localStorage.getItem("selectedLanguage") || "nl"
+      );
+      toast.error(errorMsg);
     }
   };
 
@@ -34,7 +48,7 @@ const HomePage = () => {
 
   return (
     <div className="bg-white p-6 space-y-4">
-      <TranslateInitializer/>
+      <TranslateInitializer />
       {/* Sonner Toaster */}
       <Toaster position="top-right" richColors />
 
@@ -50,7 +64,9 @@ const HomePage = () => {
           type="text"
           className="border p-2 w-full rounded"
           value={formData.header}
-          onChange={(e) => setFormData({ ...formData, header: e.target.value })}
+          onChange={(e) =>
+            setFormData({ ...formData, header: e.target.value })
+          }
         />
       </div>
 
@@ -62,7 +78,9 @@ const HomePage = () => {
           type="text"
           className="border p-2 w-full rounded"
           value={formData.title}
-          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+          onChange={(e) =>
+            setFormData({ ...formData, title: e.target.value })
+          }
         />
       </div>
 

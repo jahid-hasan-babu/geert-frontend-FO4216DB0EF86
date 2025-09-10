@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -14,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Eye, EyeOff } from "lucide-react";
 import axios from "axios";
+import { useTranslate } from "@/hooks/useTranslate";
 
 interface PasswordModalProps {
   isOpen: boolean;
@@ -33,6 +33,12 @@ export function PasswordModal({ isOpen, onClose }: PasswordModalProps) {
   });
   const [loading, setLoading] = useState(false);
 
+  const { translateBatch } = useTranslate();
+  const targetLanguage =
+    typeof window !== "undefined"
+      ? localStorage.getItem("currentLanguage") || "en"
+      : "en";
+
   const togglePasswordVisibility = (field: keyof typeof showPasswords) => {
     setShowPasswords((prev) => ({
       ...prev,
@@ -44,7 +50,8 @@ export function PasswordModal({ isOpen, onClose }: PasswordModalProps) {
     e.preventDefault();
 
     if (passwords.newPassword !== passwords.confirmPassword) {
-      toast.error("New password and confirm password do not match!");
+      const msg = "New password and confirm password do not match!";
+      translateBatch([msg], targetLanguage).then(([tMsg]) => toast.error(tMsg));
       return;
     }
 
@@ -65,27 +72,31 @@ export function PasswordModal({ isOpen, onClose }: PasswordModalProps) {
       );
 
       if (res.data.success) {
-        toast.success("Password changed successfully!");
+        const msg = "Password changed successfully!";
+        translateBatch([msg], targetLanguage).then(([tMsg]) => toast.success(tMsg));
+
         onClose();
         setPasswords({ oldPassword: "", newPassword: "", confirmPassword: "" });
       } else {
-        toast.error(res.data.message || "Failed to change password");
+        const msg = res.data.message || "Failed to change password";
+        translateBatch([msg], targetLanguage).then(([tMsg]) => toast.error(tMsg));
       }
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
-        toast.error(
+        const msg =
           err.response?.data?.message ||
-            "An error occurred while changing password"
-        );
+          "An error occurred while changing password";
+        translateBatch([msg], targetLanguage).then(([tMsg]) => toast.error(tMsg));
       } else {
-        toast.error("Something went wrong");
+        const msg = "Something went wrong";
+        translateBatch([msg], targetLanguage).then(([tMsg]) => toast.error(tMsg));
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ trigger translation refresh when modal opens
+  // Trigger translation refresh when modal opens
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => {
@@ -98,10 +109,7 @@ export function PasswordModal({ isOpen, onClose }: PasswordModalProps) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="relative">
-          <DialogTitle
-            className="text-center text-2xl font-bold"
-            data-translate
-          >
+          <DialogTitle className="text-center text-2xl font-bold" data-translate>
             Password
           </DialogTitle>
         </DialogHeader>
@@ -109,11 +117,7 @@ export function PasswordModal({ isOpen, onClose }: PasswordModalProps) {
         <form onSubmit={handleSubmit} className="space-y-6 pt-4">
           {/** Old Password */}
           <div className="space-y-2">
-            <Label
-              htmlFor="oldPassword"
-              className="text-sm font-medium text-gray-700"
-              data-translate
-            >
+            <Label htmlFor="oldPassword" className="text-sm font-medium text-gray-700" data-translate>
               Old Password
             </Label>
             <div className="relative">
@@ -122,10 +126,7 @@ export function PasswordModal({ isOpen, onClose }: PasswordModalProps) {
                 type={showPasswords.oldPassword ? "text" : "password"}
                 value={passwords.oldPassword}
                 onChange={(e) =>
-                  setPasswords((prev) => ({
-                    ...prev,
-                    oldPassword: e.target.value,
-                  }))
+                  setPasswords((prev) => ({ ...prev, oldPassword: e.target.value }))
                 }
                 className="pr-10"
                 placeholder="••••••"
@@ -137,22 +138,14 @@ export function PasswordModal({ isOpen, onClose }: PasswordModalProps) {
                 className="absolute right-0 top-0 h-full px-3"
                 onClick={() => togglePasswordVisibility("oldPassword")}
               >
-                {showPasswords.oldPassword ? (
-                  <EyeOff className="h-4 w-4 text-gray-500" />
-                ) : (
-                  <Eye className="h-4 w-4 text-gray-500" />
-                )}
+                {showPasswords.oldPassword ? <EyeOff className="h-4 w-4 text-gray-500" /> : <Eye className="h-4 w-4 text-gray-500" />}
               </Button>
             </div>
           </div>
 
           {/** New Password */}
           <div className="space-y-2">
-            <Label
-              htmlFor="newPassword"
-              className="text-sm font-medium text-gray-700"
-              data-translate
-            >
+            <Label htmlFor="newPassword" className="text-sm font-medium text-gray-700" data-translate>
               New Password
             </Label>
             <div className="relative">
@@ -161,10 +154,7 @@ export function PasswordModal({ isOpen, onClose }: PasswordModalProps) {
                 type={showPasswords.newPassword ? "text" : "password"}
                 value={passwords.newPassword}
                 onChange={(e) =>
-                  setPasswords((prev) => ({
-                    ...prev,
-                    newPassword: e.target.value,
-                  }))
+                  setPasswords((prev) => ({ ...prev, newPassword: e.target.value }))
                 }
                 className="pr-10"
                 placeholder="••••••"
@@ -176,22 +166,14 @@ export function PasswordModal({ isOpen, onClose }: PasswordModalProps) {
                 className="absolute right-0 top-0 h-full px-3"
                 onClick={() => togglePasswordVisibility("newPassword")}
               >
-                {showPasswords.newPassword ? (
-                  <EyeOff className="h-4 w-4 text-gray-500" />
-                ) : (
-                  <Eye className="h-4 w-4 text-gray-500" />
-                )}
+                {showPasswords.newPassword ? <EyeOff className="h-4 w-4 text-gray-500" /> : <Eye className="h-4 w-4 text-gray-500" />}
               </Button>
             </div>
           </div>
 
           {/** Confirm Password */}
           <div className="space-y-2">
-            <Label
-              htmlFor="confirmPassword"
-              className="text-sm font-medium text-gray-700"
-              data-translate
-            >
+            <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700" data-translate>
               Confirm Password
             </Label>
             <div className="relative">
@@ -200,10 +182,7 @@ export function PasswordModal({ isOpen, onClose }: PasswordModalProps) {
                 type={showPasswords.confirmPassword ? "text" : "password"}
                 value={passwords.confirmPassword}
                 onChange={(e) =>
-                  setPasswords((prev) => ({
-                    ...prev,
-                    confirmPassword: e.target.value,
-                  }))
+                  setPasswords((prev) => ({ ...prev, confirmPassword: e.target.value }))
                 }
                 className="pr-10"
                 placeholder="••••••"
@@ -215,11 +194,7 @@ export function PasswordModal({ isOpen, onClose }: PasswordModalProps) {
                 className="absolute right-0 top-0 h-full px-3"
                 onClick={() => togglePasswordVisibility("confirmPassword")}
               >
-                {showPasswords.confirmPassword ? (
-                  <EyeOff className="h-4 w-4 text-gray-500" />
-                ) : (
-                  <Eye className="h-4 w-4 text-gray-500" />
-                )}
+                {showPasswords.confirmPassword ? <EyeOff className="h-4 w-4 text-gray-500" /> : <Eye className="h-4 w-4 text-gray-500" />}
               </Button>
             </div>
           </div>
@@ -229,9 +204,7 @@ export function PasswordModal({ isOpen, onClose }: PasswordModalProps) {
             className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-full text-lg font-medium"
             disabled={loading}
           >
-            <span data-translate>
-              {loading ? "Changing..." : "Change Password"}
-            </span>
+            <span data-translate>{loading ? "Changing..." : "Change Password"}</span>
           </Button>
         </form>
       </DialogContent>

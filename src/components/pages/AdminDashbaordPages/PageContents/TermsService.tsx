@@ -8,8 +8,11 @@ import {
 import { toast } from "sonner";
 import Editor from "@/components/ui/Editor/Editor";
 import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
+import { useTranslate } from "@/hooks/useTranslate";
 
 const TermsOfServiceEditor = () => {
+  const { translateBatch } = useTranslate();
+
   // ✅ Fetch legal data
   const { data, isLoading, isError } = useGetLegalDataQuery(undefined);
   const [postLegalData, { isLoading: isPosting }] = usePostLegalDataMutation();
@@ -33,11 +36,23 @@ const TermsOfServiceEditor = () => {
         regularityInfo: data?.regularityInfo || "",
       }).unwrap();
 
-      toast.success("Terms of Service updated successfully!");
+      // ✅ Translate success message
+      const [successMsg] = await translateBatch(
+        ["Terms of Service updated successfully!"],
+        localStorage.getItem("selectedLanguage") || "nl"
+      );
+      toast.success(successMsg);
+
       setTermsOfService(""); // ✅ clear editor after save
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update Terms of Service");
+
+      // ✅ Translate error message
+      const [errorMsg] = await translateBatch(
+        ["Failed to update Terms of Service"],
+        localStorage.getItem("selectedLanguage") || "nl"
+      );
+      toast.error(errorMsg);
     }
   };
 
@@ -46,8 +61,10 @@ const TermsOfServiceEditor = () => {
 
   return (
     <div className="bg-white p-6 space-y-4">
-      <TranslateInitializer/>
-      <h2 className="text-xl font-semibold" data-translate>Terms of Service</h2>
+      <TranslateInitializer />
+      <h2 className="text-xl font-semibold" data-translate>
+        Terms of Service
+      </h2>
 
       {/* ✅ Render HTML safely */}
       <div
@@ -55,7 +72,9 @@ const TermsOfServiceEditor = () => {
         dangerouslySetInnerHTML={{ __html: data?.termsOfService || "" }}
       />
 
-      <div className="text-xl mt-4" data-translate>Edit Terms of Service:</div>
+      <div className="text-xl mt-4" data-translate>
+        Edit Terms of Service:
+      </div>
 
       {/* ✅ Rich Text Editor */}
       <Editor
@@ -71,6 +90,7 @@ const TermsOfServiceEditor = () => {
         }`}
         onClick={handleSave}
         disabled={isPosting}
+        data-translate
       >
         {isPosting ? "Saving..." : "Save"}
       </button>

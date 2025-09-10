@@ -13,6 +13,7 @@ import {
   useEditCourseCategoryMutation,
   useDeleteCourseCategoryMutation,
 } from "@/redux/features/users&category/usersCategoryApi";
+import { useTranslate } from "@/hooks/useTranslate";
 
 interface Category {
   id: string;
@@ -24,15 +25,15 @@ const CategoryPage = () => {
   const [newCategory, setNewCategory] = useState("");
   const [editCategoryId, setEditCategoryId] = useState<string | null>(null);
   const [editCategoryName, setEditCategoryName] = useState("");
-
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
+  const { translateBatch } = useTranslate();
+  const lang = localStorage.getItem("selectedLanguage") || "en";
 
   const { data, isLoading } = useGetCoursesCategoryQuery({});
   const [addCategory, { isLoading: isAdding }] = useAddCourseCategoryMutation();
-  const [editCategory, { isLoading: isEditing }] =
-    useEditCourseCategoryMutation();
-  const [deleteCategory, { isLoading: isDeleting }] =
-    useDeleteCourseCategoryMutation();
+  const [editCategory, { isLoading: isEditing }] = useEditCourseCategoryMutation();
+  const [deleteCategory, { isLoading: isDeleting }] = useDeleteCourseCategoryMutation();
 
   useEffect(() => {
     if (data?.data) {
@@ -43,16 +44,20 @@ const CategoryPage = () => {
   // Add category
   const handleAddCategory = async () => {
     if (!newCategory.trim()) {
-      toast.error("Please enter a category name");
+      const [msg] = await translateBatch(["Please enter a category name"], lang);
+      toast.error(msg);
       return;
     }
 
     try {
       await addCategory(newCategory.trim()).unwrap();
       setNewCategory("");
-      toast.success("Category added successfully");
+
+      const [msg] = await translateBatch(["Category added successfully"], lang);
+      toast.success(msg);
     } catch (error) {
-      toast.error("Failed to add category");
+      const [msg] = await translateBatch(["Failed to add category"], lang);
+      toast.error(msg);
       console.error("Add category error:", error);
     }
   };
@@ -65,7 +70,8 @@ const CategoryPage = () => {
 
   const handleUpdateCategory = async () => {
     if (!editCategoryName.trim()) {
-      toast.error("Please enter a category name");
+      const [msg] = await translateBatch(["Please enter a category name"], lang);
+      toast.error(msg);
       return;
     }
 
@@ -76,9 +82,12 @@ const CategoryPage = () => {
       }).unwrap();
       setEditCategoryId(null);
       setEditCategoryName("");
-      toast.success("Category updated successfully");
+
+      const [msg] = await translateBatch(["Category updated successfully"], lang);
+      toast.success(msg);
     } catch (error) {
-      toast.error("Failed to update category");
+      const [msg] = await translateBatch(["Failed to update category"], lang);
+      toast.error(msg);
       console.error("Update category error:", error);
     }
   };
@@ -89,10 +98,13 @@ const CategoryPage = () => {
 
     try {
       await deleteCategory(deleteConfirmId).unwrap();
-      toast.success("Category deleted successfully");
       setDeleteConfirmId(null);
+
+      const [msg] = await translateBatch(["Category deleted successfully"], lang);
+      toast.success(msg);
     } catch (error) {
-      toast.error("Failed to delete category");
+      const [msg] = await translateBatch(["Failed to delete category"], lang);
+      toast.error(msg);
       console.error("Delete category error:", error);
     }
   };
@@ -139,9 +151,7 @@ const CategoryPage = () => {
                     data-translate
                     value={editCategoryName}
                     onChange={(e) => setEditCategoryName(e.target.value)}
-                    onKeyDown={(e) =>
-                      e.key === "Enter" && handleUpdateCategory()
-                    }
+                    onKeyDown={(e) => e.key === "Enter" && handleUpdateCategory()}
                     className="flex-1"
                   />
                   <div className="flex gap-2 ml-2">
@@ -152,11 +162,7 @@ const CategoryPage = () => {
                       className="bg-[#3399CC] hover:bg-[#52b9ec]"
                       data-translate
                     >
-                      {isEditing ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        "Save"
-                      )}
+                      {isEditing ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save"}
                     </Button>
                     <Button
                       size="sm"
@@ -200,8 +206,10 @@ const CategoryPage = () => {
       {deleteConfirmId && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-80">
-            <h2 className="text-lg font-semibold mb-4">Confirm Delete</h2>
-            <p className="text-sm mb-6">
+            <h2 className="text-lg font-semibold mb-4" data-translate>
+              Confirm Delete
+            </h2>
+            <p className="text-sm mb-6" data-translate>
               Are you sure you want to delete this category? This action cannot
               be undone.
             </p>
@@ -210,6 +218,7 @@ const CategoryPage = () => {
                 variant="outline"
                 onClick={() => setDeleteConfirmId(null)}
                 disabled={isDeleting}
+                data-translate
               >
                 Cancel
               </Button>
@@ -217,12 +226,9 @@ const CategoryPage = () => {
                 variant="destructive"
                 onClick={handleDeleteCategory}
                 disabled={isDeleting}
+                data-translate
               >
-                {isDeleting ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  "Delete"
-                )}
+                {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Delete"}
               </Button>
             </div>
           </div>

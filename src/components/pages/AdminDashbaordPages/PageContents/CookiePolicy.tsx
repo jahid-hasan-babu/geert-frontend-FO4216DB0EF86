@@ -8,8 +8,11 @@ import {
 import { toast } from "sonner";
 import Editor from "@/components/ui/Editor/Editor";
 import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
+import { useTranslate } from "@/hooks/useTranslate";
 
 const CookiePolicyEditor = () => {
+  const { translateBatch } = useTranslate();
+
   // ✅ Fetch legal data
   const { data, isLoading, isError } = useGetLegalDataQuery(undefined);
   const [postLegalData, { isLoading: isPosting }] = usePostLegalDataMutation();
@@ -29,15 +32,24 @@ const CookiePolicyEditor = () => {
       await postLegalData({
         privacyPolicy: data?.privacyPolicy || "",
         termsOfService: data?.termsOfService || "",
-        cookiePolicy, // ✅ current state
+        cookiePolicy,
         regularityInfo: data?.regularityInfo || "",
       }).unwrap();
 
-      toast.success("Cookie Policy updated successfully!");
+      const [successMsg] = await translateBatch(
+        ["Cookie Policy updated successfully!"],
+        localStorage.getItem("selectedLanguage") || "nl"
+      );
+      toast.success(successMsg);
+
       setCookiePolicy(""); // ✅ clear editor after save
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update Cookie Policy");
+      const [errorMsg] = await translateBatch(
+        ["Failed to update Cookie Policy"],
+        localStorage.getItem("selectedLanguage") || "nl"
+      );
+      toast.error(errorMsg);
     }
   };
 
@@ -46,8 +58,10 @@ const CookiePolicyEditor = () => {
 
   return (
     <div className="bg-white p-6 space-y-4">
-      <TranslateInitializer/>
-      <h2 className="text-xl font-semibold" data-translate>Cookie Policy</h2>
+      <TranslateInitializer />
+      <h2 className="text-xl font-semibold" data-translate>
+        Cookie Policy
+      </h2>
 
       {/* ✅ Render current Cookie Policy */}
       <div
@@ -55,7 +69,9 @@ const CookiePolicyEditor = () => {
         dangerouslySetInnerHTML={{ __html: data?.cookiePolicy || "" }}
       />
 
-      <div className="text-xl mt-4" data-translate>Edit Cookie Policy:</div>
+      <div className="text-xl mt-4" data-translate>
+        Edit Cookie Policy:
+      </div>
 
       {/* ✅ Rich Text Editor */}
       <Editor

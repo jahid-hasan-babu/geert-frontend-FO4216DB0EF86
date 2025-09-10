@@ -104,32 +104,35 @@ export function MenuModal({
                     {isLoading ? (
                       <Skeleton active />
                     ) : (
-                      <div
-                        className="p-4 space-y-3 cursor-pointer hover:bg-gray-50"
-                        onClick={() => setIsProfileInfo(true)}
-                      >
-                        <div className="flex items-center space-x-3">
-                          <Avatar className="h-12 w-12">
-                            <AvatarImage
-                              src={user?.profileImage || "/placeholder.svg"}
-                              alt={user?.username || "User"}
-                            />
-                            <AvatarFallback>
-                              {user?.username
-                                ? user.username[0].toUpperCase()
-                                : "U"}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-foreground truncate">
-                              {user?.username || "No Name"}
-                            </p>
-                            <p className="text-xs text-muted-foreground truncate">
-                              {user?.email || "No Email"}
-                            </p>
+                      <>
+                        <TranslateInitializer />
+                        <div
+                          className="p-4 space-y-3 cursor-pointer hover:bg-gray-50"
+                          onClick={() => setIsProfileInfo(true)}
+                        >
+                          <div className="flex items-center space-x-3">
+                            <Avatar className="h-12 w-12">
+                              <AvatarImage
+                                src={user?.profileImage || "/placeholder.svg"}
+                                alt={user?.username || "User"}
+                              />
+                              <AvatarFallback>
+                                {user?.username
+                                  ? user.username[0].toUpperCase()
+                                  : "U"}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-foreground truncate">
+                                {user?.username || "No Name"}
+                              </p>
+                              <p className="text-xs text-muted-foreground truncate">
+                                {user?.email || "No Email"}
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      </>
                     )}
 
                     <Separator />

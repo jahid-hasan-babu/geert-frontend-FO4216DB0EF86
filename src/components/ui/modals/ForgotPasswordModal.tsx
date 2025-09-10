@@ -4,6 +4,7 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
+import { useTranslate } from "@/hooks/useTranslate";
 
 interface ForgotPasswordModalProps {
   open: boolean;
@@ -19,8 +20,18 @@ export default function ForgotPasswordModal({ open, onClose }: ForgotPasswordMod
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const { translateBatch } = useTranslate();
+  const targetLanguage = typeof window !== "undefined"
+    ? localStorage.getItem("currentLanguage") || "en"
+    : "en";
+
   const handleSendEmail = async () => {
-    if (!fpEmail) return toast.error("Enter your email");
+    if (!fpEmail) {
+      const msg = "Enter your email";
+      translateBatch([msg], targetLanguage).then(([tMsg]) => toast.error(tMsg));
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await axios.post(
@@ -28,18 +39,27 @@ export default function ForgotPasswordModal({ open, onClose }: ForgotPasswordMod
         { email: fpEmail }
       );
       setUserId(response.data.data.userId);
-      toast.success("OTP sent to your email!");
+
+      const msg = "OTP sent to your email!";
+      translateBatch([msg], targetLanguage).then(([tMsg]) => toast.success(tMsg));
+
       setStep(2);
     } catch (error) {
       const err = error as AxiosError<{ message: string }>;
-      toast.error(err.response?.data?.message || "Failed to send OTP");
+      const msg = err.response?.data?.message || "Failed to send OTP";
+      translateBatch([msg], targetLanguage).then(([tMsg]) => toast.error(tMsg));
     } finally {
       setLoading(false);
     }
   };
 
   const handleVerifyOtp = async () => {
-    if (!otpCode) return toast.error("Enter OTP");
+    if (!otpCode) {
+      const msg = "Enter OTP";
+      translateBatch([msg], targetLanguage).then(([tMsg]) => toast.error(tMsg));
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await axios.post(
@@ -47,18 +67,27 @@ export default function ForgotPasswordModal({ open, onClose }: ForgotPasswordMod
         { userId, otpCode: Number(otpCode) }
       );
       setAccessToken(response.data.data.accessToken);
-      toast.success("OTP verified! Reset your password now.");
+
+      const msg = "OTP verified! Reset your password now.";
+      translateBatch([msg], targetLanguage).then(([tMsg]) => toast.success(tMsg));
+
       setStep(3);
     } catch (error) {
       const err = error as AxiosError<{ message: string }>;
-      toast.error(err.response?.data?.message || "OTP verification failed");
+      const msg = err.response?.data?.message || "OTP verification failed";
+      translateBatch([msg], targetLanguage).then(([tMsg]) => toast.error(tMsg));
     } finally {
       setLoading(false);
     }
   };
 
   const handleResetPassword = async () => {
-    if (!newPassword) return toast.error("Enter new password");
+    if (!newPassword) {
+      const msg = "Enter new password";
+      translateBatch([msg], targetLanguage).then(([tMsg]) => toast.error(tMsg));
+      return;
+    }
+
     setLoading(true);
     try {
       await axios.post(
@@ -66,7 +95,10 @@ export default function ForgotPasswordModal({ open, onClose }: ForgotPasswordMod
         { newPassword },
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
-      toast.success("Password reset successfully!");
+
+      const msg = "Password reset successfully!";
+      translateBatch([msg], targetLanguage).then(([tMsg]) => toast.success(tMsg));
+
       onClose();
       setStep(1);
       setFpEmail("");
@@ -74,7 +106,8 @@ export default function ForgotPasswordModal({ open, onClose }: ForgotPasswordMod
       setNewPassword("");
     } catch (error) {
       const err = error as AxiosError<{ message: string }>;
-      toast.error(err.response?.data?.message || "Password reset failed");
+      const msg = err.response?.data?.message || "Password reset failed";
+      translateBatch([msg], targetLanguage).then(([tMsg]) => toast.error(tMsg));
     } finally {
       setLoading(false);
     }

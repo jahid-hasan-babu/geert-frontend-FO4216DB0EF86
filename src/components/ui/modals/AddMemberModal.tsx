@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { useAddCourseStudentMutation } from "@/redux/features/courses/coursesApi";
 import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
+import { useTranslate } from "@/hooks/useTranslate";
 
 interface AddMemberModalProps {
   courseId: string;
@@ -31,12 +32,21 @@ export default function AddMemberModal({ courseId, onAddSuccess }: AddMemberModa
   const [error, setError] = useState("");
 
   const [addCourseToStudent, { isLoading: isAdding }] = useAddCourseStudentMutation();
+  const { translateBatch } = useTranslate();
+
+  // Read current language from localStorage (or any other source)
+  const targetLanguage = typeof window !== "undefined"
+    ? localStorage.getItem("currentLanguage") || "en"
+    : "en";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!email) {
-      setError("Please enter a student email");
-      window.dispatchEvent(new Event("translate-refresh")); // refresh translation for error
+      const msg = "Please enter a student email";
+      setError(msg);
+      window.dispatchEvent(new Event("translate-refresh"));
+      translateBatch([msg], targetLanguage).then(([tMsg]) => toast.error(tMsg));
       return;
     }
 
@@ -44,7 +54,9 @@ export default function AddMemberModal({ courseId, onAddSuccess }: AddMemberModa
       const res: AddCourseStudentResponse = await addCourseToStudent({ email, courseId }).unwrap();
 
       if (res.success) {
-        toast.success(res.message || "Student added to course successfully");
+        translateBatch([res.message || "Student added to course successfully"], targetLanguage)
+          .then(([msg]) => toast.success(msg));
+
         setError("");
         setEmail("");
         setOpen(false);
@@ -65,8 +77,8 @@ export default function AddMemberModal({ courseId, onAddSuccess }: AddMemberModa
       }
 
       setError(message);
-      toast.error(message);
-      window.dispatchEvent(new Event("translate-refresh")); // refresh translation for error
+      translateBatch([message], targetLanguage).then(([tMsg]) => toast.error(tMsg));
+      window.dispatchEvent(new Event("translate-refresh"));
     }
   };
 

@@ -8,8 +8,11 @@ import {
 import { toast } from "sonner";
 import Editor from "@/components/ui/Editor/Editor";
 import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
+import { useTranslate } from "@/hooks/useTranslate";
 
 const RegulatoryInfoEditor = () => {
+  const { translateBatch } = useTranslate();
+
   // ✅ Fetch legal data
   const { data, isLoading, isError } = useGetLegalDataQuery(undefined);
   const [postLegalData, { isLoading: isPosting }] = usePostLegalDataMutation();
@@ -33,11 +36,23 @@ const RegulatoryInfoEditor = () => {
         regularityInfo: regulatoryInfo,
       }).unwrap();
 
-      toast.success("Regulatory Info updated successfully!");
+      // ✅ Translate success message
+      const [successMsg] = await translateBatch(
+        ["Regulatory Info updated successfully!"],
+        localStorage.getItem("selectedLanguage") || "nl"
+      );
+      toast.success(successMsg);
+
       setRegulatoryInfo(""); // ✅ clear editor after save
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update Regulatory Info");
+
+      // ✅ Translate error message
+      const [errorMsg] = await translateBatch(
+        ["Failed to update Regulatory Info"],
+        localStorage.getItem("selectedLanguage") || "nl"
+      );
+      toast.error(errorMsg);
     }
   };
 
@@ -46,8 +61,10 @@ const RegulatoryInfoEditor = () => {
 
   return (
     <div className="bg-white p-6 space-y-4">
-      <TranslateInitializer/>
-      <h2 className="text-xl font-semibold" data-translate>Regulatory Info</h2>
+      <TranslateInitializer />
+      <h2 className="text-xl font-semibold" data-translate>
+        Regulatory Info
+      </h2>
 
       {/* ✅ Render HTML from API */}
       <div
@@ -55,7 +72,9 @@ const RegulatoryInfoEditor = () => {
         dangerouslySetInnerHTML={{ __html: data?.regularityInfo || "" }}
       />
 
-      <div className="text-xl mt-4" data-translate>Edit Regulatory Info:</div>
+      <div className="text-xl mt-4" data-translate>
+        Edit Regulatory Info:
+      </div>
 
       <Editor
         contents={regulatoryInfo}
@@ -70,6 +89,7 @@ const RegulatoryInfoEditor = () => {
         }`}
         onClick={handleSave}
         disabled={isPosting}
+        data-translate
       >
         {isPosting ? "Saving..." : "Save"}
       </button>

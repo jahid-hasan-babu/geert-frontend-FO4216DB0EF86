@@ -8,12 +8,14 @@ import {
 import { toast } from "sonner";
 import Editor from "@/components/ui/Editor/Editor";
 import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
+import { useTranslate } from "@/hooks/useTranslate";
 
 const PrivacyPolicy = () => {
+  const { translateBatch } = useTranslate();
+
   // ✅ Fetch legal data
   const { data, isLoading, isError } = useGetLegalDataQuery(undefined);
   const [postLegalData, { isLoading: isPosting }] = usePostLegalDataMutation();
-  console.log("Data fetched:", data);
 
   const [privacyPolicy, setPrivacyPolicy] = useState("");
 
@@ -33,10 +35,22 @@ const PrivacyPolicy = () => {
         cookiePolicy: data?.cookiePolicy || "",
         regularityInfo: data?.regularityInfo || "",
       }).unwrap();
-      toast.success("Privacy Policy updated successfully!");
+
+      // Translate success message
+      const [successMsg] = await translateBatch(
+        ["Privacy Policy updated successfully!"],
+        localStorage.getItem("selectedLanguage") || "nl"
+      );
+      toast.success(successMsg);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update Privacy Policy");
+
+      // Translate error message
+      const [errorMsg] = await translateBatch(
+        ["Failed to update Privacy Policy"],
+        localStorage.getItem("selectedLanguage") || "nl"
+      );
+      toast.error(errorMsg);
     }
   };
 
@@ -46,14 +60,18 @@ const PrivacyPolicy = () => {
   return (
     <div className="bg-white p-6 space-y-4">
       <TranslateInitializer/>
-      <h2 className="text-xl font-semibold" data-translate>Privacy Policy</h2>
+      <h2 className="text-xl font-semibold" data-translate>
+        Privacy Policy
+      </h2>
 
       <div
         className="prose max-w-none border p-4 rounded bg-gray-50"
         dangerouslySetInnerHTML={{ __html: data?.privacyPolicy || "" }}
       />
 
-      <div className="text-xl mt-4" data-translate>Edit Privacy Policy:</div>
+      <div className="text-xl mt-4" data-translate>
+        Edit Privacy Policy:
+      </div>
 
       <Editor
         contents={privacyPolicy}
@@ -67,6 +85,7 @@ const PrivacyPolicy = () => {
         }`}
         onClick={handleSave}
         disabled={isPosting}
+        data-translate
       >
         {isPosting ? "Saving..." : "Save"}
       </button>

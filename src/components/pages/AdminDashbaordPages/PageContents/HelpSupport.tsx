@@ -8,10 +8,11 @@ import {
 import { toast } from "sonner";
 import Editor from "@/components/ui/Editor/Editor";
 import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
+import { useTranslate } from "@/hooks/useTranslate";
 
 const HelpSupport = () => {
+  const { translateBatch } = useTranslate();
   const { data, isLoading, isError } = useGetHelpSupportQuery(undefined);
-  console.log("Data fetched:", data);
   const [createHelpSupport, { isLoading: isPosting }] =
     useCreateHelpSupportMutation();
 
@@ -27,11 +28,22 @@ const HelpSupport = () => {
   const handleSave = async () => {
     try {
       await createHelpSupport({ description: helpSupport }).unwrap();
-      toast.success("Help & Support updated successfully!");
+
+      // Translate success message
+      const [successMsg] = await translateBatch(
+        ["Help & Support updated successfully!"],
+        localStorage.getItem("selectedLanguage") || "nl"
+      );
+      toast.success(successMsg);
+
       setHelpSupport("");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update Help & Support");
+      const [errorMsg] = await translateBatch(
+        ["Failed to update Help & Support"],
+        localStorage.getItem("selectedLanguage") || "nl"
+      );
+      toast.error(errorMsg);
     }
   };
 
@@ -59,6 +71,8 @@ const HelpSupport = () => {
         onSave={(content) => setHelpSupport(content)}
         onBlur={() => {}}
       />
+
+      {/* Save button */}
       <button
         className={`bg-blue-600 text-white px-4 py-2 rounded ${
           isPosting ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
