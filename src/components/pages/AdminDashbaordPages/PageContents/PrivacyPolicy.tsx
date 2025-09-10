@@ -7,6 +7,7 @@ import {
 } from "@/redux/features/legal/legalApi";
 import { toast } from "sonner";
 import Editor from "@/components/ui/Editor/Editor";
+import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
 
 const PrivacyPolicy = () => {
   // ✅ Fetch legal data
@@ -44,14 +45,15 @@ const PrivacyPolicy = () => {
 
   return (
     <div className="bg-white p-6 space-y-4">
-      <h2 className="text-xl font-semibold">Privacy Policy</h2>
+      <TranslateInitializer/>
+      <h2 className="text-xl font-semibold" data-translate>Privacy Policy</h2>
 
       <div
         className="prose max-w-none border p-4 rounded bg-gray-50"
         dangerouslySetInnerHTML={{ __html: data?.privacyPolicy || "" }}
       />
 
-      <div className="text-xl mt-4">Edit Privacy Policy:</div>
+      <div className="text-xl mt-4" data-translate>Edit Privacy Policy:</div>
 
       <Editor
         contents={privacyPolicy}

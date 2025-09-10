@@ -12,6 +12,7 @@ import axios from "axios";
 import { ChevronDown, CheckCircle, Play, Lock, FileText } from "lucide-react";
 import CourseCertification from "@/components/certification/CourseCertification";
 import { QuizModal, Quiz } from "../modals/QuizModal";
+import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
 
 // ---------------- Types ----------------
 export interface LessonsItem {
@@ -53,7 +54,6 @@ export const CourseProvider: React.FC<{
   modules: Module[];
   children: ReactNode;
 }> = ({ modules, children }) => {
-  // Initialize currentLesson to first unlocked lesson (video preferred)
   const initialLesson =
     modules
       .flatMap((m) => m.lessons)
@@ -87,7 +87,6 @@ export const CourseVideoPlayer: React.FC<CourseVideoPlayerProps> = ({
   const [secondsWatched, setSecondsWatched] = useState(0);
   const lastTimeRef = useRef(0);
 
-  // Track watched time for videos
   const handleTimeUpdate = () => {
     if (!videoRef.current) return;
     const currentTime = videoRef.current.currentTime;
@@ -110,13 +109,11 @@ export const CourseVideoPlayer: React.FC<CourseVideoPlayerProps> = ({
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log("Progress updated ✅", Math.floor(secondsWatched));
     } catch (err) {
       console.error("Failed to update progress:", err);
     }
   };
 
-  // Reset progress when lesson changes
   useEffect(() => {
     setSecondsWatched(0);
     lastTimeRef.current = 0;
@@ -124,7 +121,10 @@ export const CourseVideoPlayer: React.FC<CourseVideoPlayerProps> = ({
 
   if (!currentLesson) {
     return (
-      <div className="w-full h-64 flex items-center justify-center border rounded-lg bg-gray-100 text-gray-500">
+      <div
+        className="w-full h-64 flex items-center justify-center border rounded-lg bg-gray-100 text-gray-500"
+        data-translate
+      >
         No lesson selected
       </div>
     );
@@ -160,8 +160,11 @@ export const CourseVideoPlayer: React.FC<CourseVideoPlayerProps> = ({
 
   if (currentLesson.type === "quiz") {
     return (
-      <div className="w-full h-64 flex items-center justify-center border rounded-lg bg-yellow-50 p-4">
-        <p className="text-gray-700">📝 Quiz: {currentLesson.title}</p>
+      <div
+        className="w-full h-64 flex items-center justify-center border rounded-lg bg-yellow-50 p-4"
+        data-translate
+      >
+        📝 Quiz: {currentLesson.title}
       </div>
     );
   }
@@ -228,7 +231,7 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
             }`}
           >
             <h3 className="text-[16px] font-semibold text-gray-900 text-left">
-              Lesson {idx + 1}: {module.title}
+              <span data-translate>Lesson</span> {idx + 1}: {module.title}
             </h3>
             <ChevronDown
               className={`w-5 h-5 text-gray-600 transition-transform duration-300 transform ${
@@ -260,6 +263,7 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
                     }`}
                     onClick={() => handleLessonClick(lesson)}
                   >
+                    <TranslateInitializer />
                     <div className="flex flex-col items-center mr-4">
                       <div
                         className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
@@ -288,10 +292,14 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
                           className={`font-medium ${
                             isLocked ? "text-gray-400" : "text-gray-900"
                           }`}
+                          data-translate
                         >
                           {lesson.title}
                           {isLocked && (
-                            <span className="ml-2 text-xs text-gray-400">
+                            <span
+                              className="ml-2 text-xs text-gray-400"
+                              data-translate
+                            >
                               (Locked)
                             </span>
                           )}
@@ -301,13 +309,18 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
                             isLocked ? "text-gray-400" : "text-gray-600"
                           }`}
                         >
-                          {lesson.type === "video"
-                            ? `Video: ${lesson.duration}`
-                            : lesson.type === "doc"
-                            ? `Doc`
-                            : lesson.type === "quiz"
-                            ? "Quiz"
-                            : lesson.duration}
+                          {lesson.type === "video" ? (
+                            <>
+                              <span data-translate>Video:</span>{" "}
+                              {lesson.duration}
+                            </>
+                          ) : lesson.type === "doc" ? (
+                            <span data-translate>Doc</span>
+                          ) : lesson.type === "quiz" ? (
+                            <span data-translate>Quiz</span>
+                          ) : (
+                            lesson.duration
+                          )}
                         </p>
                       </div>
 
@@ -319,6 +332,8 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
                               openQuiz(lesson.quiz ?? null);
                             }}
                             className="p-2 rounded-full hover:bg-gray-200 cursor-pointer"
+                            data-translate
+                            title="Take Quiz"
                           >
                             <CheckCircle className="w-5 h-5 text-blue-500" />
                           </button>
@@ -331,6 +346,8 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
                               setCurrentLesson(lesson);
                             }}
                             className="p-2 rounded-full hover:bg-gray-200 cursor-pointer"
+                            title="Play Video"
+                            data-translate
                           >
                             <Play className="w-5 h-5 text-gray-600" />
                           </button>
@@ -343,6 +360,8 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
                               setCurrentLesson(lesson);
                             }}
                             className="p-2 rounded-full hover:bg-gray-200 cursor-pointer"
+                            title="Open Doc"
+                            data-translate
                           >
                             <FileText className="w-5 h-5 text-gray-600" />
                           </button>
@@ -367,7 +386,10 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
             isCertOpen ? "border-b border-[#E7E7E7]" : ""
           }`}
         >
-          <h3 className="text-[16px] font-semibold text-gray-900">
+          <h3
+            data-translate
+            className="text-[16px] font-semibold text-gray-900"
+          >
             Certification
           </h3>
           <ChevronDown

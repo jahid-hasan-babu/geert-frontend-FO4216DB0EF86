@@ -1,5 +1,11 @@
 "use client";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useTranslate } from "@/hooks/useTranslate";
 import { useState, useEffect } from "react";
 
@@ -59,16 +65,15 @@ export function LanguageSwitcher() {
 export function TranslateInitializer() {
   const { translateBatch } = useTranslate();
 
-  const runTranslation = async () => {
+  const translateElements = async () => {
     const lang = localStorage.getItem("selectedLanguage") || "en";
     if (lang === "en") return; // default, no need to translate
 
     const elements = document.querySelectorAll("[data-translate]");
     const texts = Array.from(elements).map((el) => {
       const original = el.getAttribute("data-original") || el.textContent || "";
-      if (!el.getAttribute("data-original")) {
+      if (!el.getAttribute("data-original"))
         el.setAttribute("data-original", original);
-      }
       return original;
     });
 
@@ -81,17 +86,19 @@ export function TranslateInitializer() {
   };
 
   useEffect(() => {
-    // run once on mount
-    runTranslation();
+    // Initial translation
+    translateElements();
 
-    // ✅ listen for manual refresh events
-    const handler = () => runTranslation();
-    window.addEventListener("translate-refresh", handler);
-
-    return () => {
-      window.removeEventListener("translate-refresh", handler);
+    // Listen for refresh events
+    const handleRefresh = () => {
+      translateElements();
     };
-  }, []);
+
+    window.addEventListener("translate-refresh", handleRefresh);
+    return () => {
+      window.removeEventListener("translate-refresh", handleRefresh);
+    };
+  }, [translateBatch]);
 
   return null;
 }

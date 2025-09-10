@@ -14,7 +14,7 @@ export default function Footer() {
   const [message, setMessage] = useState("");
 
   const handleSubscribe = async () => {
-    if (!email) {
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setMessage("⚠️ Please enter a valid email address.");
       return;
     }
@@ -57,6 +57,7 @@ export default function Footer() {
               <PrimaryButton
                 label={loading ? "Subscribing..." : "Subscribe Now"}
                 onClick={handleSubscribe}
+                translate
               />
             </div>
 
@@ -65,12 +66,19 @@ export default function Footer() {
 
           {/* Company Links */}
           <div>
-            <h4 className="text-lg font-semibold mb-6 text-gray-300">
+            <h4
+              data-translate
+              className="text-lg font-semibold mb-6 text-gray-300"
+            >
               Company
             </h4>
             <ul className="space-y-4">
               <li>
-                <Link href="/" className="text-gray-300 hover:text-white">
+                <Link
+                  href="/"
+                  className="text-gray-300 hover:text-white"
+                  data-translate
+                >
                   Home
                 </Link>
               </li>
@@ -78,6 +86,7 @@ export default function Footer() {
                 <Link
                   href="/courses"
                   className="text-gray-300 hover:text-white"
+                  data-translate
                 >
                   Course
                 </Link>
@@ -86,6 +95,7 @@ export default function Footer() {
                 <Link
                   href="/contact"
                   className="text-gray-300 hover:text-white"
+                  data-translate
                 >
                   Contact
                 </Link>
@@ -94,6 +104,7 @@ export default function Footer() {
                 <Link
                   href="/help-support"
                   className="text-gray-300 hover:text-white"
+                  data-translate
                 >
                   Support
                 </Link>
@@ -103,36 +114,45 @@ export default function Footer() {
 
           {/* Legal Links */}
           <div>
-            <h4 className="text-lg font-semibold mb-6 text-gray-300">Legal</h4>
+            <h4
+              data-translate
+              className="text-lg font-semibold mb-6 text-gray-300"
+            >
+              Legal
+            </h4>
             <ul className="space-y-4">
               <li>
                 <Link
                   href="/privacy-policy"
                   className="text-gray-300 hover:text-white"
+                  data-translate
                 >
                   Privacy Policy
                 </Link>
               </li>
               <li>
                 <Link
-                  href="terms-service"
+                  href="/terms-service"
                   className="text-gray-300 hover:text-white"
+                  data-translate
                 >
                   Terms of Service
                 </Link>
               </li>
               <li>
                 <Link
-                  href="cookies-policy"
+                  href="/cookies-policy"
                   className="text-gray-300 hover:text-white"
+                  data-translate
                 >
                   Cookies Policy
                 </Link>
               </li>
               <li>
                 <Link
-                  href="regulatory-info"
+                  href="/regulatory-info"
                   className="text-gray-300 hover:text-white"
+                  data-translate
                 >
                   Regulatory Info
                 </Link>
@@ -143,25 +163,28 @@ export default function Footer() {
 
         {/* Bottom Section */}
         <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-gray-800">
-          <p className="text-gray-400 text-sm mb-4 md:mb-0">
+          <p className="text-gray-400 text-sm mb-4 md:mb-0" data-translate>
             © VMTA - All rights reserved.
           </p>
 
           <div className="flex space-x-4">
             <a
               href="#"
+              aria-label="Twitter"
               className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-gray-300 hover:text-white hover:bg-gray-700"
             >
               <FaXTwitter className="w-5 h-5" />
             </a>
             <a
               href="#"
+              aria-label="Facebook"
               className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-gray-300 hover:text-white hover:bg-gray-700"
             >
               <FaFacebook className="w-5 h-5" />
             </a>
             <a
               href="#"
+              aria-label="WhatsApp"
               className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-gray-300 hover:text-white hover:bg-gray-700"
             >
               <FaWhatsapp className="w-5 h-5" />

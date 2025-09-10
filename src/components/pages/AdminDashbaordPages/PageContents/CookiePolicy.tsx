@@ -7,6 +7,7 @@ import {
 } from "@/redux/features/legal/legalApi";
 import { toast } from "sonner";
 import Editor from "@/components/ui/Editor/Editor";
+import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
 
 const CookiePolicyEditor = () => {
   // ✅ Fetch legal data
@@ -45,7 +46,8 @@ const CookiePolicyEditor = () => {
 
   return (
     <div className="bg-white p-6 space-y-4">
-      <h2 className="text-xl font-semibold">Cookie Policy</h2>
+      <TranslateInitializer/>
+      <h2 className="text-xl font-semibold" data-translate>Cookie Policy</h2>
 
       {/* ✅ Render current Cookie Policy */}
       <div
@@ -53,7 +55,7 @@ const CookiePolicyEditor = () => {
         dangerouslySetInnerHTML={{ __html: data?.cookiePolicy || "" }}
       />
 
-      <div className="text-xl mt-4">Edit Cookie Policy:</div>
+      <div className="text-xl mt-4" data-translate>Edit Cookie Policy:</div>
 
       {/* ✅ Rich Text Editor */}
       <Editor
@@ -69,6 +71,7 @@ const CookiePolicyEditor = () => {
         }`}
         onClick={handleSave}
         disabled={isPosting}
+        data-translate
       >
         {isPosting ? "Saving..." : "Save"}
       </button>

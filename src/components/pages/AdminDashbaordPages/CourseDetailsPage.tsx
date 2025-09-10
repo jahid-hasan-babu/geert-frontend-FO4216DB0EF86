@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-
 import type React from "react";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
@@ -13,9 +12,8 @@ import {
 } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Info, Trash2, Upload } from "lucide-react";
+import { Info, Trash2, Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
 import {
   useGetCourseByIdQuery,
   useEditCourseMutation,
@@ -26,17 +24,11 @@ import {
 } from "@/redux/features/courses/coursesApi";
 import AddModuleModal from "@/components/ui/modal/add-module-modal";
 import { AddLessonModal } from "@/components/ui/modal/add-lesson-modal";
-// Use shared types from add-lesson-modal to ensure compatibility
-import type {
-  Module,
-  Lesson,
-  Quiz,
-  QuizOption,
-  Question,
-} from "@/components/ui/modal/add-lesson-modal";
+import type { Module, Lesson } from "@/components/ui/modal/add-lesson-modal";
 import Editor from "@/components/ui/Editor/Editor";
 import AddMemberModal from "@/components/ui/modals/AddMemberModal";
 import { Dialog } from "@headlessui/react";
+import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
 
 interface Instructor {
   id: string;
@@ -113,7 +105,6 @@ const CourseDetailsPage = () => {
     lessonTitle: string;
   } | null>(null);
 
-  // Add these two functions
   const handleDeleteLessonClick = (lessonId: string, lessonTitle: string) => {
     setLessonToDelete({ lessonId, lessonTitle });
     setDeleteLessonModalOpen(true);
@@ -121,7 +112,6 @@ const CourseDetailsPage = () => {
 
   const handleDeleteLessonSubmit = async () => {
     if (!lessonToDelete) return;
-
     setDeletingLessonId(lessonToDelete.lessonId);
     try {
       await deleteLesson({ lessonId: lessonToDelete.lessonId }).unwrap();
@@ -134,8 +124,6 @@ const CourseDetailsPage = () => {
       setDeletingLessonId(null);
     }
   };
-
-  const courseModules = course?.modules;
 
   useEffect(() => {
     if (data?.data) {
@@ -176,39 +164,22 @@ const CourseDetailsPage = () => {
         title: formData.title,
         description: formData.description,
         duration: formData.duration,
-        price: Number(formData.price), // Ensure price is always a number
+        price: Number(formData.price),
       };
 
       if (coverImageFile) {
-        // If there's a new image, use FormData but structure bodyData separately
         const submitData = new FormData();
         submitData.append("bodyData", JSON.stringify(bodyData));
         submitData.append("coverImage", coverImageFile);
 
-        await editCourse({
-          id: course?.id,
-          formData: submitData,
-        }).unwrap();
+        await editCourse({ id: course?.id, formData: submitData }).unwrap();
       } else {
-        // If no new image, send JSON data with structured bodyData
-        await editCourse({
-          id: course?.id,
-          formData: bodyData,
-        }).unwrap();
+        await editCourse({ id: course?.id, formData: bodyData }).unwrap();
       }
 
-      // toast({
-      //   title: "Success",
-      //   description: "Course updated successfully!",
-      // });
       setIsEditMode(false);
     } catch (error) {
       console.log(error);
-      // toast({
-      //   title: "Error",
-      //   description: "Failed to update course. Please try again.",
-      //   variant: "destructive",
-      // });
     }
   };
 
@@ -226,27 +197,12 @@ const CourseDetailsPage = () => {
     setIsEditMode(false);
   };
 
-  const handleAddModule = () => {
-    setIsModuleModalVisible(true);
-  };
-
-  const handleAddLesson = () => {
-    setIsLessonModalVisible(true);
-  };
-
-  const handleModuleSuccess = () => {
-    // Refetch course data to show new module
-    window.location.reload(); // Simple refresh, could be optimized with RTK Query refetch
-  };
-
-  const handleLessonSuccess = () => {
-    // Refetch course data to show new lesson
-    window.location.reload(); // Simple refresh, could be optimized with RTK Query refetch
-  };
-
+  const handleAddModule = () => setIsModuleModalVisible(true);
+  const handleAddLesson = () => setIsLessonModalVisible(true);
+  const handleModuleSuccess = () => window.location.reload();
+  const handleLessonSuccess = () => window.location.reload();
   const handleDeleteCourse = async () => {
     if (!course?.id) return;
-
     try {
       await deleteCourse(course.id).unwrap();
       setIsDeleteModalOpen(false);
@@ -263,16 +219,14 @@ const CourseDetailsPage = () => {
 
   const handleEditModuleSubmit = async () => {
     if (!editingModule) return;
-
     setIsEditingModule(true);
     try {
       await editModule({
         moduleId: editingModule.moduleId,
         title: editModuleTitle,
       }).unwrap();
-
       setEditingModule(null);
-      window.location.reload(); // optional: can be replaced later with state update
+      window.location.reload();
     } catch (error) {
       console.error(error);
     } finally {
@@ -296,20 +250,16 @@ const CourseDetailsPage = () => {
     try {
       const formData = new FormData();
       const { title, description, duration, videoFile } = editLessonData;
-
       formData.append(
         "bodyData",
         JSON.stringify({ title, description, duration })
       );
-
       if (videoFile) formData.append("videoURL", videoFile);
-
       await editLesson({
         moduleId: editingLesson.moduleId,
         lessonId: editingLesson.lesson.id,
         formData,
       }).unwrap();
-
       setEditingLesson(null);
       window.location.reload();
     } catch (error) {
@@ -337,11 +287,14 @@ const CourseDetailsPage = () => {
 
   return (
     <div className="mx-auto bg-white p-6">
+      <TranslateInitializer />
       <div className="flex items-center justify-between mb-6">
         <div className="bg-white py-[10px] px-[12px] flex space-x-[4px] text-[14px]">
-          <div className="text-[#3399CC]">Course</div>
+          <div className="text-[#3399CC]" data-translate>
+            Course
+          </div>
           <div>/</div>
-          <div>Course Details</div>
+          <div data-translate>Course Details</div>
         </div>
         <div>
           <AddMemberModal
@@ -394,10 +347,15 @@ const CourseDetailsPage = () => {
       </div>
 
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold mb-6">Course Details</h1>
+        <h1 className="text-2xl font-semibold mb-6" data-translate>
+          Course Details
+        </h1>
         <div className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              className="block text-sm font-medium text-gray-700 mb-2"
+              data-translate
+            >
               Course Title
             </label>
             <Input
@@ -409,7 +367,10 @@ const CourseDetailsPage = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              className="block text-sm font-medium text-gray-700 mb-2"
+              data-translate
+            >
               Description
             </label>
             {/* <Textarea
@@ -440,7 +401,10 @@ const CourseDetailsPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                className="block text-sm font-medium text-gray-700 mb-2"
+                data-translate
+              >
                 Course Category
               </label>
               <Input
@@ -451,7 +415,10 @@ const CourseDetailsPage = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                className="block text-sm font-medium text-gray-700 mb-2"
+                data-translate
+              >
                 Course Duration
               </label>
               <div className="relative">
@@ -471,7 +438,11 @@ const CourseDetailsPage = () => {
 
           {isEditMode && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <TranslateInitializer />
+              <label
+                className="block text-sm font-medium text-gray-700 mb-2"
+                data-translate
+              >
                 Course Price (€)
               </label>
               <Input
@@ -493,18 +464,23 @@ const CourseDetailsPage = () => {
 
       <div className="mb-8">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold">Module</h2>
+          <h2 className="text-2xl font-semibold" data-translate>
+            Module
+          </h2>
           {isEditMode && (
             <div className="flex gap-2">
+              <TranslateInitializer />
               <Button
                 onClick={handleAddLesson}
                 className="bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+                data-translate
               >
                 Add Lesson
               </Button>
               <Button
                 onClick={handleAddModule}
                 className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
+                data-translate
               >
                 Add Module
               </Button>
@@ -519,6 +495,7 @@ const CourseDetailsPage = () => {
               value={`module-${module.id}`}
               className="border border-gray-200 rounded-lg"
             >
+              <TranslateInitializer />
               <AccordionTrigger className="px-4 py-3 text-left hover:no-underline cursor-pointer">
                 <span className="text-gray-700 font-medium font-sans">
                   Module {index + 1}: {module.title}
@@ -654,6 +631,7 @@ const CourseDetailsPage = () => {
 
                   {isEditMode && (
                     <div className="mt-2">
+                      <TranslateInitializer />
                       {editingModule?.moduleId === module.id ? (
                         <div className="flex gap-2 mt-2">
                           <Input
@@ -691,6 +669,7 @@ const CourseDetailsPage = () => {
                             handleEditModuleClick(module.id, module.title)
                           }
                           className="bg-yellow-500 hover:bg-yellow-600 text-white"
+                          data-translate
                         >
                           Edit Module
                         </Button>
@@ -705,11 +684,17 @@ const CourseDetailsPage = () => {
       </div>
 
       <div className="mb-8">
-        <h2 className="text-2xl font-semibold mb-6">Instructor Info</h2>
+        <TranslateInitializer />
+        <h2 className="text-2xl font-semibold mb-6" data-translate>
+          Instructor Info
+        </h2>
         {course.instructor ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                className="block text-sm font-medium text-gray-700 mb-2"
+                data-translate
+              >
                 Instructor Name
               </label>
               <Input
@@ -719,7 +704,10 @@ const CourseDetailsPage = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                className="block text-sm font-medium text-gray-700 mb-2"
+                data-translate
+              >
                 Email
               </label>
               <Input
@@ -739,10 +727,12 @@ const CourseDetailsPage = () => {
       <div className="mb-8">
         {isEditMode ? (
           <div className="flex gap-4">
+            <TranslateInitializer />
             <Button
               onClick={handleSubmit}
               disabled={isEditing}
               className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg"
+              data-translate
             >
               {isEditing ? (
                 <>
@@ -757,15 +747,18 @@ const CourseDetailsPage = () => {
               onClick={handleCancelEdit}
               variant="outline"
               className="flex-1 py-3 rounded-lg bg-transparent"
+              data-translate
             >
               Cancel
             </Button>
           </div>
         ) : (
           <div className="flex flex-col space-y-4">
+            <TranslateInitializer />
             <Button
               onClick={() => setIsEditMode(true)}
               className="w-full bg-[#3399CC] hover:bg-[#52b9ec] text-white py-3 rounded-lg cursor-pointer"
+              data-translate
             >
               Edit Course
             </Button>
@@ -773,6 +766,7 @@ const CourseDetailsPage = () => {
               onClick={() => setIsDeleteModalOpen(true)}
               className="w-full bg-red-500 hover:bg-red-700 text-white py-3 rounded-lg cursor-pointer"
               disabled={isDeleting}
+              data-translate
             >
               {isDeleting ? "Deleting..." : "Delete Course"}
             </Button>

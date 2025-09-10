@@ -4,6 +4,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { X } from "lucide-react";
 import { Skeleton } from "antd";
+import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
 
 interface Notification {
   id: string;
@@ -53,10 +54,12 @@ export default function NotificationModal({
   onClose,
   notifications,
 }: NotificationModalProps) {
-  console.log("Notifications >>", notifications);
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
+        {/* ✅ Initialize translator */}
+        <TranslateInitializer />
+
         {/* Overlay */}
         <Transition.Child
           as={Fragment}
@@ -89,7 +92,10 @@ export default function NotificationModal({
                 <>
                   {/* Header */}
                   <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-[20px] font-semibold font-playfairDisplay">
+                    <h2
+                      className="text-[20px] font-semibold font-playfairDisplay"
+                      data-translate
+                    >
                       Notifications
                     </h2>
                     <button onClick={onClose}>
@@ -105,15 +111,28 @@ export default function NotificationModal({
                           key={n.id}
                           className="p-3 border rounded-lg hover:bg-gray-50"
                         >
-                          <div className="text-xs font-semibold">{n.title}</div>
-                          <div className="text-sm">{n.body}</div>
-                          <div className="text-gray-400 text-xs mt-1 flex justify-end">
+                          <div
+                            className="text-xs font-semibold"
+                            data-translate
+                          >
+                            {n.title}
+                          </div>
+                          <div className="text-sm" data-translate>
+                            {n.body}
+                          </div>
+                          <div
+                            className="text-gray-400 text-xs mt-1 flex justify-end"
+                            data-translate
+                          >
                             {timeAgo(new Date(n.createdAt))}
                           </div>
                         </div>
                       ))
                     ) : (
-                      <p className="text-gray-500 text-center">
+                      <p
+                        className="text-gray-500 text-center"
+                        data-translate
+                      >
                         No new notifications
                       </p>
                     )}

@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import {
   Dialog,
@@ -12,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useAddCourseStudentMutation } from "@/redux/features/courses/coursesApi";
 import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
 
 interface AddMemberModalProps {
   courseId: string;
@@ -34,6 +36,7 @@ export default function AddMemberModal({ courseId, onAddSuccess }: AddMemberModa
     e.preventDefault();
     if (!email) {
       setError("Please enter a student email");
+      window.dispatchEvent(new Event("translate-refresh")); // refresh translation for error
       return;
     }
 
@@ -63,43 +66,55 @@ export default function AddMemberModal({ courseId, onAddSuccess }: AddMemberModa
 
       setError(message);
       toast.error(message);
+      window.dispatchEvent(new Event("translate-refresh")); // refresh translation for error
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline">+ Add Member</Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Add New Member</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="email" className="text-right">
-                Student Email
-              </Label>
-              <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter student email"
-                className="col-span-3 border rounded px-2 py-1"
-                disabled={isAdding}
-              />
+    <>
+      <TranslateInitializer />
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button variant="outline" data-translate>
+            + Add Member
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <TranslateInitializer />
+            <DialogTitle data-translate>Add New Member</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="email" className="text-right" data-translate>
+                  Student Email
+                </Label>
+                <input
+                  type="email"
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter student email"
+                  className="col-span-3 border rounded px-2 py-1"
+                  disabled={isAdding}
+                  data-translate
+                />
+              </div>
+              {error && (
+                <p className="text-red-500 text-sm" data-translate>
+                  {error}
+                </p>
+              )}
             </div>
-            {error && <p className="text-red-500 text-sm">{error}</p>}
-          </div>
-          <div className="flex justify-end">
-            <Button type="submit" disabled={isAdding}>
-              {isAdding ? "Adding..." : "Add Member"}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+            <div className="flex justify-end">
+              <Button type="submit" disabled={isAdding} data-translate>
+                {isAdding ? "Adding..." : "Add Member"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

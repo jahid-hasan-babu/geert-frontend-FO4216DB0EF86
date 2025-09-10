@@ -6,6 +6,7 @@ import {
   usePostHomeDataMutation,
 } from "@/redux/features/legal/legalApi";
 import { Toaster, toast } from "sonner";
+import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
 
 const HomePage = () => {
   const { data, isLoading } = useGetHomeDataQuery(undefined);
@@ -33,6 +34,7 @@ const HomePage = () => {
 
   return (
     <div className="bg-white p-6 space-y-4">
+      <TranslateInitializer/>
       {/* Sonner Toaster */}
       <Toaster position="top-right" richColors />
 

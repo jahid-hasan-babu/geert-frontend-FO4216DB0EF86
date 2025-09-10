@@ -7,6 +7,7 @@ import {
 } from "@/redux/features/legal/legalApi";
 import { toast } from "sonner";
 import Editor from "@/components/ui/Editor/Editor";
+import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
 
 const RegulatoryInfoEditor = () => {
   // ✅ Fetch legal data
@@ -45,7 +46,8 @@ const RegulatoryInfoEditor = () => {
 
   return (
     <div className="bg-white p-6 space-y-4">
-      <h2 className="text-xl font-semibold">Regulatory Info</h2>
+      <TranslateInitializer/>
+      <h2 className="text-xl font-semibold" data-translate>Regulatory Info</h2>
 
       {/* ✅ Render HTML from API */}
       <div
@@ -53,7 +55,7 @@ const RegulatoryInfoEditor = () => {
         dangerouslySetInnerHTML={{ __html: data?.regularityInfo || "" }}
       />
 
-      <div className="text-xl mt-4">Edit Regulatory Info:</div>
+      <div className="text-xl mt-4" data-translate>Edit Regulatory Info:</div>
 
       <Editor
         contents={regulatoryInfo}

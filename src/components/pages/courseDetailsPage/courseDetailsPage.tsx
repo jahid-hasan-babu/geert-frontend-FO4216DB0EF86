@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/context/CourseContext";
 import axios, { AxiosError } from "axios";
 import { Spin } from "antd";
+import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
 
 // ---------------- Types ----------------
 export interface Instructor {
@@ -114,7 +115,9 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
       } catch (err) {
         const error = err as AxiosError<{ message: string }>;
         console.error(error);
-        setError(error.response?.data?.message || "Something went wrong");
+        setError(
+          error.response?.data?.message || "Something went wrong"
+        );
       } finally {
         setLoadingCourse(false);
       }
@@ -129,10 +132,24 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
         <Spin size="large" tip="Loading course..." />
       </div>
     );
-  if (error) return <p className="text-center py-10 text-red-500">{error}</p>;
-  if (!course) return <p className="text-center py-10">Course not found</p>;
+  if (error)
+    return (
+      <p className="text-center py-10 text-red-500" data-translate>
+        {error}
+      </p>
+    );
+  if (!course)
+    return (
+      <p className="text-center py-10" data-translate>
+        Course not found
+      </p>
+    );
   if (!course.instructor)
-    return <p className="text-center py-10">Instructor not found</p>;
+    return (
+      <p className="text-center py-10" data-translate>
+        Instructor not found
+      </p>
+    );
 
   const courseId = course._id || course.id || "";
 
@@ -182,6 +199,7 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
 
   return (
     <CourseProvider modules={modules}>
+      <TranslateInitializer />
       <div className="container">
         <section className="py-8 lg:py-12 mx-auto">
           <div className="grid lg:grid-cols-4 gap-12 items-start">
@@ -206,18 +224,27 @@ export default function CourseDetailsPage({ slug }: CourseDetailsPageProps) {
                         </span>
                       ))}
                     </div>
-                    <span className="text-gray-700 font-medium text-[14px]">
+                    <span
+                      className="text-gray-700 font-medium text-[14px]"
+                      data-translate
+                    >
                       {averageRating.toFixed(1)} ({reviews.length})
                     </span>
                   </div>
 
                   {/* Title + Microlearning badge */}
                   <div className="flex items-center space-x-4 mb-6">
-                    <h1 className="text-3xl md:text-4xl lg:text-[24px] font-bold text-gray-900 font-playfairDisplay">
+                    <h1
+                      className="text-3xl md:text-4xl lg:text-[24px] font-bold text-gray-900 font-playfairDisplay"
+                      data-translate
+                    >
                       {course.title}
                     </h1>
                     {course.isMicroLearning && (
-                      <span className="bg-[#3399CC] text-white py-1 px-2 rounded-full text-[10px]">
+                      <span
+                        className="bg-[#3399CC] text-white py-1 px-2 rounded-full text-[10px]"
+                        data-translate
+                      >
                         Microlearning
                       </span>
                     )}

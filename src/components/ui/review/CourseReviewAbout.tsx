@@ -5,6 +5,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { InstructorModal } from "../modals/InstructorModal";
 import DOMPurify from "isomorphic-dompurify";
+import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
 
 interface Review {
   id: string;
@@ -44,6 +45,7 @@ export default function CourseReviewAbout({
   return (
     <div className="w-full max-w-6xl mx-auto px-3 sm:px-4 md:px-6">
       {/* Responsive Tabs */}
+      <TranslateInitializer />
       <div className="flex mb-4 sm:mb-6 text-sm sm:text-base">
         <button
           onClick={() => setActiveTab("about")}
@@ -52,6 +54,7 @@ export default function CourseReviewAbout({
               ? "bg-[#C0DFEF] text-[#070707]"
               : "bg-sky-100 text-gray-600 hover:bg-sky-150"
           }`}
+          data-translate
         >
           About
         </button>
@@ -62,8 +65,10 @@ export default function CourseReviewAbout({
               ? "bg-[#C0DFEF] text-[#070707]"
               : "bg-sky-100 text-gray-600 hover:bg-sky-150"
           }`}
+          data-translate
         >
-          Reviews {reviews.length > 0 && (
+          Reviews{" "}
+          {reviews.length > 0 && (
             <span className="ml-1 text-xs sm:text-sm bg-white/30 px-2 py-0.5 rounded-full">
               {reviews.length}
             </span>
@@ -75,8 +80,12 @@ export default function CourseReviewAbout({
       {activeTab === "about" ? (
         <div className="space-y-4 sm:space-y-6">
           {/* Description Section */}
+          <TranslateInitializer></TranslateInitializer>
           <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border border-gray-100">
-            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">
+            <h3
+              className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4"
+              data-translate
+            >
               Course Description
             </h3>
             <div className="text-gray-700 leading-relaxed prose max-w-none">
@@ -92,6 +101,7 @@ export default function CourseReviewAbout({
                 <button
                   onClick={() => setShowFullDescription(!showFullDescription)}
                   className="text-sky-500 hover:text-sky-600 font-medium ml-1 cursor-pointer text-sm sm:text-base transition-colors duration-200"
+                  data-translate
                 >
                   {showFullDescription ? " Read Less" : " ... Read More"}
                 </button>
@@ -101,7 +111,10 @@ export default function CourseReviewAbout({
 
           {/* Instructor Section */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-100">
-            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 p-4 sm:p-6 pb-3 sm:pb-4">
+            <h3
+              className="text-lg sm:text-xl font-semibold text-gray-900 p-4 sm:p-6 pb-3 sm:pb-4"
+              data-translate
+            >
               Meet Your Instructor
             </h3>
             <div
@@ -117,7 +130,12 @@ export default function CourseReviewAbout({
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs sm:text-sm text-gray-600 mb-1">Instructor</p>
+                <p
+                  className="text-xs sm:text-sm text-gray-600 mb-1"
+                  data-translate
+                >
+                  Instructor
+                </p>
                 <p className="font-semibold text-gray-900 text-sm sm:text-base truncate">
                   {instructor?.username}
                 </p>
@@ -125,20 +143,24 @@ export default function CourseReviewAbout({
                   {instructor?.email}
                 </p>
               </div>
-              <div className="text-gray-400 text-sm sm:text-base">
-                →
-              </div>
+              <div className="text-gray-400 text-sm sm:text-base">→</div>
             </div>
           </div>
         </div>
       ) : (
         // Reviews Tab
         <div className="space-y-4 sm:space-y-6">
+          <TranslateInitializer />
           {reviews.length === 0 ? (
             <div className="bg-white rounded-lg p-8 sm:p-12 text-center shadow-sm border border-gray-100">
               <div className="text-gray-400 text-4xl sm:text-6xl mb-4">📝</div>
-              <p className="text-gray-500 text-base sm:text-lg mb-2">No reviews yet</p>
-              <p className="text-gray-400 text-sm sm:text-base">
+              <p
+                className="text-gray-500 text-base sm:text-lg mb-2"
+                data-translate
+              >
+                No reviews yet
+              </p>
+              <p className="text-gray-400 text-sm sm:text-base" data-translate>
                 Be the first to share your experience with this course!
               </p>
             </div>
@@ -147,13 +169,20 @@ export default function CourseReviewAbout({
               {/* Reviews Header */}
               <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border border-gray-100">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900">
+                  <h3
+                    className="text-lg sm:text-xl font-semibold text-gray-900"
+                    data-translate
+                  >
                     Student Reviews ({reviews.length})
                   </h3>
                   <div className="flex items-center space-x-2">
                     <div className="flex space-x-1">
                       {[...Array(5)].map((_, i) => {
-                        const avgRating = reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length;
+                        const avgRating =
+                          reviews.reduce(
+                            (acc, review) => acc + review.rating,
+                            0
+                          ) / reviews.length;
                         return (
                           <span
                             key={i}
@@ -169,7 +198,12 @@ export default function CourseReviewAbout({
                       })}
                     </div>
                     <span className="text-sm sm:text-base text-gray-600 font-medium">
-                      {(reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length).toFixed(1)}
+                      {(
+                        reviews.reduce(
+                          (acc, review) => acc + review.rating,
+                          0
+                        ) / reviews.length
+                      ).toFixed(1)}
                     </span>
                   </div>
                 </div>
@@ -229,7 +263,10 @@ export default function CourseReviewAbout({
               {/* Show More Reviews Button (if many reviews) */}
               {reviews.length > 6 && (
                 <div className="text-center">
-                  <button className="bg-sky-500 hover:bg-sky-600 text-white px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-medium transition-colors duration-200 text-sm sm:text-base">
+                  <button
+                    className="bg-sky-500 hover:bg-sky-600 text-white px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-medium transition-colors duration-200 text-sm sm:text-base"
+                    data-translate
+                  >
                     View All Reviews
                   </button>
                 </div>

@@ -7,6 +7,7 @@ import {
 } from "@/redux/features/legal/legalApi"; 
 import { toast } from "sonner";
 import Editor from "@/components/ui/Editor/Editor";
+import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
 
 const HelpSupport = () => {
   const { data, isLoading, isError } = useGetHelpSupportQuery(undefined);
@@ -39,7 +40,8 @@ const HelpSupport = () => {
 
   return (
     <div className="bg-white p-6 space-y-4">
-      <h2 className="text-xl font-semibold">Help & Support</h2>
+      <TranslateInitializer/>
+      <h2 className="text-xl font-semibold" data-translate>Help & Support</h2>
 
       {/* ✅ Show current help-support description */}
       <div
@@ -49,7 +51,7 @@ const HelpSupport = () => {
         }}
       />
 
-      <div className="text-xl mt-4">Edit Help & Support:</div>
+      <div className="text-xl mt-4" data-translate>Edit Help & Support:</div>
 
       {/* ✅ Rich Text Editor */}
       <Editor
@@ -57,14 +59,13 @@ const HelpSupport = () => {
         onSave={(content) => setHelpSupport(content)}
         onBlur={() => {}}
       />
-
-      {/* ✅ Save button */}
       <button
         className={`bg-blue-600 text-white px-4 py-2 rounded ${
           isPosting ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
         }`}
         onClick={handleSave}
         disabled={isPosting}
+        data-translate
       >
         {isPosting ? "Saving..." : "Save"}
       </button>

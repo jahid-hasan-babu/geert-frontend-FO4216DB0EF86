@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -84,11 +85,23 @@ export function PasswordModal({ isOpen, onClose }: PasswordModalProps) {
     }
   };
 
+  // ✅ trigger translation refresh when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => {
+        window.dispatchEvent(new Event("translate-refresh"));
+      }, 200);
+    }
+  }, [isOpen]);
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="relative">
-          <DialogTitle className="text-center text-2xl font-bold">
+          <DialogTitle
+            className="text-center text-2xl font-bold"
+            data-translate
+          >
             Password
           </DialogTitle>
         </DialogHeader>
@@ -99,6 +112,7 @@ export function PasswordModal({ isOpen, onClose }: PasswordModalProps) {
             <Label
               htmlFor="oldPassword"
               className="text-sm font-medium text-gray-700"
+              data-translate
             >
               Old Password
             </Label>
@@ -137,6 +151,7 @@ export function PasswordModal({ isOpen, onClose }: PasswordModalProps) {
             <Label
               htmlFor="newPassword"
               className="text-sm font-medium text-gray-700"
+              data-translate
             >
               New Password
             </Label>
@@ -175,6 +190,7 @@ export function PasswordModal({ isOpen, onClose }: PasswordModalProps) {
             <Label
               htmlFor="confirmPassword"
               className="text-sm font-medium text-gray-700"
+              data-translate
             >
               Confirm Password
             </Label>
@@ -213,7 +229,9 @@ export function PasswordModal({ isOpen, onClose }: PasswordModalProps) {
             className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-full text-lg font-medium"
             disabled={loading}
           >
-            {loading ? "Changing..." : "Change Password"}
+            <span data-translate>
+              {loading ? "Changing..." : "Change Password"}
+            </span>
           </Button>
         </form>
       </DialogContent>

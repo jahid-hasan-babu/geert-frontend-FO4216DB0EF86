@@ -44,12 +44,12 @@ export default function TopNav() {
 
   return (
     <nav className="px-3 sm:px-12 flex items-center justify-between bg-white h-full">
-      <div className="font-medium text-2xl hidden lg:flex truncate max-w-[300px]">
+      <TranslateInitializer />
+      <div className="font-medium text-2xl hidden lg:flex truncate max-w-[300px]" data-translate>
         {getPageTitle()}
       </div>
 
       <div className="flex items-center gap-2 ml-auto lg:ml-0">
-        <TranslateInitializer />
         <LanguageSwitcher />
         <DropdownMenu>
           <DropdownMenuTrigger className="focus:outline-none">

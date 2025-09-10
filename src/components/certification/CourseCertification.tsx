@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { Download } from "lucide-react";
 import axios, { AxiosError } from "axios";
 import logo from "@/assets/images/logo.png";
+import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
 
 interface CertificateData {
   studentName: string;
@@ -51,7 +52,7 @@ export default function CourseCertification({ courseId }: Props) {
         if (!certRes.data.success) throw new Error("Certificate not available");
         setCertificate(certRes.data.data);
 
-        // Fetch result (optional)
+        // Fetch result
         try {
           const resultRes = await axios.get<{
             success: boolean;
@@ -62,16 +63,13 @@ export default function CourseCertification({ courseId }: Props) {
           );
           if (resultRes.data.success) setResult(resultRes.data.data);
         } catch (err) {
-          const error = err as AxiosError;
           console.warn(
             "Result not available, continuing without it:",
-            error.message
+            (err as AxiosError).message
           );
         }
-      } catch (err) {
-        const error = err as AxiosError;
-        console.error("Error fetching data:", error);
-        setError("Certificate not for now!");
+      } catch {
+        setError("Certificate not available.");
       } finally {
         setLoading(false);
       }
@@ -87,27 +85,45 @@ export default function CourseCertification({ courseId }: Props) {
       const printWindow = window.open("", "_blank");
       if (!printWindow) return;
 
+      const selectedLanguage = localStorage.getItem("selectedLanguage") || "en";
+
+      // Texts for certificate
+      const texts = {
+        en: {
+          certificateTitle: "Certificate of Completion",
+          presentedTo: "This certificate is proudly presented to",
+          forCourse: "for successfully completing the course",
+          instructor: "Instructor",
+          courseStartDate: "Course Start Date",
+          finalScore: "Final Score",
+          overallPercent: "Overall Percent",
+          classPosition: "Class Position",
+          congratulations: "Congratulations on your achievement!",
+        },
+        nl: {
+          certificateTitle: "Certificaat van Voltooiing",
+          presentedTo: "Dit certificaat wordt met trots uitgereikt aan",
+          forCourse: "voor het succesvol voltooien van de cursus",
+          instructor: "Instructeur",
+          courseStartDate: "Startdatum van de cursus",
+          finalScore: "Eindscore",
+          overallPercent: "Totaalpercentage",
+          classPosition: "Klaspositie",
+          congratulations: "Gefeliciteerd met uw prestatie!",
+        },
+      };
+
+      const t = selectedLanguage === "nl" ? texts.nl : texts.en;
+
       const htmlContent = `
 <!DOCTYPE html>
-<html>
+<html lang="${selectedLanguage}">
 <head>
-  <title>${certificate.courseTitle} Certificate</title>
+  <meta charset="UTF-8">
+  <title data-translate>${t.certificateTitle}</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    html, body {
-      width: 100%;
-      height: 100vh;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: white; display: flex; justify-content: center; align-items: center; }
     
     .certificate-container {
       width: 90%;
@@ -119,56 +135,52 @@ export default function CourseCertification({ courseId }: Props) {
       text-align: center;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
-    
+
     .certificate-container > * {
       margin: 20px 0;
     }
-    
+
     .logo {
       max-width: 120px;
       height: auto;
       margin: 0 auto 30px auto;
       display: block;
     }
-    
+
     .title {
       font-size: 2.5rem;
       font-weight: bold;
       color: #1e40af;
-      margin: 0 0 20px 0;
       line-height: 1.2;
     }
-    
+
     .subtitle {
       color: #374151;
       font-size: 1.25rem;
-      margin: 16px 0;
       line-height: 1.4;
     }
-    
+
     .student-name {
       font-size: 2.25rem;
       font-weight: 600;
       color: #111827;
-      margin: 30px 0;
       line-height: 1.2;
     }
-    
+
     .course-title {
       font-size: 1.75rem;
       font-weight: 500;
       color: #1d4ed8;
-      margin: 30px 0;
       line-height: 1.3;
     }
-    
+
     .details {
       color: #374151;
       margin: 20px 0;
       font-size: 1.125rem;
       line-height: 1.4;
     }
-    
+
     .highlight {
       font-size: 1.5rem;
       font-weight: bold;
@@ -176,14 +188,14 @@ export default function CourseCertification({ courseId }: Props) {
       margin: 15px 0;
       line-height: 1.3;
     }
-    
+
     .congratulations {
       color: #6b7280;
       margin-top: 40px;
       font-size: 1rem;
       font-style: italic;
     }
-    
+
     @media print {
       html, body {
         width: 100%;
@@ -206,51 +218,48 @@ export default function CourseCertification({ courseId }: Props) {
         page-break-inside: avoid;
       }
       
-      .title {
-        font-size: 2.25rem;
-      }
-      
-      .student-name {
-        font-size: 2rem;
-      }
-      
-      .course-title {
-        font-size: 1.5rem;
-      }
+      .title { font-size: 2.25rem; }
+      .student-name { font-size: 2rem; }
+      .course-title { font-size: 1.5rem; }
     }
-    
-    @page {
-      size: A4;
-      margin: 0.5in;
-    }
+
+    @page { size: A4; margin: 0.5in; }
   </style>
 </head>
 <body>
   <div class="certificate-container">
     <img class="logo" src="${logo.src}" alt="Logo" />
-    <h1 class="title">Certificate of Completion</h1>
-    <p class="subtitle">This certificate is proudly presented to</p>
+    <h1 class="title" data-translate>${t.certificateTitle}</h1>
+    <p class="subtitle" data-translate>${t.presentedTo}</p>
     <h2 class="student-name">${certificate.studentName}</h2>
-    <p class="subtitle">for successfully completing the course</p>
+    <p class="subtitle" data-translate>${t.forCourse}</p>
     <h3 class="course-title">${certificate.courseTitle}</h3>
-    <p class="details">Instructor: ${certificate.instructorName}${
+    <p class="details" data-translate>
+      ${t.instructor}: ${certificate.instructorName}${
         certificate.instructorDesignation
           ? ` - ${certificate.instructorDesignation}`
           : ""
-      }</p>
-    <p class="details">Course Start Date: ${new Date(
-      certificate.courseStartDate
-    ).toLocaleDateString()}</p>
+      }
+    </p>
+    <p class="details" data-translate>
+      ${t.courseStartDate}: ${new Date(
+        certificate.courseStartDate
+      ).toLocaleDateString()}
+    </p>
     ${
       result
-        ? `<p class="highlight">Final Score: ${result.finalScore}</p>
-           <p class="highlight">Overall Percent: ${result.overallPercent}%</p>
-           <p class="highlight">Class Position: ${
-             result.position
-           }${getOrdinalSuffix(result.position)} of ${result.totalStudents}</p>`
+        ? `<p class="highlight" data-translate>${t.finalScore}: ${
+            result.finalScore
+          }</p>
+           <p class="highlight" data-translate>${t.overallPercent}: ${
+            result.overallPercent
+          }%</p>
+           <p class="highlight" data-translate>${t.classPosition}: ${
+            result.position
+          }${getOrdinalSuffix(result.position)} of ${result.totalStudents}</p>`
         : ""
     }
-    <p class="congratulations">Congratulations on your achievement!</p>
+    <p class="congratulations" data-translate>${t.congratulations}</p>
   </div>
 </body>
 </html>
@@ -269,60 +278,65 @@ export default function CourseCertification({ courseId }: Props) {
   };
 
   if (loading)
-    return <p className="text-center text-gray-500">Loading certificate...</p>;
+    return (
+      <p className="text-center text-gray-500" data-translate>
+        Loading certificate...
+      </p>
+    );
   if (error || !certificate)
     return (
-      <p className="text-center text-red-500">
+      <p className="text-center text-red-500" data-translate>
         {error || "Certificate not available."}
       </p>
     );
 
   return (
     <div className="max-w-xl mx-auto">
+      <TranslateInitializer />
       <div
         ref={certificateRef}
         className="p-6 border-4 border-gray-300 rounded-2xl bg-white text-center space-y-4"
       >
-        <h1 className="text-3xl font-bold text-blue-800">
+        <h1 className="text-3xl font-bold text-blue-800" data-translate>
           Certificate of Completion
         </h1>
-        <p className="text-gray-700 text-sm">
+        <p className="text-gray-700 text-sm" data-translate>
           This certificate is proudly presented to
         </p>
         <h2 className="text-2xl font-semibold text-gray-900">
           {certificate.studentName}
         </h2>
-        <p className="text-gray-700 text-sm">
+        <p className="text-gray-700 text-sm" data-translate>
           for successfully completing the course
         </p>
         <h3 className="text-xl font-medium text-blue-700">
           {certificate.courseTitle}
         </h3>
-        <p className="text-gray-700 mt-2 text-sm">
+        <p className="text-gray-700 mt-2 text-sm" data-translate>
           Instructor: {certificate.instructorName}{" "}
           {certificate.instructorDesignation
             ? `- ${certificate.instructorDesignation}`
             : ""}
         </p>
-        <p className="text-gray-700 text-sm">
+        <p className="text-gray-700 text-sm" data-translate>
           Course Start Date:{" "}
           {new Date(certificate.courseStartDate).toLocaleDateString()}
         </p>
         {result && (
           <>
-            <p className="text-blue-600 font-bold text-lg">
+            <p className="text-blue-600 font-bold text-lg" data-translate>
               Final Score: {result.finalScore}
             </p>
-            <p className="text-blue-600 font-bold text-lg">
+            <p className="text-blue-600 font-bold text-lg" data-translate>
               Overall Percent: {result.overallPercent}%
             </p>
-            <p className="text-blue-600 font-bold text-lg">
+            <p className="text-blue-600 font-bold text-lg" data-translate>
               Class Position: {result.position}
               {getOrdinalSuffix(result.position)} of {result.totalStudents}
             </p>
           </>
         )}
-        <p className="text-gray-500 mt-4 text-xs">
+        <p className="text-gray-500 mt-4 text-xs" data-translate>
           Congratulations on your achievement!
         </p>
       </div>
@@ -330,6 +344,7 @@ export default function CourseCertification({ courseId }: Props) {
       <button
         onClick={handleDownloadPDF}
         className="w-full mt-4 bg-sky-500 hover:bg-sky-600 text-white font-semibold py-2 rounded-xl transition-colors duration-200 flex items-center justify-center space-x-2"
+        data-translate
       >
         <Download className="w-5 h-5" />
         <span>Download PDF</span>

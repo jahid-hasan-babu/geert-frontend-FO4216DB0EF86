@@ -23,7 +23,7 @@ import { usePathname } from "next/navigation";
 import { useDispatch } from "react-redux";
 import Image from "next/image";
 import logo from "@/assets/images/logo.png";
-import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
+import { TranslateInitializer } from "@/lib/language-translate/DashboardLanguageSwitcher";
 
 export default function Sidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -104,8 +104,7 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile toggle button */}
-      <TranslateInitializer/>
+      <TranslateInitializer />
       <button
         type="button"
         className="lg:hidden fixed top-4 left-4 z-[70] p-2 rounded-lg bg-white shadow-md"
@@ -255,7 +254,10 @@ export default function Sidebar() {
                   className="w-full flex items-center cursor-pointer"
                 >
                   <LogOut size={35} className="h-5 w-5 mr-3" />
-                  <span className="text-sm md:text-base text-gray-600" data-translate>
+                  <span
+                    className="text-sm md:text-base text-gray-600"
+                    data-translate
+                  >
                     Logout
                   </span>
                 </button>

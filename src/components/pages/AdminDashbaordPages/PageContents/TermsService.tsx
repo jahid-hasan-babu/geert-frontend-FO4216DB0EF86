@@ -7,6 +7,7 @@ import {
 } from "@/redux/features/legal/legalApi";
 import { toast } from "sonner";
 import Editor from "@/components/ui/Editor/Editor";
+import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
 
 const TermsOfServiceEditor = () => {
   // ✅ Fetch legal data
@@ -45,7 +46,8 @@ const TermsOfServiceEditor = () => {
 
   return (
     <div className="bg-white p-6 space-y-4">
-      <h2 className="text-xl font-semibold">Terms of Service</h2>
+      <TranslateInitializer/>
+      <h2 className="text-xl font-semibold" data-translate>Terms of Service</h2>
 
       {/* ✅ Render HTML safely */}
       <div
@@ -53,7 +55,7 @@ const TermsOfServiceEditor = () => {
         dangerouslySetInnerHTML={{ __html: data?.termsOfService || "" }}
       />
 
-      <div className="text-xl mt-4">Edit Terms of Service:</div>
+      <div className="text-xl mt-4" data-translate>Edit Terms of Service:</div>
 
       {/* ✅ Rich Text Editor */}
       <Editor
