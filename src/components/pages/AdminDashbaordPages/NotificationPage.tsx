@@ -19,10 +19,8 @@ import {
 } from "@/lib/validations/notification";
 import { toast } from "sonner";
 import { useCreateNotificationMutation } from "@/redux/features/notification/notificationsApi";
-import { useTranslate } from "@/hooks/useTranslate";
 
 export default function NotificationPage() {
-  const { translateBatch } = useTranslate();
 
   const [sendTo, setSendTo] = useState("All");
   const [title, setTitle] = useState("");
@@ -67,26 +65,14 @@ export default function NotificationPage() {
 
     try {
       await createNotification(validation.data).unwrap();
-
-      // Translate the success message
-      const [successMsg] = await translateBatch(
-        ["Notification sent successfully!"],
-        localStorage.getItem("selectedLanguage") || "nl"
-      );
-      toast.success(successMsg);
+      toast.success(<span data-translate>Notification sent successfully!</span>);
 
       setSendTo("All");
       setTitle("");
       setMessage("");
     } catch (error) {
       console.error("Failed to send notification:", error);
-
-      // Translate the error message
-      const [errorMsg] = await translateBatch(
-        ["Failed to send notification. Please try again."],
-        localStorage.getItem("selectedLanguage") || "nl"
-      );
-      toast.error(errorMsg);
+      toast.error("Failed to send notification");
     }
   };
 

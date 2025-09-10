@@ -135,7 +135,7 @@ export const AddLessonModal: React.FC<AddLessonModalProps> = ({
         progress = 100;
         clearInterval(interval);
         setIsUploading(false);
-        toast.success("Video file selected successfully!");
+        toast.success(<span data-translate>Video file selected successfully!</span>);
       }
       setUploadProgress(Math.min(progress, 100));
     }, 200 + Math.random() * 300);
@@ -222,7 +222,7 @@ const handleSubmit = async (values: LessonFormData): Promise<void> => {
     const result = await addLesson({ id: values.moduleId, formData }).unwrap();
 
     if (result?.success) {
-      toast.success("Lesson added successfully!");
+      toast.success(<span data-translate>Lesson added successfully!</span>);
       resetForm();
       onCancel();
     } else {

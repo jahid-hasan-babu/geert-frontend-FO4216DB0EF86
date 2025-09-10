@@ -8,11 +8,8 @@ import {
 import { toast } from "sonner";
 import Editor from "@/components/ui/Editor/Editor";
 import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
-import { useTranslate } from "@/hooks/useTranslate";
 
 const RegulatoryInfoEditor = () => {
-  const { translateBatch } = useTranslate();
-
   // ✅ Fetch legal data
   const { data, isLoading, isError } = useGetLegalDataQuery(undefined);
   const [postLegalData, { isLoading: isPosting }] = usePostLegalDataMutation();
@@ -36,23 +33,11 @@ const RegulatoryInfoEditor = () => {
         regularityInfo: regulatoryInfo,
       }).unwrap();
 
-      // ✅ Translate success message
-      const [successMsg] = await translateBatch(
-        ["Regulatory Info updated successfully!"],
-        localStorage.getItem("selectedLanguage") || "nl"
-      );
-      toast.success(successMsg);
+      toast.success(<span data-translate>Regulatory Info updated successfully!</span>);
 
-      setRegulatoryInfo(""); // ✅ clear editor after save
+      setRegulatoryInfo("");
     } catch (err) {
       console.error(err);
-
-      // ✅ Translate error message
-      const [errorMsg] = await translateBatch(
-        ["Failed to update Regulatory Info"],
-        localStorage.getItem("selectedLanguage") || "nl"
-      );
-      toast.error(errorMsg);
     }
   };
 

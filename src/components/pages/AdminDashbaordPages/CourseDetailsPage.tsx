@@ -29,6 +29,7 @@ import Editor from "@/components/ui/Editor/Editor";
 import AddMemberModal from "@/components/ui/modals/AddMemberModal";
 import { Dialog } from "@headlessui/react";
 import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
+import { useRouter } from "next/navigation";
 
 interface Instructor {
   id: string;
@@ -71,6 +72,9 @@ const CourseDetailsPage = () => {
   });
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string>("");
+
+  // Add this inside your component, after the other hooks
+  const router = useRouter();
 
   const { data, isLoading } = useGetCourseByIdQuery(id);
   const [editCourse, { isLoading: isEditing }] = useEditCourseMutation();
@@ -202,13 +206,43 @@ const CourseDetailsPage = () => {
   const handleModuleSuccess = () => window.location.reload();
   const handleLessonSuccess = () => window.location.reload();
   const handleDeleteCourse = async () => {
-    if (!course?.id) return;
+    if (!course?.id) {
+      console.error("No course ID found");
+      return;
+    }
+
+    console.log("Starting delete process for course ID:", course.id);
+    console.log("Course object:", course);
+
     try {
-      await deleteCourse(course.id).unwrap();
+      console.log("Calling deleteCourse mutation...");
+
+      const result = await deleteCourse(course.id).unwrap();
+
+      console.log("Delete successful, result:", result);
       setIsDeleteModalOpen(false);
-      window.location.href = "/dashboard/course";
-    } catch (error) {
-      console.error(error);
+
+      // Use Next.js router instead of window.location
+      router.push("/dashboard/course");
+    } catch (error: unknown) {
+      console.error("Delete failed with error:", error);
+      if (typeof error === "object" && error !== null) {
+        const err = error as { status?: string; data?: { message?: string }; message?: string };
+        console.error("Error details:", {
+          status: err?.status,
+          data: err?.data,
+          message: err?.message,
+        });
+
+        // Show user-friendly error message
+        alert(
+          `Failed to delete course: ${
+            err?.data?.message || err?.message || "Unknown error"
+          }`
+        );
+      } else {
+        alert("Failed to delete course: Unknown error");
+      }
     }
   };
 
@@ -303,7 +337,6 @@ const CourseDetailsPage = () => {
           />
         </div>
       </div>
-
       <div className="w-full h-48 relative mb-8">
         {isEditMode ? (
           <div className="relative">
@@ -345,7 +378,6 @@ const CourseDetailsPage = () => {
           />
         )}
       </div>
-
       <div className="mb-8">
         <h1 className="text-2xl font-semibold mb-6" data-translate>
           Course Details
@@ -461,7 +493,6 @@ const CourseDetailsPage = () => {
           )}
         </div>
       </div>
-
       <div className="mb-8">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-semibold" data-translate>
@@ -682,7 +713,6 @@ const CourseDetailsPage = () => {
           ))}
         </Accordion>
       </div>
-
       <div className="mb-8">
         <TranslateInitializer />
         <h2 className="text-2xl font-semibold mb-6" data-translate>
@@ -723,7 +753,6 @@ const CourseDetailsPage = () => {
           </p>
         )}
       </div>
-
       <div className="mb-8">
         {isEditMode ? (
           <div className="flex gap-4">
@@ -773,7 +802,6 @@ const CourseDetailsPage = () => {
           </div>
         )}
       </div>
-
       <Dialog
         open={deleteLessonModalOpen}
         onClose={() => setDeleteLessonModalOpen(false)}
@@ -823,14 +851,57 @@ const CourseDetailsPage = () => {
           </div>
         </div>
       </Dialog>
-
+      <Dialog
+        open={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        className="fixed inset-0 z-50 flex items-center justify-center"
+      >
+        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+        <div className="bg-white p-6 rounded-lg z-10 max-w-md mx-auto">
+          <Dialog.Title className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Trash2 className="w-5 h-5 text-red-500" />
+            Confirm Delete Course
+          </Dialog.Title>
+          <p className="text-gray-600 mb-6">
+            Are you sure you want to delete the course &quot;
+            <span className="font-semibold text-gray-800">{course?.title}</span>
+            &quot;? This action will permanently delete the course and all its
+            modules and lessons. This cannot be undone.
+          </p>
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteModalOpen(false)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="bg-red-500 hover:bg-red-700 text-white flex items-center gap-2"
+              onClick={handleDeleteCourse}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-4 h-4" />
+                  Delete Course
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </Dialog>
       <AddModuleModal
         visible={isModuleModalVisible}
         onCancel={() => setIsModuleModalVisible(false)}
         courseId={id as string}
         onSuccess={handleModuleSuccess}
       />
-
       <AddLessonModal
         visible={isLessonModalVisible}
         onCancel={() => setIsLessonModalVisible(false)}

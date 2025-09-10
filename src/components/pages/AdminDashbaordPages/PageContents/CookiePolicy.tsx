@@ -8,10 +8,8 @@ import {
 import { toast } from "sonner";
 import Editor from "@/components/ui/Editor/Editor";
 import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
-import { useTranslate } from "@/hooks/useTranslate";
 
 const CookiePolicyEditor = () => {
-  const { translateBatch } = useTranslate();
 
   // ✅ Fetch legal data
   const { data, isLoading, isError } = useGetLegalDataQuery(undefined);
@@ -35,21 +33,12 @@ const CookiePolicyEditor = () => {
         cookiePolicy,
         regularityInfo: data?.regularityInfo || "",
       }).unwrap();
-
-      const [successMsg] = await translateBatch(
-        ["Cookie Policy updated successfully!"],
-        localStorage.getItem("selectedLanguage") || "nl"
-      );
-      toast.success(successMsg);
+      toast.success(<span data-translate>Cookie Policy updated successfully!</span>);
 
       setCookiePolicy(""); // ✅ clear editor after save
     } catch (err) {
       console.error(err);
-      const [errorMsg] = await translateBatch(
-        ["Failed to update Cookie Policy"],
-        localStorage.getItem("selectedLanguage") || "nl"
-      );
-      toast.error(errorMsg);
+      toast.error("Failed to update Cookie Policy");
     }
   };
 

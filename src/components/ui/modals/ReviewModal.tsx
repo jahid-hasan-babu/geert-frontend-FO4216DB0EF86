@@ -7,7 +7,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Star } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
-import { useTranslate } from "@/hooks/useTranslate";
 
 interface ReviewModalProps {
   isOpen: boolean;
@@ -27,12 +26,6 @@ export function ReviewModal({
   const [feedback, setFeedback] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
-  const { translateBatch } = useTranslate();
-  const targetLanguage =
-    typeof window !== "undefined"
-      ? localStorage.getItem("currentLanguage") || "en"
-      : "en";
-
   const handleSubmit = async () => {
     if (!canReview) return;
     try {
@@ -45,8 +38,7 @@ export function ReviewModal({
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const successMsg = "Review submitted!";
-      translateBatch([successMsg], targetLanguage).then(([tMsg]) => toast.success(tMsg));
+      toast.success(<span data-translate>Review submitted successfully!</span>);
 
       setRating(0);
       setFeedback("");
@@ -62,7 +54,7 @@ export function ReviewModal({
         }
       }
 
-      translateBatch([errorMessage], targetLanguage).then(([tMsg]) => toast.error(tMsg));
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -71,12 +63,14 @@ export function ReviewModal({
   if (!canReview) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
+        {" "}
         <DialogContent className="sm:max-w-md p-6 text-center">
-          {translateBatch(
-            ["You can leave a review only after completing the course."],
-            targetLanguage
-          ).then(([tMsg]) => <p className="text-gray-600">{tMsg}</p>)}
-        </DialogContent>
+          {" "}
+          <p className="text-gray-600">
+            {" "}
+            You can leave a review only after completing the course.{" "}
+          </p>{" "}
+        </DialogContent>{" "}
       </Dialog>
     );
   }
@@ -84,9 +78,10 @@ export function ReviewModal({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md p-6">
-        {translateBatch(["Leave Review"], targetLanguage).then(([tMsg]) => (
-          <h2 className="text-center text-2xl font-semibold mb-4">{tMsg}</h2>
-        ))}
+        <h2 className="text-center text-2xl font-semibold mb-4">
+          {" "}
+          Leave Review{" "}
+        </h2>
 
         {/* Star Rating */}
         <div className="flex justify-center gap-2 mb-4">
@@ -111,27 +106,22 @@ export function ReviewModal({
         </div>
 
         {/* Feedback */}
-        {translateBatch(["Write your feedback..."], targetLanguage).then(
-          ([tPlaceholder]) => (
-            <Textarea
-              placeholder={tPlaceholder}
-              value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
-              className="w-full min-h-[120px] mb-4 resize-none"
-            />
-          )
-        )}
+        <Textarea
+          placeholder="Write your feedback..."
+          value={feedback}
+          onChange={(e) => setFeedback(e.target.value)}
+          className="w-full min-h-[120px] mb-4 resize-none"
+        />
 
         {/* Submit Button */}
-        {translateBatch(["Submit"], targetLanguage).then(([tSubmit]) => (
-          <Button
-            onClick={handleSubmit}
-            disabled={loading || rating === 0}
-            className="w-full py-3 rounded-full bg-blue-500 hover:bg-blue-600 text-white disabled:bg-gray-300"
-          >
-            {loading ? "Submitting..." : tSubmit}
-          </Button>
-        ))}
+        <Button
+          onClick={handleSubmit}
+          disabled={loading || rating === 0}
+          className="w-full py-3 rounded-full bg-blue-500 hover:bg-blue-600 text-white disabled:bg-gray-300"
+        >
+          {" "}
+          {loading ? "Submitting..." : "Submit"}{" "}
+        </Button>
       </DialogContent>
     </Dialog>
   );

@@ -8,10 +8,8 @@ import {
 import { toast } from "sonner";
 import Editor from "@/components/ui/Editor/Editor";
 import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
-import { useTranslate } from "@/hooks/useTranslate";
 
 const TermsOfServiceEditor = () => {
-  const { translateBatch } = useTranslate();
 
   // ✅ Fetch legal data
   const { data, isLoading, isError } = useGetLegalDataQuery(undefined);
@@ -36,23 +34,12 @@ const TermsOfServiceEditor = () => {
         regularityInfo: data?.regularityInfo || "",
       }).unwrap();
 
-      // ✅ Translate success message
-      const [successMsg] = await translateBatch(
-        ["Terms of Service updated successfully!"],
-        localStorage.getItem("selectedLanguage") || "nl"
-      );
-      toast.success(successMsg);
+      toast.success(<span data-translate>Terms of Service updated successfully!</span>);
 
       setTermsOfService(""); // ✅ clear editor after save
     } catch (err) {
       console.error(err);
-
-      // ✅ Translate error message
-      const [errorMsg] = await translateBatch(
-        ["Failed to update Terms of Service"],
-        localStorage.getItem("selectedLanguage") || "nl"
-      );
-      toast.error(errorMsg);
+      toast.error("Failed to update Terms of Service");
     }
   };
 

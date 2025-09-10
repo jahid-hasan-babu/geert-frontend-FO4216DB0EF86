@@ -17,7 +17,6 @@ import {
   LanguageSwitcher,
   TranslateInitializer,
 } from "@/lib/language-translate/LanguageSwitcher";
-import { useTranslate } from "@/hooks/useTranslate";
 
 const loginSchema = z.object({
   email: z
@@ -57,44 +56,26 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const { translateBatch } = useTranslate();
-
   const onSubmit = async (data: LoginFormData) => {
     try {
       const responseData = await login({
         email: data.email,
         password: data.password,
       }).unwrap();
-
       dispatch(
         setUser({
           user: responseData?.data,
           access_token: responseData?.data?.accessToken,
         })
       );
-
       const { accessToken: token, ...user } = responseData.data;
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
-
-      // Translate the success message
-      const [successMessage] = await translateBatch(
-        ["Logged in successfully!"],
-        localStorage.getItem("selectedLanguage") || "en"
-      );
-
-      toast.success(successMessage);
-
+      toast.success(<span data-translate>Logged in successfully!</span>);
       if (user?.role === "SUPERADMIN") router.push("/dashboard");
       else router.push("/");
     } catch {
-      // Translate the error message
-      const [errorMessage] = await translateBatch(
-        ["Invalid email or password"],
-        localStorage.getItem("selectedLanguage") || "en"
-      );
-
-      toast.error(errorMessage);
+      toast.error("Invalid email or password");
     }
   };
 

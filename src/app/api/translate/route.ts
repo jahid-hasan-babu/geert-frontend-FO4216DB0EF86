@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const { texts, target } = await req.json(); // batch translation
+    const { texts, target } = await req.json();
     
 
     const res = await fetch(`https://translation.googleapis.com/language/translate/v2?key=AIzaSyCfIDqsAcDMUKSaqjOfD0qfdao8ZfeeUcI`,

@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/table";
 import Pagination from "@/components/ui/pagination/Pagination";
 import AddStudentModal from "@/components/ui/modals/AddStudentModal";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -33,7 +33,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { useTranslate } from "@/hooks/useTranslate";
 
 type Student = {
   id: string;
@@ -45,7 +44,6 @@ type Student = {
 };
 
 export default function StudentsPage() {
-  const { translateBatch } = useTranslate();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -66,13 +64,8 @@ export default function StudentsPage() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setStudents(res.data.data.data);
-    } catch (error) {
-      const err = error as AxiosError<{ message: string }>;
-      const [msg] = await translateBatch(
-        [err.response?.data?.message || "Failed to load students"],
-        localStorage.getItem("selectedLanguage") || "nl"
-      );
-      toast.error(msg);
+    } catch{
+      toast.error("Failed to load students");
     } finally {
       setLoading(false);
     }
@@ -115,27 +108,13 @@ export default function StudentsPage() {
       );
 
       if (res.data.success) {
-        const [msg] = await translateBatch(
-          ["Student added successfully!"],
-          localStorage.getItem("selectedLanguage") || "nl"
-        );
-        toast.success(msg);
+        toast.success(<span data-translate>Student added successfully!</span>);
         fetchStudents();
       } else {
-        const [msg] = await translateBatch(
-          [res.data.message || "Failed to add student"],
-          localStorage.getItem("selectedLanguage") || "nl"
-        );
-        toast.error(msg);
+        toast.error(res.data.message || "Failed to add student");
       }
-    } catch (error) {
-      const err = error as AxiosError<{ message: string }>;
-      const [msg] = await translateBatch(
-        [err.response?.data?.message || "Failed to add student"],
-        localStorage.getItem("selectedLanguage") || "nl"
-      );
-      toast.error(msg);
-      throw err;
+    } catch {
+      toast.error("Failed to add student");
     }
   };
 
@@ -156,18 +135,9 @@ export default function StudentsPage() {
         prev.map((s) => (s.id === student.id ? { ...s, status } : s))
       );
 
-      const [msg] = await translateBatch(
-        [`Status updated to ${status}`],
-        localStorage.getItem("selectedLanguage") || "nl"
-      );
-      toast.success(msg);
-    } catch (err) {
-      const error = err as AxiosError<{ message: string }>;
-      const [msg] = await translateBatch(
-        [error.response?.data?.message || "Failed to update status"],
-        localStorage.getItem("selectedLanguage") || "nl"
-      );
-      toast.error(msg);
+      toast.success(`Status updated to ${status}`);
+    } catch {
+      toast.error("Failed to update status");
     }
   };
 
@@ -187,19 +157,10 @@ export default function StudentsPage() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const [msg] = await translateBatch(
-        ["Student removed successfully!"],
-        localStorage.getItem("selectedLanguage") || "nl"
-      );
-      toast.success(msg);
+      toast.success(<span data-translate>Student removed successfully!</span>);
       fetchStudents();
-    } catch (err) {
-      const error = err as AxiosError<{ message: string }>;
-      const [msg] = await translateBatch(
-        [error.response?.data?.message || "Failed to remove student"],
-        localStorage.getItem("selectedLanguage") || "nl"
-      );
-      toast.error(msg);
+    } catch {
+      toast.error("Failed to remove student");
     } finally {
       setDeleteDialogOpen(false);
       setSelectedStudent(null);

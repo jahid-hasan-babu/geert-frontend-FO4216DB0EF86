@@ -34,7 +34,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { useTranslate } from "@/hooks/useTranslate";
 
 export interface Instructor {
   id: string;
@@ -58,8 +57,6 @@ export default function InstructorPage() {
     useState<Instructor | null>(null);
 
   const instructorsPerPage = 15;
-  const lang = localStorage.getItem("selectedLanguage") || "en";
-  const { translateBatch } = useTranslate();
 
   const fetchInstructors = async () => {
     try {
@@ -73,8 +70,7 @@ export default function InstructorPage() {
     } catch (error) {
       const err = error as AxiosError<{ message: string }>;
       console.error(err);
-      const [msg] = await translateBatch(["Failed to load instructors"], lang);
-      toast.error(err.response?.data?.message || msg);
+      toast.error(err.response?.data?.message);
     } finally {
       setLoading(false);
     }
@@ -128,27 +124,15 @@ export default function InstructorPage() {
       );
 
       if (res.data.success) {
-        const [msg] = await translateBatch(
-          ["Instructor added successfully!"],
-          lang
-        );
-        toast.success(msg);
+        toast.success(<span data-translate>Instructor added successfully!</span>);
         fetchInstructors();
       } else {
-        const [msg] = await translateBatch(
-          [res.data.message || "Failed to add instructor"],
-          lang
-        );
-        toast.error(msg);
+        toast.error(res.data.message || "Failed to add instructor");
       }
     } catch (error) {
       const err = error as AxiosError<{ message: string }>;
       console.error(err);
-      const [msg] = await translateBatch(
-        [err.response?.data?.message || "Failed to add instructor"],
-        lang
-      );
-      toast.error(msg);
+      toast.error(err.response?.data?.message || "Failed to add instructor");
     }
   };
 
@@ -163,14 +147,12 @@ export default function InstructorPage() {
         { status },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      const [msg] = await translateBatch([`Status changed to ${status}`], lang);
-      toast.success(msg);
+      toast.success(`Status changed to ${status}`);
       fetchInstructors();
     } catch (error) {
       const err = error as AxiosError<{ message: string }>;
       console.error(err);
-      const [msg] = await translateBatch(["Failed to change status"], lang);
-      toast.error(err.response?.data?.message || msg);
+      toast.error(err.response?.data?.message || "Failed to change status");
     }
   };
 
@@ -189,16 +171,11 @@ export default function InstructorPage() {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      const [msg] = await translateBatch(
-        ["Instructor removed successfully!"],
-        lang
-      );
-      toast.success(msg);
+      toast.success(<span data-translate>Instructor removed successfully!</span>);
       fetchInstructors();
     } catch (err) {
       const error = err as AxiosError<{ message: string }>;
-      const [msg] = await translateBatch(["Failed to remove instructor"], lang);
-      toast.error(error.response?.data?.message || msg);
+      toast.error(error.response?.data?.message || "Failed to remove instructor");
     } finally {
       setDeleteDialogOpen(false);
       setSelectedInstructor(null);

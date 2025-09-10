@@ -8,10 +8,8 @@ import {
 import { toast } from "sonner";
 import Editor from "@/components/ui/Editor/Editor";
 import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
-import { useTranslate } from "@/hooks/useTranslate";
 
 const HelpSupport = () => {
-  const { translateBatch } = useTranslate();
   const { data, isLoading, isError } = useGetHelpSupportQuery(undefined);
   const [createHelpSupport, { isLoading: isPosting }] =
     useCreateHelpSupportMutation();
@@ -28,22 +26,11 @@ const HelpSupport = () => {
   const handleSave = async () => {
     try {
       await createHelpSupport({ description: helpSupport }).unwrap();
-
-      // Translate success message
-      const [successMsg] = await translateBatch(
-        ["Help & Support updated successfully!"],
-        localStorage.getItem("selectedLanguage") || "nl"
-      );
-      toast.success(successMsg);
+      toast.success(<span data-translate>Help & Support updated successfully!</span>);
 
       setHelpSupport("");
-    } catch (err) {
-      console.error(err);
-      const [errorMsg] = await translateBatch(
-        ["Failed to update Help & Support"],
-        localStorage.getItem("selectedLanguage") || "nl"
-      );
-      toast.error(errorMsg);
+    } catch {
+      toast.error("Failed to update Help & Support");
     }
   };
 

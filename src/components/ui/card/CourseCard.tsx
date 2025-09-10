@@ -12,7 +12,6 @@ import { toast } from "sonner";
 import { useAddToFavoritesMutation } from "@/redux/features/favorites/favoritesApi";
 import { useRouter } from "next/navigation";
 import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
-import { useTranslate } from "@/hooks/useTranslate";
 
 interface Course {
   id: string;
@@ -51,8 +50,6 @@ export default function CourseCard({
     (review) => review.courseId === course.id
   );
 
-  const { translateBatch } = useTranslate();
-
   useEffect(() => {
     setIsFavorite(course.isFavorite ?? false);
   }, [course.isFavorite]);
@@ -66,26 +63,14 @@ export default function CourseCard({
       setIsFavorite(newFavoriteState);
       await addToFavorites(course.id).unwrap();
 
-      // ✅ Translate toast message dynamically
-      const [message] = await translateBatch(
-        newFavoriteState
-          ? ["Course added to favorites!"]
-          : ["Course removed from favorites!"],
-        localStorage.getItem("selectedLanguage") || "nl"
-      );
-      toast.success(message);
+      toast.success(newFavoriteState ? "Added to favorites" : "Removed from favorites");
 
       // Trigger translation refresh in case dynamic text changed
       window.dispatchEvent(new Event("translate-refresh"));
     } catch (error) {
       setIsFavorite(isFavorite);
       console.error("Failed to toggle favorite:", error);
-
-      const [errMsg] = await translateBatch(
-        ["Failed to update favorites. Please try again."],
-        localStorage.getItem("selectedLanguage") || "nl"
-      );
-      toast.error(errMsg);
+      toast.error("Failed to update favorite status");
     }
   };
 

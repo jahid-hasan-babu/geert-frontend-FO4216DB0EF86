@@ -4,14 +4,16 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
-import { useTranslate } from "@/hooks/useTranslate";
 
 interface ForgotPasswordModalProps {
   open: boolean;
   onClose: () => void;
 }
 
-export default function ForgotPasswordModal({ open, onClose }: ForgotPasswordModalProps) {
+export default function ForgotPasswordModal({
+  open,
+  onClose,
+}: ForgotPasswordModalProps) {
   const [step, setStep] = useState(1);
   const [fpEmail, setFpEmail] = useState("");
   const [userId, setUserId] = useState("");
@@ -20,18 +22,8 @@ export default function ForgotPasswordModal({ open, onClose }: ForgotPasswordMod
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const { translateBatch } = useTranslate();
-  const targetLanguage = typeof window !== "undefined"
-    ? localStorage.getItem("currentLanguage") || "en"
-    : "en";
-
   const handleSendEmail = async () => {
-    if (!fpEmail) {
-      const msg = "Enter your email";
-      translateBatch([msg], targetLanguage).then(([tMsg]) => toast.error(tMsg));
-      return;
-    }
-
+    if (!fpEmail) return toast.error("Enter your email");
     setLoading(true);
     try {
       const response = await axios.post(
@@ -40,25 +32,19 @@ export default function ForgotPasswordModal({ open, onClose }: ForgotPasswordMod
       );
       setUserId(response.data.data.userId);
 
-      const msg = "OTP sent to your email!";
-      translateBatch([msg], targetLanguage).then(([tMsg]) => toast.success(tMsg));
+      toast.success(<span data-translate>OTP sent to your email!</span>);
 
       setStep(2);
     } catch (error) {
       const err = error as AxiosError<{ message: string }>;
-      const msg = err.response?.data?.message || "Failed to send OTP";
-      translateBatch([msg], targetLanguage).then(([tMsg]) => toast.error(tMsg));
+      toast.error(err.response?.data?.message || "Failed to send OTP");
     } finally {
       setLoading(false);
     }
   };
 
   const handleVerifyOtp = async () => {
-    if (!otpCode) {
-      const msg = "Enter OTP";
-      translateBatch([msg], targetLanguage).then(([tMsg]) => toast.error(tMsg));
-      return;
-    }
+    if (!otpCode) return toast.error("Enter OTP");
 
     setLoading(true);
     try {
@@ -68,25 +54,19 @@ export default function ForgotPasswordModal({ open, onClose }: ForgotPasswordMod
       );
       setAccessToken(response.data.data.accessToken);
 
-      const msg = "OTP verified! Reset your password now.";
-      translateBatch([msg], targetLanguage).then(([tMsg]) => toast.success(tMsg));
+      toast.success(<span data-translate>OTP verified! Reset your password now.</span>);
 
       setStep(3);
     } catch (error) {
       const err = error as AxiosError<{ message: string }>;
-      const msg = err.response?.data?.message || "OTP verification failed";
-      translateBatch([msg], targetLanguage).then(([tMsg]) => toast.error(tMsg));
+      toast.error(err.response?.data?.message || "OTP verification failed");
     } finally {
       setLoading(false);
     }
   };
 
   const handleResetPassword = async () => {
-    if (!newPassword) {
-      const msg = "Enter new password";
-      translateBatch([msg], targetLanguage).then(([tMsg]) => toast.error(tMsg));
-      return;
-    }
+    if (!newPassword) return toast.error("Enter new password");
 
     setLoading(true);
     try {
@@ -96,8 +76,7 @@ export default function ForgotPasswordModal({ open, onClose }: ForgotPasswordMod
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
 
-      const msg = "Password reset successfully!";
-      translateBatch([msg], targetLanguage).then(([tMsg]) => toast.success(tMsg));
+      toast.success(<span data-translate>Password reset successfully!</span>);
 
       onClose();
       setStep(1);
@@ -106,8 +85,7 @@ export default function ForgotPasswordModal({ open, onClose }: ForgotPasswordMod
       setNewPassword("");
     } catch (error) {
       const err = error as AxiosError<{ message: string }>;
-      const msg = err.response?.data?.message || "Password reset failed";
-      translateBatch([msg], targetLanguage).then(([tMsg]) => toast.error(tMsg));
+      toast.error(err.response?.data?.message || "Password reset failed");
     } finally {
       setLoading(false);
     }

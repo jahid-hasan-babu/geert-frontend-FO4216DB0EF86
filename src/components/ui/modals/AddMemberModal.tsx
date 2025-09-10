@@ -14,7 +14,6 @@ import { toast } from "sonner";
 import { useAddCourseStudentMutation } from "@/redux/features/courses/coursesApi";
 import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
-import { useTranslate } from "@/hooks/useTranslate";
 
 interface AddMemberModalProps {
   courseId: string;
@@ -26,37 +25,30 @@ interface AddCourseStudentResponse {
   message?: string;
 }
 
-export default function AddMemberModal({ courseId, onAddSuccess }: AddMemberModalProps) {
+export default function AddMemberModal({
+  courseId,
+  onAddSuccess,
+}: AddMemberModalProps) {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
 
-  const [addCourseToStudent, { isLoading: isAdding }] = useAddCourseStudentMutation();
-  const { translateBatch } = useTranslate();
-
-  // Read current language from localStorage (or any other source)
-  const targetLanguage = typeof window !== "undefined"
-    ? localStorage.getItem("currentLanguage") || "en"
-    : "en";
+  const [addCourseToStudent, { isLoading: isAdding }] =
+    useAddCourseStudentMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!email) {
-      const msg = "Please enter a student email";
-      setError(msg);
-      window.dispatchEvent(new Event("translate-refresh"));
-      translateBatch([msg], targetLanguage).then(([tMsg]) => toast.error(tMsg));
+      setError("Please enter a student email");
       return;
     }
-
     try {
-      const res: AddCourseStudentResponse = await addCourseToStudent({ email, courseId }).unwrap();
-
+      const res: AddCourseStudentResponse = await addCourseToStudent({
+        email,
+        courseId,
+      }).unwrap();
       if (res.success) {
-        translateBatch([res.message || "Student added to course successfully"], targetLanguage)
-          .then(([msg]) => toast.success(msg));
-
+        toast.success(res.message || "Student added to course successfully");
         setError("");
         setEmail("");
         setOpen(false);
@@ -64,21 +56,21 @@ export default function AddMemberModal({ courseId, onAddSuccess }: AddMemberModa
       }
     } catch (err) {
       console.error(err);
-
       let message = "Failed to add student to course";
-
       if ((err as FetchBaseQueryError)?.status) {
         const fetchErr = err as FetchBaseQueryError;
-        if ("data" in fetchErr && fetchErr.data && typeof fetchErr.data === "object") {
+        if (
+          "data" in fetchErr &&
+          fetchErr.data &&
+          typeof fetchErr.data === "object"
+        ) {
           message = (fetchErr.data as { message?: string }).message || message;
         }
       } else if (err instanceof Error) {
         message = err.message;
       }
-
       setError(message);
-      translateBatch([message], targetLanguage).then(([tMsg]) => toast.error(tMsg));
-      window.dispatchEvent(new Event("translate-refresh"));
+      toast.error(message);
     }
   };
 

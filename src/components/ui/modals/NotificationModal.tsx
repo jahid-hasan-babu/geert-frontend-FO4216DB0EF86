@@ -108,9 +108,10 @@ export default function NotificationModal({
                     {notifications.length > 0 ? (
                       notifications.map((n) => (
                         <div
-                          key={n.id}
-                          className="p-3 border rounded-lg hover:bg-gray-50"
+                        key={n.id}
+                        className="p-3 border rounded-lg hover:bg-gray-50"
                         >
+                          <TranslateInitializer/>
                           <div
                             className="text-xs font-semibold"
                             data-translate

@@ -8,10 +8,8 @@ import {
 import { toast } from "sonner";
 import Editor from "@/components/ui/Editor/Editor";
 import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
-import { useTranslate } from "@/hooks/useTranslate";
 
 const PrivacyPolicy = () => {
-  const { translateBatch } = useTranslate();
 
   // ✅ Fetch legal data
   const { data, isLoading, isError } = useGetLegalDataQuery(undefined);
@@ -35,22 +33,10 @@ const PrivacyPolicy = () => {
         cookiePolicy: data?.cookiePolicy || "",
         regularityInfo: data?.regularityInfo || "",
       }).unwrap();
-
-      // Translate success message
-      const [successMsg] = await translateBatch(
-        ["Privacy Policy updated successfully!"],
-        localStorage.getItem("selectedLanguage") || "nl"
-      );
-      toast.success(successMsg);
+      toast.success(<span data-translate>Privacy Policy updated successfully!</span>);
     } catch (err) {
       console.error(err);
-
-      // Translate error message
-      const [errorMsg] = await translateBatch(
-        ["Failed to update Privacy Policy"],
-        localStorage.getItem("selectedLanguage") || "nl"
-      );
-      toast.error(errorMsg);
+      toast.error("Failed to update Privacy Policy");
     }
   };
 
