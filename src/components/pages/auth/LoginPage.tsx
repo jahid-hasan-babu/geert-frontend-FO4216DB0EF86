@@ -1,7 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
@@ -38,6 +36,15 @@ export default function LoginPage() {
   const dispatch = useDispatch();
   const [login, { isLoading }] = useLoginMutation();
 
+  // 🔹 Reload once on first mount to ensure translations load
+  useEffect(() => {
+    const hasReloaded = sessionStorage.getItem("loginReloaded");
+    if (!hasReloaded) {
+      sessionStorage.setItem("loginReloaded", "true");
+      window.location.reload();
+    }
+  }, []);
+
   const {
     register,
     handleSubmit,
@@ -70,8 +77,8 @@ export default function LoginPage() {
       toast.success("Logged in successfully!");
       if (user?.role === "SUPERADMIN") router.push("/dashboard");
       else router.push("/");
-    } catch (error: any) {
-      toast.error(error?.data?.message || "Invalid email or password");
+    } catch {
+      toast.error("Invalid email or password");
     }
   };
 
@@ -96,10 +103,16 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-2">
-            <h1 className="text-[28px] text-center text-black font-medium leading-[120%] font-sans" data-translate>
+            <h1
+              className="text-[28px] text-center text-black font-medium leading-[120%] font-sans"
+              data-translate
+            >
               Welcome Back
             </h1>
-            <p className="text-[#5C5C5C] text-center text-[16px] font-sans" data-translate>
+            <p
+              className="text-[#5C5C5C] text-center text-[16px] font-sans"
+              data-translate
+            >
               Enter your email & password to login
             </p>
           </div>
@@ -187,7 +200,6 @@ export default function LoginPage() {
             </button>
           </form>
           <div className="flex justify-end">
-            {/* <LanguageSwitcher /> */}
             <TranslateInitializer />
             <LanguageSwitcher />
           </div>

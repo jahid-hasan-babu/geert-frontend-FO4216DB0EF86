@@ -8,8 +8,7 @@ export function LanguageSwitcher() {
   const { translateBatch } = useTranslate();
 
   useEffect(() => {
-    // default language = nl
-    localStorage.setItem("selectedLanguage", "nl");
+      localStorage.setItem("selectedLanguage", "nl");
     const storedLang = localStorage.getItem("selectedLanguage");
     if (storedLang) setSelectedLanguage(storedLang);
   }, []);
@@ -21,9 +20,7 @@ export function LanguageSwitcher() {
     const elements = document.querySelectorAll("[data-translate]");
     const texts = Array.from(elements).map((el) => {
       const original = el.getAttribute("data-original") || el.textContent || "";
-      if (!el.getAttribute("data-original")) {
-        el.setAttribute("data-original", original);
-      }
+      if (!el.getAttribute("data-original")) el.setAttribute("data-original", original);
       return original;
     });
 
@@ -33,9 +30,6 @@ export function LanguageSwitcher() {
         el.textContent = translated[i];
       });
     }
-
-    // ✅ trigger refresh so other components (like modals) re-run translation
-    window.dispatchEvent(new Event("translate-refresh"));
   };
 
   return (
@@ -56,42 +50,29 @@ export function LanguageSwitcher() {
   );
 }
 
+
 export function TranslateInitializer() {
   const { translateBatch } = useTranslate();
 
-  const runTranslation = async () => {
+  useEffect(() => {
     const lang = localStorage.getItem("selectedLanguage") || "en";
     if (lang === "en") return; // default, no need to translate
 
     const elements = document.querySelectorAll("[data-translate]");
     const texts = Array.from(elements).map((el) => {
       const original = el.getAttribute("data-original") || el.textContent || "";
-      if (!el.getAttribute("data-original")) {
-        el.setAttribute("data-original", original);
-      }
+      if (!el.getAttribute("data-original")) el.setAttribute("data-original", original);
       return original;
     });
 
     if (texts.length > 0) {
-      const translated = await translateBatch(texts, lang);
-      Array.from(elements).forEach((el, i) => {
-        el.textContent = translated[i];
+      translateBatch(texts, lang).then((translated) => {
+        Array.from(elements).forEach((el, i) => {
+          el.textContent = translated[i];
+        });
       });
     }
-  };
-
-  useEffect(() => {
-    // run once on mount
-    runTranslation();
-
-    // ✅ listen for manual refresh events
-    const handler = () => runTranslation();
-    window.addEventListener("translate-refresh", handler);
-
-    return () => {
-      window.removeEventListener("translate-refresh", handler);
-    };
-  }, []);
+  }, [translateBatch]);
 
   return null;
 }
