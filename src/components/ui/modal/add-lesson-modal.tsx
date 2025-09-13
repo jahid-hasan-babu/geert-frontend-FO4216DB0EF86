@@ -33,7 +33,7 @@ export interface Quiz {
 
 export interface Lesson {
   id: string;
-  type: "video" | "doc"
+  type: "video" | "doc";
   title: string;
   description: string;
   duration: string;
@@ -57,6 +57,7 @@ export interface Course {
   avgRating: number;
   totalLessons: number;
   isFavorite: boolean;
+  isMicroLearning?: boolean;
   modules: Module[];
 }
 
@@ -135,7 +136,9 @@ export const AddLessonModal: React.FC<AddLessonModalProps> = ({
         progress = 100;
         clearInterval(interval);
         setIsUploading(false);
-        toast.success(<span data-translate>Video file selected successfully!</span>);
+        toast.success(
+          <span data-translate>Video file selected successfully!</span>
+        );
       }
       setUploadProgress(Math.min(progress, 100));
     }, 200 + Math.random() * 300);
@@ -171,8 +174,8 @@ export const AddLessonModal: React.FC<AddLessonModalProps> = ({
     // value == null → covers both null and undefined
 
     const seconds = Number(convertTimeToSeconds(timeString));
-	form.setFieldsValue({ duration: timeString });
-	form.setFieldsValue({ durationSecs: seconds });
+    form.setFieldsValue({ duration: timeString });
+    form.setFieldsValue({ durationSecs: seconds });
   };
 
   // Handler for editor changes
@@ -181,76 +184,80 @@ export const AddLessonModal: React.FC<AddLessonModalProps> = ({
     form.setFieldsValue({ editorContent: content });
   };
 
-const handleSubmit = async (values: LessonFormData): Promise<void> => {
-  try {
-    const formData = new FormData() as any;
+  const handleSubmit = async (values: LessonFormData): Promise<void> => {
+    try {
+      const formData = new FormData() as any;
 
-    // Basic lesson fields
-    formData.append("title", values.title);
-    formData.append("type", values.type);
+      // Basic lesson fields
+      formData.append("title", values.title);
+      formData.append("type", values.type);
 
-    // ✅ Description handling
-    const description =
-      values.type === "doc" ? editorContent || "" : values.description || "";
-    formData.append("description", description);
+      // ✅ Description handling
+      const description =
+        values.type === "doc" ? editorContent || "" : values.description || "";
+      formData.append("description", description);
 
-    // ✅ Duration handling
-    const duration =
-      values.duration && values.duration !== "undefined" ? values.duration : null;
-    const durationSecs =
-      values.durationSecs !== undefined && values.durationSecs !== null
-        ? values.durationSecs
-        : null;
+      // ✅ Duration handling
+      const duration =
+        values.duration && values.duration !== "undefined"
+          ? values.duration
+          : null;
+      const durationSecs =
+        values.durationSecs !== undefined && values.durationSecs !== null
+          ? values.durationSecs
+          : null;
 
-    if (duration !== null) {
-      formData.append("duration", duration);
+      if (duration !== null) {
+        formData.append("duration", duration);
+      }
+      if (durationSecs !== null) {
+        formData.append("durationSecs", String(durationSecs));
+      }
+
+      // Module ID
+      formData.append("moduleId", values.moduleId);
+
+      // Files
+      if (videoFile && values.type === "video") {
+        formData.append("videoUrl", videoFile);
+      }
+
+      // Submit
+      const result = await addLesson({
+        id: values.moduleId,
+        formData,
+      }).unwrap();
+
+      if (result?.success) {
+        toast.success(<span data-translate>Lesson added successfully!</span>);
+        resetForm();
+        onCancel();
+      } else {
+        toast.error("Failed to add lesson. Please try again.");
+      }
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      console.error("Error adding lesson:", apiError);
+
+      if (apiError?.data?.err?.name === "PrismaClientValidationError") {
+        const errorMessage =
+          apiError.data.errorMessages?.[0]?.message ||
+          "Invalid data provided. Please check your inputs.";
+        toast.error(`Validation error: ${errorMessage}`);
+      } else if (apiError?.data?.err?.code === "LIMIT_UNEXPECTED_FILE") {
+        const fieldName = apiError?.data?.err?.field || "unknown";
+        toast.error(
+          `File upload failed: Backend doesn't expect field "${fieldName}". Please check backend Multer config.`
+        );
+      } else if (apiError?.data?.message) {
+        toast.error(apiError.data.message);
+      } else if (apiError?.message) {
+        toast.error(apiError.message);
+      } else {
+        toast.error("Failed to add lesson. Please try again.");
+      }
     }
-    if (durationSecs !== null) {
-      formData.append("durationSecs", String(durationSecs));
-    }
-
-    // Module ID
-    formData.append("moduleId", values.moduleId);
-
-    // Files
-    if (videoFile && values.type === "video") {
-      formData.append("videoUrl", videoFile);
-    }
-
-
-    // Submit
-    const result = await addLesson({ id: values.moduleId, formData }).unwrap();
-
-    if (result?.success) {
-      toast.success(<span data-translate>Lesson added successfully!</span>);
-      resetForm();
-      onCancel();
-    } else {
-      toast.error("Failed to add lesson. Please try again.");
-    }
-  } catch (error: unknown) {
-    const apiError = error as ApiError;
-    console.error("Error adding lesson:", apiError);
-
-    if (apiError?.data?.err?.name === "PrismaClientValidationError") {
-      const errorMessage =
-        apiError.data.errorMessages?.[0]?.message ||
-        "Invalid data provided. Please check your inputs.";
-      toast.error(`Validation error: ${errorMessage}`);
-    } else if (apiError?.data?.err?.code === "LIMIT_UNEXPECTED_FILE") {
-      const fieldName = apiError?.data?.err?.field || "unknown";
-      toast.error(
-        `File upload failed: Backend doesn't expect field "${fieldName}". Please check backend Multer config.`
-      );
-    } else if (apiError?.data?.message) {
-      toast.error(apiError.data.message);
-    } else if (apiError?.message) {
-      toast.error(apiError.message);
-    } else {
-      toast.error("Failed to add lesson. Please try again.");
-    }
-  }
-};
+  };
 
   const handleCancel = (): void => {
     resetForm();

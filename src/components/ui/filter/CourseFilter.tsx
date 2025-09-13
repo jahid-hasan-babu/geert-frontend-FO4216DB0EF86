@@ -1,5 +1,7 @@
 "use client";
 
+import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
+
 interface CourseFilterProps {
   filters: string[];
   activeFilter: string;
@@ -13,6 +15,7 @@ export default function CourseFilter({
 }: CourseFilterProps) {
   return (
     <div className="flex flex-wrap gap-3">
+      <TranslateInitializer />
       {filters.map((filter) => (
         <button
           key={filter}
@@ -22,6 +25,7 @@ export default function CourseFilter({
               ? "bg-[#3399CC] text-white"
               : "bg-[#EBF5FA] text-[#404040]"
           }`}
+          data-translate
         >
           {filter}
         </button>

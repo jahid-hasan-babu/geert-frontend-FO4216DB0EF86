@@ -57,7 +57,7 @@ export function MenuModal({
   const [isPasswordOpen, setIsPasswordOpen] = useState(false);
 
   const menuItems: MenuItem[] = [
-    { label: "My Learning", onClick: () => router.push("/learning") },
+    { label: "My Courses", onClick: () => router.push("/learning") },
     { label: "Password", onClick: () => setIsPasswordOpen(true) },
     { label: "Help & Support", onClick: () => router.push("/help-support") },
     { label: "Sign Out", onClick: handleLogout, closeOnClick: false },

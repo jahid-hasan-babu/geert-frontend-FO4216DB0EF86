@@ -73,6 +73,7 @@ export default function CourseCard({
       toast.error("Failed to update favorite status");
     }
   };
+  console.log("course in card", course);
 
   return (
     <>

@@ -148,13 +148,23 @@ export default function Footer() {
                   Cookies Policy
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link
                   href="/regulatory-info"
                   className="text-gray-300 hover:text-white"
                   data-translate
                 >
                   Regulatory Info
+                </Link>
+              </li> */}
+              <li>
+                <Link
+                  href="https://vmta.nl/"
+                  className="text-gray-300 hover:text-white"
+                  data-translate
+                  target="_blank"
+                >
+                  V.M.T.A
                 </Link>
               </li>
             </ul>
@@ -168,27 +178,31 @@ export default function Footer() {
           </p>
 
           <div className="flex space-x-4">
-            <a
-              href="#"
+            <Link
+              href="https://x.com/bhvontzorgen"
               aria-label="Twitter"
               className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-gray-300 hover:text-white hover:bg-gray-700"
+              target="_blank"
             >
               <FaXTwitter className="w-5 h-5" />
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              href="https://www.facebook.com/vmta.bhv"
               aria-label="Facebook"
               className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-gray-300 hover:text-white hover:bg-gray-700"
+              target="_blank"
             >
               <FaFacebook className="w-5 h-5" />
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              href="https://wa.me/880615087817"
               aria-label="WhatsApp"
               className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-gray-300 hover:text-white hover:bg-gray-700"
+              target="_blank"
+              rel="noopener noreferrer"
             >
               <FaWhatsapp className="w-5 h-5" />
-            </a>
+            </Link>
           </div>
         </div>
       </div>

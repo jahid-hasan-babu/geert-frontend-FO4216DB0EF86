@@ -18,7 +18,7 @@ interface LanguageOption {
 }
 
 const LANGUAGES: LanguageOption[] = [
-  { code: "nl", name: "Dutch", nativeName: "Netherlands" },
+  { code: "nl", name: "Netherlands", nativeName: "Netherlands" },
   { code: "en", name: "English", nativeName: "English" },
 ];
 

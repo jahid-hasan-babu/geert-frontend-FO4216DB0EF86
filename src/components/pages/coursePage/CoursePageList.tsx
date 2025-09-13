@@ -37,14 +37,15 @@ interface Course {
 export default function CoursesPageList() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
-  const [activeFilter, setActiveFilter] = useState("All");
+  const [activeFilter, setActiveFilter] = useState("All Courses");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
 
   const coursesPerPage = 9;
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -72,16 +73,19 @@ export default function CoursesPageList() {
         const queryParams: string[] = [];
 
         let searchParam = searchQuery;
-        if (activeFilter !== "All") searchParam = activeFilter;
+        if (activeFilter !== "All Courses") searchParam = activeFilter;
 
-        if (searchParam) queryParams.push(`search=${encodeURIComponent(searchParam)}`);
+        if (searchParam)
+          queryParams.push(`search=${encodeURIComponent(searchParam)}`);
 
         queryParams.push(`page=${currentPage}`);
         queryParams.push(`limit=${coursesPerPage}`);
 
         if (queryParams.length > 0) url += `?${queryParams.join("&")}`;
 
-        const res = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } });
+        const res = await axios.get(url, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         setCourses(res.data.data.data || []);
         setTotalPages(res.data.data.meta?.totalPage || 1);
@@ -109,14 +113,14 @@ export default function CoursesPageList() {
           Start Learning Something Today
         </h1>
         <p data-translate className="text-lg text-gray-600">
-          Explore high-quality courses that help you grow.
+          Develop your skills with our practice-oriented e-learning courses
         </p>
       </div>
 
       {/* Filters and Search */}
       <div className="flex flex-col lg:flex-row justify-between items-center my-[40px] gap-6">
         <CourseFilter
-          filters={["All", ...categories.map((c) => c.name)]}
+          filters={["All Courses", ...categories.map((c) => c.name)]}
           activeFilter={activeFilter}
           onChange={(f) => {
             setActiveFilter(f);
@@ -124,6 +128,7 @@ export default function CoursesPageList() {
           }}
         />
         <CourseSearch
+          data-translate
           value={searchQuery}
           onChange={(v) => {
             setSearchQuery(v);

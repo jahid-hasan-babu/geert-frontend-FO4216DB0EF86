@@ -21,34 +21,35 @@ import { toast } from "sonner";
 import { useCreateNotificationMutation } from "@/redux/features/notification/notificationsApi";
 
 export default function NotificationPage() {
-
   const [sendTo, setSendTo] = useState("All");
   const [title, setTitle] = useState("");
-  const [message, setMessage] = useState("");
+  const [body, setBody] = useState(""); // ✅ matches schema
   const [errors, setErrors] = useState<
     Partial<Record<keyof NotificationFormData, string>>
   >({});
 
-  const { data, isLoading } = useGetAllCoursesQuery("");
+  // ✅ No searchTerm / currentPage anymore
+  const { data, isLoading } = useGetAllCoursesQuery({});
   const [createNotification, { isLoading: isCreating }] =
     useCreateNotificationMutation();
-  const course = data?.data?.data;
+
+  const courses = data?.data?.data ?? [];
 
   const recipients = [
     { value: "All", label: "All" },
     ...(isLoading
       ? []
-      : course?.map((c: { id: string; title: string }) => ({
+      : courses.map((c: { id: string; title: string }) => ({
           value: c.id,
           label: c.title,
-        })) ?? []),
+        }))),
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
 
-    const formData = { sendTo, title, body: message };
+    const formData = { sendTo, title, body };
 
     const validation = notificationSchema.safeParse(formData);
     if (!validation.success) {
@@ -67,11 +68,12 @@ export default function NotificationPage() {
       await createNotification(validation.data).unwrap();
       toast.success(<span data-translate>Notification sent successfully!</span>);
 
+      // reset form
       setSendTo("All");
       setTitle("");
-      setMessage("");
-    } catch (error) {
-      console.error("Failed to send notification:", error);
+      setBody("");
+    } catch {
+      console.error("Failed to send notification:");
       toast.error("Failed to send notification");
     }
   };
@@ -79,12 +81,13 @@ export default function NotificationPage() {
   return (
     <div className="mx-auto p-6 bg-white">
       <h1 className="text-2xl font-semibold text-gray-900 mb-8" data-translate>
-        Make Notification
+        Send Notification
       </h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
+            {/* Send To */}
             <div>
               <label
                 className="text-sm font-medium text-gray-600"
@@ -97,11 +100,17 @@ export default function NotificationPage() {
                   <SelectValue placeholder="Select recipients" />
                 </SelectTrigger>
                 <SelectContent>
-                  {recipients.map((r) => (
-                    <SelectItem key={r.value} value={r.value}>
-                      {r.label}
+                  {isLoading ? (
+                    <SelectItem value="loading" disabled>
+                      Loading...
                     </SelectItem>
-                  ))}
+                  ) : (
+                    recipients.map((r) => (
+                      <SelectItem key={r.value} value={r.value}>
+                        {r.label}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
               {errors.sendTo && (
@@ -129,15 +138,15 @@ export default function NotificationPage() {
             </div>
           </div>
 
-          {/* Message */}
+          {/* Body */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-600" data-translate>
-              Send Message
+              Message
             </label>
             <Textarea
               placeholder="Write here..."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
               className="min-h-[120px] border-gray-200 rounded-lg resize-none"
             />
             {errors.body && (
@@ -153,7 +162,7 @@ export default function NotificationPage() {
           className="w-full h-14 bg-[#3399CC] hover:bg-[#61b1da] text-white font-medium rounded-full text-lg cursor-pointer disabled:opacity-50"
           data-translate
         >
-          {isCreating ? "Sending..." : "Make Notification"}
+          {isCreating ? "Sending..." : "Send Notification"}
         </Button>
       </form>
     </div>

@@ -29,6 +29,7 @@ import CourseModuleAdd from "./CourseModuleAdd";
 import { Spin } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
+import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
 
 type QuizOption = {
   text: string;
@@ -363,6 +364,7 @@ export default function CourseAddPage() {
 
   return (
     <div className="mx-auto p-6 space-y-8 bg-white">
+      <TranslateInitializer/>
       {validationErrors.length > 0 && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -389,7 +391,7 @@ export default function CourseAddPage() {
                   <p className="text-gray-700 font-medium text-sm">
                     {coverImageName}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500" data-translate>
                     Click to change cover image
                   </p>
                 </div>
@@ -397,10 +399,10 @@ export default function CourseAddPage() {
             ) : (
               <>
                 <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                <p className="text-gray-600 font-medium">
+                <p className="text-gray-600 font-medium" data-translate>
                   Upload Cover Image *
                 </p>
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="text-sm text-gray-500 mt-2" data-translate>
                   Recommended: 1200x600px, JPG or PNG
                 </p>
               </>
@@ -418,10 +420,10 @@ export default function CourseAddPage() {
 
       {/* Course Details */}
       <div className="space-y-6">
-        <h2 className="text-2xl font-semibold text-gray-900">Course Details</h2>
+        <h2 className="text-2xl font-semibold text-gray-900" data-translate>Course Details</h2>
         <div className="space-y-4 border-2 border-gray-100 p-4 rounded-lg">
           <div>
-            <label className="block text-sm font-medium text-[#585858] mb-2">
+            <label className="block text-sm font-medium text-[#585858] mb-2" data-translate>
               Course Title *
             </label>
             <Input
@@ -434,19 +436,20 @@ export default function CourseAddPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#585858] mb-2">
+            <label className="block text-sm font-medium text-[#585858] mb-2" data-translate>
               Description *
             </label>
             <Editor
               contents={courseData.description}
               onSave={handleDescriptionChange}
               onBlur={() => {}}
+              data-translate
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2" data-translate>
                 Course Category *
               </label>
               <Select
@@ -454,6 +457,7 @@ export default function CourseAddPage() {
                 onValueChange={(value) =>
                   handleInputChange("categoryId", value)
                 }
+                data-translate
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select category" />
@@ -473,7 +477,7 @@ export default function CourseAddPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2" data-translate>
                 Course Duration *
               </label>
               <div className="relative">
@@ -510,7 +514,7 @@ export default function CourseAddPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2" data-translate>
                 Price (€) *
               </label>
               <Input
@@ -537,12 +541,12 @@ export default function CourseAddPage() {
 
       {/* Instructor */}
       <div className="space-y-6">
-        <h2 className="text-2xl font-semibold text-gray-900">
+        <h2 className="text-2xl font-semibold text-gray-900" data-translate>
           Instructor Info
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2" data-translate>
               Instructor Name *
             </label>
             <Select
@@ -581,7 +585,7 @@ export default function CourseAddPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2" data-translate>
               Instructor Email *
             </label>
             <Input

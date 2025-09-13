@@ -34,6 +34,11 @@ const CoursesPage = () => {
   });
 
   const courses: Course[] = data?.data?.data || [];
+  // ✅ Filter only non-microlearning (normal courses)
+  const filteredCourses: Course[] = courses.filter(
+    (course: Course) => !course.isMicroLearning
+  );
+
   const totalPages: number = data?.data?.meta?.totalPage || 1;
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,7 +62,10 @@ const CoursesPage = () => {
             />
           </div>
           <Link href="/dashboard/course/add-course">
-            <button className="bg-[#3399CC] hover:bg-[#0077CC] duration-300 text-white px-2 lg:px-4 py-[5px] lg:py-[10px] text-xs lg:text-sm rounded-full font-semibold transition-colors shadow-lg cursor-pointer font-sans" data-translate>
+            <button
+              className="bg-[#3399CC] hover:bg-[#0077CC] duration-300 text-white px-2 lg:px-4 py-[5px] lg:py-[10px] text-xs lg:text-sm rounded-full font-semibold transition-colors shadow-lg cursor-pointer font-sans"
+              data-translate
+            >
               + Add Course
             </button>
           </Link>
@@ -66,9 +74,9 @@ const CoursesPage = () => {
         {/* Courses Grid */}
         {isLoading || isFetching ? (
           <Skeleton active />
-        ) : courses.length > 0 ? (
+        ) : filteredCourses.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {courses.map((course: Course) => (
+            {filteredCourses.map((course: Course) => (
               <CourseCard key={course.id} course={course} />
             ))}
           </div>

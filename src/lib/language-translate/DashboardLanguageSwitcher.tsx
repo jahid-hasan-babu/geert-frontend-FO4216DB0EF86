@@ -50,13 +50,13 @@ export function LanguageSwitcher() {
         <SelectValue>
           {{
             en: "English",
-            nl: "Dutch",
+            nl: "Netherlands",
           }[selectedLanguage] || "Select a language"}
         </SelectValue>
       </SelectTrigger>
       <SelectContent className="bg-white">
         <SelectItem value="en">English</SelectItem>
-        <SelectItem value="nl">Dutch</SelectItem>
+        <SelectItem value="nl">Netherlands</SelectItem>
       </SelectContent>
     </Select>
   );

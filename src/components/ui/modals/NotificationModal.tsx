@@ -2,9 +2,11 @@
 
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
-import { X } from "lucide-react";
+import { X, Trash2 } from "lucide-react";
 import { Skeleton } from "antd";
 import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
+import { useDeleteNotificationMutation } from "@/redux/features/notification/notificationsApi";
+import { toast } from "sonner";
 
 interface Notification {
   id: string;
@@ -54,6 +56,19 @@ export default function NotificationModal({
   onClose,
   notifications,
 }: NotificationModalProps) {
+  const [deleteNotification, { isLoading: isDeleting }] =
+    useDeleteNotificationMutation();
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteNotification(id).unwrap();
+      toast.success("Notification deleted");
+    } catch (error) {
+      toast.error("Failed to delete notification");
+      console.error(error);
+    }
+  };
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
@@ -85,7 +100,6 @@ export default function NotificationModal({
             leaveTo="opacity-0 scale-95 translate-y-2"
           >
             <Dialog.Panel className="w-full max-w-sm transform overflow-hidden rounded-xl bg-white p-6 shadow-xl transition-all">
-              {/* Loading state inside Dialog.Panel */}
               {isLoading ? (
                 <Skeleton active />
               ) : (
@@ -108,32 +122,39 @@ export default function NotificationModal({
                     {notifications.length > 0 ? (
                       notifications.map((n) => (
                         <div
-                        key={n.id}
-                        className="p-3 border rounded-lg hover:bg-gray-50"
+                          key={n.id}
+                          className="p-3 border rounded-lg hover:bg-gray-50 flex justify-between items-start"
                         >
-                          <TranslateInitializer/>
-                          <div
-                            className="text-xs font-semibold"
-                            data-translate
+                          <div className="flex-1">
+                            <div
+                              className="text-xs font-semibold"
+                              data-translate
+                            >
+                              {n.title}
+                            </div>
+                            <div className="text-sm" data-translate>
+                              {n.body}
+                            </div>
+                            <div
+                              className="text-gray-400 text-xs mt-1"
+                              data-translate
+                            >
+                              {timeAgo(new Date(n.createdAt))}
+                            </div>
+                          </div>
+
+                          {/* Delete button */}
+                          <button
+                            onClick={() => handleDelete(n.id)}
+                            disabled={isDeleting}
+                            className="ml-2 text-red-500 hover:text-red-700"
                           >
-                            {n.title}
-                          </div>
-                          <div className="text-sm" data-translate>
-                            {n.body}
-                          </div>
-                          <div
-                            className="text-gray-400 text-xs mt-1 flex justify-end"
-                            data-translate
-                          >
-                            {timeAgo(new Date(n.createdAt))}
-                          </div>
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
                       ))
                     ) : (
-                      <p
-                        className="text-gray-500 text-center"
-                        data-translate
-                      >
+                      <p className="text-gray-500 text-center" data-translate>
                         No new notifications
                       </p>
                     )}

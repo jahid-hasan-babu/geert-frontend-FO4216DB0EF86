@@ -4,7 +4,7 @@ export class GoogleTranslateManager {
   private static instance: GoogleTranslateManager;
   private isInitialized = false;
   private isLoading = false;
-  private currentLanguage = "nl"; // Default language set to Dutch
+  private currentLanguage = "nl";
   private observers: Set<(lang: string) => void> = new Set();
 
   private constructor() {}
@@ -36,7 +36,7 @@ export class GoogleTranslateManager {
       // Add styles to hide Google Translate UI
       this.addStyles();
 
-      // Set Dutch cookie before script loads
+      // Set Netherlands cookie before script loads
       if (
         !localStorage.getItem("preferred-language") &&
         !this.getCookie("googtrans")

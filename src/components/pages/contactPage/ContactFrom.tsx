@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Mail, Phone, MapPin } from "lucide-react";
 import { useSendContactFormMutation } from "@/redux/features/contact/contactApi";
 import { contactFormSchema } from "@/lib/validations/contact";
@@ -52,12 +52,53 @@ export default function ContactForm() {
 
     try {
       await sendContactForm(validation.data).unwrap();
-      toast("Your message has been sent successfully.");
+      toast(
+        <span data-translate>Your message has been sent successfully.</span>
+      );
       setFormData({ fullName: "", email: "", question: "", description: "" });
     } catch {
-      toast("Failed to send message. Please try again.");
+      toast(
+        <span data-translate>Failed to send message. Please try again.</span>
+      );
     }
   };
+
+  useEffect(() => {
+    function fixPlaceholders() {
+      document
+        .querySelectorAll(
+          "input[data-translate-placeholder], textarea[data-translate-placeholder]"
+        )
+        .forEach((el) => {
+          const input = el as HTMLInputElement | HTMLTextAreaElement;
+
+          if (
+            !input.nextElementSibling?.classList.contains(
+              "translate-placeholder-proxy"
+            )
+          ) {
+            const span = document.createElement("span");
+            span.style.display = "none";
+            span.className = "translate-placeholder-proxy";
+            span.setAttribute("data-translate", "");
+            span.innerText =
+              input.getAttribute("data-translate-placeholder") || "";
+            input.insertAdjacentElement("afterend", span);
+
+            // Sync translations back to placeholder
+            const observer = new MutationObserver(() => {
+              input.placeholder = span.innerText;
+            });
+            observer.observe(span, { childList: true, subtree: true });
+
+            // Set initial placeholder
+            input.placeholder = span.innerText;
+          }
+        });
+    }
+
+    fixPlaceholders();
+  }, []);
 
   return (
     <>
@@ -65,6 +106,7 @@ export default function ContactForm() {
 
       <section className="py-16 lg:py-[80px]">
         <div className="container mx-auto px-6">
+          {/* Header */}
           <div className="relative text-center mb-16">
             <div className="absolute inset-0 flex justify-center pointer-events-none z-0">
               <span
@@ -91,7 +133,9 @@ export default function ContactForm() {
             </div>
           </div>
 
+          {/* Form + Contact Info */}
           <div className="grid lg:grid-cols-3 gap-16 max-w-6xl mx-auto">
+            {/* Form */}
             <div className="lg:col-span-2 relative z-10">
               <Spin spinning={isLoading} tip="Sending..." size="large">
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -100,8 +144,7 @@ export default function ContactForm() {
                       <input
                         type="text"
                         name="fullName"
-                        placeholder="Full Name"
-                        data-translate
+                        data-translate-placeholder="Full Name"
                         value={formData.fullName}
                         onChange={handleInputChange}
                         className={`w-full px-4 py-4 bg-[#EBF5FA] border rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent ${
@@ -110,7 +153,9 @@ export default function ContactForm() {
                         required
                       />
                       {errors.name && (
-                        <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.name}
+                        </p>
                       )}
                     </div>
 
@@ -118,8 +163,7 @@ export default function ContactForm() {
                       <input
                         type="email"
                         name="email"
-                        placeholder="Email Address"
-                        data-translate
+                        data-translate-placeholder="Email Address"
                         value={formData.email}
                         onChange={handleInputChange}
                         className={`w-full px-4 py-4 bg-[#EBF5FA] border rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent ${
@@ -128,7 +172,9 @@ export default function ContactForm() {
                         required
                       />
                       {errors.email && (
-                        <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.email}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -137,8 +183,7 @@ export default function ContactForm() {
                     <input
                       type="text"
                       name="question"
-                      placeholder="What's your question?"
-                      data-translate
+                      data-translate-placeholder="What's your question?"
                       value={formData.question}
                       onChange={handleInputChange}
                       className={`w-full px-4 py-4 bg-[#EBF5FA] border rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent ${
@@ -147,15 +192,16 @@ export default function ContactForm() {
                       required
                     />
                     {errors.questions && (
-                      <p className="text-red-500 text-sm mt-1">{errors.questions}</p>
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.questions}
+                      </p>
                     )}
                   </div>
 
                   <div>
                     <textarea
                       name="description"
-                      placeholder="Describe your issue"
-                      data-translate
+                      data-translate-placeholder="Describe your issue"
                       value={formData.description}
                       onChange={handleInputChange}
                       rows={8}
@@ -165,7 +211,9 @@ export default function ContactForm() {
                       required
                     />
                     {errors.message && (
-                      <p className="text-red-500 text-sm mt-1">{errors.message}</p>
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.message}
+                      </p>
                     )}
                   </div>
 
@@ -175,14 +223,18 @@ export default function ContactForm() {
                     data-translate
                     className="w-full bg-[#3399CC] hover:bg-sky-600 disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 px-8 rounded-full font-semibold text-lg transition-colors duration-200 cursor-pointer"
                   >
-                    Submit
+                    Send
                   </button>
                 </form>
               </Spin>
             </div>
 
+            {/* Contact Info */}
             <div className="lg:col-span-1 relative z-10">
-              <h2 data-translate className="text-2xl md:text-4xl text-gray-900 mb-[18px] font-playfairDisplay">
+              <h2
+                data-translate
+                className="text-2xl md:text-4xl text-gray-900 mb-[18px] font-playfairDisplay"
+              >
                 Get in touch with our experts team
               </h2>
 
@@ -191,11 +243,13 @@ export default function ContactForm() {
                   <div className="space-y-[12px]">
                     <div className="flex items-center space-x-[6px]">
                       <Mail className="w-6 h-5 text-[#404040]" />
-                      <p data-translate className="text-[#404040]">Email</p>
+                      <p data-translate className="text-[#404040]">
+                        Email
+                      </p>
                     </div>
                     <div className="border-b-[0.5px] border-[#76BBDD]"></div>
                     <div>
-                      <p className="text-[#404040] text-sm">vmta@gmail.com</p>
+                      <p className="text-[#404040] text-sm">info@mijnvmta.nl</p>
                     </div>
                   </div>
                 </div>
@@ -204,11 +258,15 @@ export default function ContactForm() {
                   <div className="space-y-[12px]">
                     <div className="flex items-center space-x-[6px]">
                       <Phone className="w-6 h-5 text-[#404040]" />
-                      <p data-translate className="text-[#404040]">Phone</p>
+                      <p data-translate className="text-[#404040]">
+                        Phone
+                      </p>
                     </div>
                     <div className="border-b-[0.5px] border-[#76BBDD]"></div>
                     <div>
-                      <p className="text-[#404040] text-sm">+1 (354) 456-1565</p>
+                      <p className="text-[#404040] text-sm">
+                        +0615087817
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -217,13 +275,14 @@ export default function ContactForm() {
                   <div className="space-y-[12px]">
                     <div className="flex items-center space-x-[6px]">
                       <MapPin className="w-6 h-5 text-[#404040]" />
-                      <p data-translate className="text-[#404040]">Location</p>
+                      <p data-translate className="text-[#404040]">
+                        Location
+                      </p>
                     </div>
                     <div className="border-b-[0.5px] border-[#76BBDD]"></div>
                     <div>
                       <p className="text-[#404040] text-sm" data-translate>
-                        California [CA], 90011 49th St, Los Angeles, United
-                        States
+                        Meander 19, 9231DB Surhuisterveen
                       </p>
                     </div>
                   </div>

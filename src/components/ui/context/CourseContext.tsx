@@ -315,7 +315,7 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
                               {lesson.duration}
                             </>
                           ) : lesson.type === "doc" ? (
-                            <span data-translate>Doc</span>
+                            <span data-translate>Document</span>
                           ) : lesson.type === "quiz" ? (
                             <span data-translate>Quiz</span>
                           ) : (

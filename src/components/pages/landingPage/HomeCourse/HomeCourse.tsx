@@ -86,7 +86,7 @@ export default function HomeCourse() {
                         course={{
                           id: course?.id,
                           title: course?.title,
-                          slug: course?.slug || course?.id, // fallback to id if slug not available
+                          slug: course?.slug || course?.id,
                           coverImage: course?.coverImage || "",
                           duration: course?.duration || "",
                           lessons: course?.totalLessons || 0,
@@ -97,7 +97,7 @@ export default function HomeCourse() {
                           isBestseller: course?.isBestseller || false,
                           isMicroLearning: course?.isMicroLearning || false,
                           description: course?.description || "",
-                          courseContexts: [], // required by CourseCard
+                          courseContexts: [],
                         }}
                       />
                     </Link>

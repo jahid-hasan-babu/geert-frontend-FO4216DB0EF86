@@ -20,7 +20,7 @@ export const useGoogleTranslate = () => {
       try {
         await manager.initialize();
 
-        // Automatically translate to Dutch if first load
+        // Automatically translate to Netherlands if first load
         if (!localStorage.getItem("preferred-language") && manager.getCurrentLanguage() !== "nl") {
           manager.translateTo("nl");
         }

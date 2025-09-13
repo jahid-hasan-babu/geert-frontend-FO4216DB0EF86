@@ -27,8 +27,8 @@ import {
 } from "@/lib/language-translate/LanguageSwitcher";
 
 const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/courses", label: "Courses" },
+  { href: "/", label: "Homepage" },
+  { href: "/courses", label: "Course" },
   { href: "/contact", label: "Contact" },
   { href: "/help-support", label: "Support" },
 ];

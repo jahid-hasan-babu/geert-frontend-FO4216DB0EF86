@@ -98,7 +98,7 @@ const CourseDetailsPage = () => {
     title: "",
     description: "",
     duration: "",
-    videoFile: null as File | null,
+    videoUrl: null as File | null,
   });
 
   const [deleteLesson] = useDeleteLessonMutation();
@@ -227,7 +227,11 @@ const CourseDetailsPage = () => {
     } catch (error: unknown) {
       console.error("Delete failed with error:", error);
       if (typeof error === "object" && error !== null) {
-        const err = error as { status?: string; data?: { message?: string }; message?: string };
+        const err = error as {
+          status?: string;
+          data?: { message?: string };
+          message?: string;
+        };
         console.error("Error details:", {
           status: err?.status,
           data: err?.data,
@@ -274,7 +278,7 @@ const CourseDetailsPage = () => {
       title: lesson?.title,
       description: lesson?.description,
       duration: lesson?.duration,
-      videoFile: null,
+      videoUrl: null,
     });
   };
 
@@ -283,25 +287,32 @@ const CourseDetailsPage = () => {
     setIsEditingLesson(true);
     try {
       const formData = new FormData();
-      const { title, description, duration, videoFile } = editLessonData;
+      const { title, description, duration, videoUrl } = editLessonData;
+
       formData.append(
         "bodyData",
         JSON.stringify({ title, description, duration })
       );
-      if (videoFile) formData.append("videoURL", videoFile);
+
+      if (videoUrl) {
+        formData.append("videoUrl", videoUrl);
+      }
+
       await editLesson({
         moduleId: editingLesson.moduleId,
         lessonId: editingLesson.lesson.id,
         formData,
       }).unwrap();
+
       setEditingLesson(null);
-      window.location.reload();
     } catch (error) {
       console.error(error);
     } finally {
       setIsEditingLesson(false);
     }
   };
+
+  console.log("Editing Lesson", editingLesson);
 
   if (isLoading) {
     return (
@@ -563,33 +574,36 @@ const CourseDetailsPage = () => {
                                 }
                                 placeholder="Lesson Title"
                               />
-                              <Textarea
-                                value={editLessonData.description}
-                                onChange={(e) =>
-                                  setEditLessonData((prev) => ({
-                                    ...prev,
-                                    description: e.target.value,
-                                  }))
-                                }
-                                placeholder="Lesson Description"
-                                className="min-h-[60px]"
-                              />
-                              <Input
-                                value={editLessonData.duration}
-                                onChange={(e) =>
-                                  setEditLessonData((prev) => ({
-                                    ...prev,
-                                    duration: e.target.value,
-                                  }))
-                                }
-                                placeholder="Duration"
-                              />
+                              {editingLesson?.lesson?.type === "doc" && (
+                                <Editor
+                                  contents={editLessonData.description}
+                                  onSave={(value: string) =>
+                                    setEditLessonData((prev) => ({
+                                      ...prev,
+                                      description: value,
+                                    }))
+                                  }
+                                  onBlur={() => {}}
+                                />
+                              )}
+                              {editingLesson?.lesson?.type === "video" && (
+                                <Input
+                                  value={editLessonData.duration}
+                                  onChange={(e) =>
+                                    setEditLessonData((prev) => ({
+                                      ...prev,
+                                      duration: e.target.value,
+                                    }))
+                                  }
+                                  placeholder="Durtation (HH:MM)"
+                                />
+                              )}
                               <Input
                                 type="file"
                                 onChange={(e) =>
                                   setEditLessonData((prev) => ({
                                     ...prev,
-                                    videoFile: e.target.files?.[0] || null,
+                                    videoUrl: e.target.files?.[0] || null,
                                   }))
                                 }
                               />
@@ -598,7 +612,7 @@ const CourseDetailsPage = () => {
                                   size="sm"
                                   onClick={handleEditLessonSubmit}
                                   className="bg-green-500 hover:bg-green-600 text-white flex items-center gap-2"
-                                  disabled={false} // We’ll set a loading state
+                                  disabled={false}
                                 >
                                   {isEditingLesson ? (
                                     <>

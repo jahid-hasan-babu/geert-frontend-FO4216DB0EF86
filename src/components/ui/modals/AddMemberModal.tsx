@@ -80,7 +80,7 @@ export default function AddMemberModal({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button variant="outline" data-translate>
-            + Add Member
+            + Add Student
           </Button>
         </DialogTrigger>
         <DialogContent>
