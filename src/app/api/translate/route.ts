@@ -38,6 +38,8 @@ export async function POST(req: Request) {
     const customGlossary: Record<string, string> = {
       Student: " Cursist ",
       Save: " Opslaan ",
+      "Develop your skills with our practice-oriented e-learning courses": "Ontwikkel je skills met onze praktijkgerichte e-learning cursussen",
+      "+ Add Student" : "+ Cursist toevoegen"
     };
 
     // Always use glossary translation if exists
