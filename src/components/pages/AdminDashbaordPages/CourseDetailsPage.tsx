@@ -595,7 +595,7 @@ const CourseDetailsPage = () => {
                                       duration: e.target.value,
                                     }))
                                   }
-                                  placeholder="Durtation (HH:MM)"
+                                  placeholder="Durtation (MM:SS)"
                                 />
                               )}
                               <Input
