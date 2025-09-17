@@ -132,28 +132,29 @@ export default function CourseCertification({ courseId }: Props) {
 
           ctx.font = "30px Arial";
           ctx.fillText("Uitgegeven op", canvas.width / 2, 330);
-          
-          
+
           // Student Name
           ctx.font = "bold 40px Arial";
           ctx.fillText(certificate.studentName, canvas.width / 2, 400);
-          
+
           //Statci Text
           ctx.font = "italic 28px Arial";
           ctx.fillText("vur het succesvol afronden", canvas.width / 2, 450);
-          
+
           // Course Name + "on" + Completion Date
           ctx.font = "bold 48px Arial";
           ctx.fillText(certificate.courseTitle, canvas.width / 2, 520);
 
           if (certificate.courseCompletedDate) {
+            const date = new Date(certificate.courseCompletedDate);
+            const day = date.getDate();
+            const month = date.toLocaleString("default", { month: "long" }); // Full month name
+            const year = date.getFullYear();
+            const formattedDate = `${day} ${month}, ${year}`;
+
             ctx.font = "30px Arial";
             ctx.fillText("on", canvas.width / 2, 560);
-            ctx.fillText(
-              new Date(certificate.courseCompletedDate).toLocaleDateString(),
-              canvas.width / 2,
-              600
-            );
+            ctx.fillText(formattedDate, canvas.width / 2, 600);
           }
 
           // Results (if available)
