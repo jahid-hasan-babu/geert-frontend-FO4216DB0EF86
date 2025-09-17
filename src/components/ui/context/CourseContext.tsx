@@ -12,7 +12,6 @@ import axios from "axios";
 import { ChevronDown, CheckCircle, Play, Lock, FileText } from "lucide-react";
 import CourseCertification from "@/components/certification/CourseCertification";
 import { QuizModal, Quiz } from "../modals/QuizModal";
-import { TranslateInitializer } from "@/lib/language-translate/LanguageSwitcher";
 
 // ---------------- Types ----------------
 export interface LessonsItem {
@@ -121,10 +120,7 @@ export const CourseVideoPlayer: React.FC<CourseVideoPlayerProps> = ({
 
   if (!currentLesson) {
     return (
-      <div
-        className="w-full h-64 flex items-center justify-center border rounded-lg bg-gray-100 text-gray-500"
-        data-translate
-      >
+      <div className="w-full h-64 flex items-center justify-center border rounded-lg bg-gray-100 text-gray-500">
         No lesson selected
       </div>
     );
@@ -160,10 +156,7 @@ export const CourseVideoPlayer: React.FC<CourseVideoPlayerProps> = ({
 
   if (currentLesson.type === "quiz") {
     return (
-      <div
-        className="w-full h-64 flex items-center justify-center border rounded-lg bg-yellow-50 p-4"
-        data-translate
-      >
+      <div className="w-full h-64 flex items-center justify-center border rounded-lg bg-yellow-50 p-4">
         📝 Quiz: {currentLesson.title}
       </div>
     );
@@ -189,6 +182,16 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
   const [isCertOpen, setIsCertOpen] = useState(false);
   const [quizModalOpen, setQuizModalOpen] = useState(false);
   const [currentQuiz, setCurrentQuiz] = useState<Quiz | null>(null);
+
+  const getSelectedLanguage = () => {
+    if (typeof window === "undefined") return "en"; // SSR safe
+    return localStorage.getItem("selectedLanguage") === "nl" ? "nl" : "en";
+  };
+
+  const translate = (en: string, nl: string) => {
+    const lang = getSelectedLanguage();
+    return lang === "nl" ? nl : en;
+  };
 
   const toggleModule = (id: string) => {
     setOpenModuleId((prev) => (prev === id ? null : id));
@@ -216,7 +219,7 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
       setCurrentLesson(lesson);
     else if (lesson.type === "quiz" && lesson.quiz) openQuiz(lesson.quiz);
   };
-  console.log("Modules>>>", modules)
+  console.log("Modules>>>", modules);
 
   return (
     <div className="space-y-4">
@@ -232,7 +235,7 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
             }`}
           >
             <h3 className="text-[16px] font-semibold text-gray-900 text-left">
-              <span data-translate>Lesson</span> {idx + 1}: {module.title}
+              {translate("Lesson", "Les")} {idx + 1}: {module.title}
             </h3>
             <ChevronDown
               className={`w-5 h-5 text-gray-600 transition-transform duration-300 transform ${
@@ -264,7 +267,6 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
                     }`}
                     onClick={() => handleLessonClick(lesson)}
                   >
-                    <TranslateInitializer />
                     <div className="flex flex-col items-center mr-4">
                       <div
                         className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
@@ -293,14 +295,10 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
                           className={`font-medium ${
                             locked ? "text-gray-400" : "text-gray-900"
                           }`}
-                          data-translate
                         >
                           {lesson.title}
                           {locked && (
-                            <span
-                              className="ml-2 text-xs text-gray-400"
-                              data-translate
-                            >
+                            <span className="ml-2 text-xs text-gray-400">
                               (Locked)
                             </span>
                           )}
@@ -312,13 +310,12 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
                         >
                           {lesson.type === "video" ? (
                             <>
-                              <span data-translate>Video:</span>{" "}
-                              {lesson.duration}
+                              <span>Video:</span> {lesson.duration}
                             </>
                           ) : lesson.type === "doc" ? (
-                            <span data-translate>Document</span>
+                            <span>Document</span>
                           ) : lesson.type === "quiz" ? (
-                            <span data-translate>Quiz</span>
+                            <span>Quiz</span>
                           ) : (
                             lesson.duration
                           )}
@@ -333,7 +330,6 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
                               openQuiz(lesson.quiz ?? null);
                             }}
                             className="p-2 rounded-full hover:bg-gray-200 cursor-pointer"
-                            data-translate
                             title="Take Quiz"
                           >
                             <CheckCircle className="w-5 h-5 text-blue-500" />
@@ -348,7 +344,6 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
                             }}
                             className="p-2 rounded-full hover:bg-gray-200 cursor-pointer"
                             title="Play Video"
-                            data-translate
                           >
                             <Play className="w-5 h-5 text-gray-600" />
                           </button>
@@ -362,7 +357,6 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
                             }}
                             className="p-2 rounded-full hover:bg-gray-200 cursor-pointer"
                             title="Open Doc"
-                            data-translate
                           >
                             <FileText className="w-5 h-5 text-gray-600" />
                           </button>
@@ -387,11 +381,8 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
             isCertOpen ? "border-b border-[#E7E7E7]" : ""
           }`}
         >
-          <h3
-            data-translate
-            className="text-[16px] font-semibold text-gray-900"
-          >
-            Certification
+          <h3 className="text-[16px] font-semibold text-gray-900">
+            {translate("Certification", "Certificering")}
           </h3>
           <ChevronDown
             className={`w-5 h-5 text-gray-600 transition-transform duration-300 transform ${
