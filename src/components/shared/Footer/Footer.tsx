@@ -195,7 +195,7 @@ export default function Footer() {
               <FaFacebook className="w-5 h-5" />
             </Link>
             <Link
-              href="https://wa.me/880615087817"
+              href="https://wa.me/31615087817"
               aria-label="WhatsApp"
               className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-gray-300 hover:text-white hover:bg-gray-700"
               target="_blank"

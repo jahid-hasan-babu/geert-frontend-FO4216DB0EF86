@@ -26,7 +26,8 @@ export default function Promotion() {
                 className="text-lg md:text-lg text-gray-600 leading-[150%]"
                 data-translate
               >
-                Download our mobile app to access courses, track progress, and learn on your schedule—anytime, anywhere.
+                Download our mobile app to access courses, track progress, and
+                learn on your schedule—anytime, anywhere.
               </p>
             </div>
 
@@ -34,7 +35,8 @@ export default function Promotion() {
             <div className="flex gap-4">
               {/* App Store Button */}
               <Link
-                href="#"
+                href="https://www.apple.com/app-store/"
+                target="_blank"
                 className="justify-center text-white rounded-lg transition-colors duration-200"
               >
                 <Image src={AppStore_Button} alt="App Store" />
@@ -42,7 +44,8 @@ export default function Promotion() {
 
               {/* Google Play Button */}
               <Link
-                href="#"
+                href="https://play.google.com/"
+                target="_blank"
                 className="justify-center text-white rounded-lg transition-colors duration-200"
               >
                 <Image src={PlayStore_Button} alt="Google Play" />

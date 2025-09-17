@@ -39,7 +39,9 @@ export async function POST(req: Request) {
       Student: " Cursist ",
       Save: " Opslaan ",
       "Develop your skills with our practice-oriented e-learning courses": "Ontwikkel je skills met onze praktijkgerichte e-learning cursussen",
-      "+ Add Student" : "+ Cursist toevoegen"
+      "+ Add Student" : "+ Cursist toevoegen",
+      Support: "Support",
+      " ... Read More": "Less minder"
     };
 
     // Always use glossary translation if exists

@@ -30,6 +30,8 @@ export default function AddMemberModal({
   onAddSuccess,
 }: AddMemberModalProps) {
   const [open, setOpen] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
 
@@ -38,18 +40,25 @@ export default function AddMemberModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) {
-      setError("Please enter a student email");
+
+    if (!firstName || !lastName || !email) {
+      setError("Please fill all required fields");
       return;
     }
+
     try {
       const res: AddCourseStudentResponse = await addCourseToStudent({
+        firstName,
+        lastName,
         email,
         courseId,
       }).unwrap();
+
       if (res.success) {
         toast.success(res.message || "Student added to course successfully");
         setError("");
+        setFirstName("");
+        setLastName("");
         setEmail("");
         setOpen(false);
         onAddSuccess?.();
@@ -90,6 +99,41 @@ export default function AddMemberModal({
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <div className="grid gap-4 py-4">
+              {/* First Name */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="firstName" className="text-right" data-translate>
+                  First Name
+                </Label>
+                <input
+                  type="text"
+                  id="firstName"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="Enter first name"
+                  className="col-span-3 border rounded px-2 py-1"
+                  disabled={isAdding}
+                  data-translate
+                />
+              </div>
+
+              {/* Last Name */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="lastName" className="text-right" data-translate>
+                  Last Name
+                </Label>
+                <input
+                  type="text"
+                  id="lastName"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder="Enter last name"
+                  className="col-span-3 border rounded px-2 py-1"
+                  disabled={isAdding}
+                  data-translate
+                />
+              </div>
+
+              {/* Email */}
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="email" className="text-right" data-translate>
                   Student Email
@@ -105,12 +149,15 @@ export default function AddMemberModal({
                   data-translate
                 />
               </div>
+
+              {/* Error message */}
               {error && (
                 <p className="text-red-500 text-sm" data-translate>
                   {error}
                 </p>
               )}
             </div>
+
             <div className="flex justify-end">
               <Button type="submit" disabled={isAdding} data-translate>
                 {isAdding ? "Adding..." : "Add Member"}

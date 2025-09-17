@@ -114,10 +114,10 @@ const coursesApi = baseApi.injectEndpoints({
       providesTags: ["courses"],
     }),
     addCourseStudent: builder.mutation({
-      query: ({ courseId, email }) => ({
-        url: `/courses/add-student`,
+      query: ({ courseId, firstName, lastName, email }) => ({
+        url: `/users/add-student`,
         method: "POST",
-        body: { courseId, email },
+        body: { courseId, firstName, lastName, email },
       }),
       invalidatesTags: ["courses"],
     }),
@@ -127,6 +127,13 @@ const coursesApi = baseApi.injectEndpoints({
         method: "POST",
       }),
       invalidatesTags: ["courses"],
+    }),
+    getStudentsInCourse: builder.query({
+      query: (id) => ({
+        url: `/courses/enroll-student/${id}`,
+        method: "GET",
+      }),
+      providesTags: ["courses"],
     }),
   }),
 });
@@ -142,8 +149,9 @@ export const {
   useAddCourseLessonMutation,
   useEditModuleMutation,
   useEditLessonMutation,
-  useDeleteLessonMutation, // NEW: Export the delete lesson hook
+  useDeleteLessonMutation,
   useGetMyCourseProgressQuery,
   useAddCourseStudentMutation,
   useDeleteCourseMutation,
+  useGetStudentsInCourseQuery,
 } = coursesApi;

@@ -206,16 +206,17 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
   };
 
   const handleLessonClick = (lesson: LessonsItem) => {
-    const isLocked =
+    const locked =
       lesson.type === "quiz"
         ? lesson.quiz?.locked ?? lesson.locked
         : lesson.locked;
-    if (isLocked) return;
+    if (locked) return;
 
     if (lesson.type === "video" || lesson.type === "doc")
       setCurrentLesson(lesson);
     else if (lesson.type === "quiz" && lesson.quiz) openQuiz(lesson.quiz);
   };
+  console.log("Modules>>>", modules)
 
   return (
     <div className="space-y-4">
@@ -249,7 +250,7 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
           >
             <div className="bg-white">
               {module.lessons.map((lesson, idx) => {
-                const isLocked =
+                const locked =
                   lesson.type === "quiz"
                     ? lesson.quiz?.locked ?? lesson.locked
                     : lesson.locked;
@@ -257,7 +258,7 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
                   <div
                     key={lesson.id}
                     className={`flex items-center p-4 border-b border-gray-100 last:border-b-0 ${
-                      isLocked
+                      locked
                         ? "bg-gray-50 cursor-not-allowed opacity-60"
                         : "hover:bg-gray-50 cursor-pointer"
                     }`}
@@ -269,15 +270,15 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
                         className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
                           lesson.completed
                             ? "bg-green-500 border-green-500"
-                            : !isLocked
+                            : !locked
                             ? "bg-green-500"
                             : "border-gray-300 bg-white"
                         }`}
                       >
-                        {lesson.completed && !isLocked && (
+                        {lesson.completed && !locked && (
                           <CheckCircle className="w-4 h-4 text-white" />
                         )}
-                        {isLocked && !lesson.completed && (
+                        {locked && !lesson.completed && (
                           <Lock className="w-3 h-3 text-gray-400" />
                         )}
                       </div>
@@ -290,12 +291,12 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
                       <div>
                         <h4
                           className={`font-medium ${
-                            isLocked ? "text-gray-400" : "text-gray-900"
+                            locked ? "text-gray-400" : "text-gray-900"
                           }`}
                           data-translate
                         >
                           {lesson.title}
-                          {isLocked && (
+                          {locked && (
                             <span
                               className="ml-2 text-xs text-gray-400"
                               data-translate
@@ -306,7 +307,7 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
                         </h4>
                         <p
                           className={`text-sm ${
-                            isLocked ? "text-gray-400" : "text-gray-600"
+                            locked ? "text-gray-400" : "text-gray-600"
                           }`}
                         >
                           {lesson.type === "video" ? (
@@ -325,7 +326,7 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
                       </div>
 
                       <div className="flex items-center space-x-2">
-                        {lesson.type === "quiz" && lesson.quiz && !isLocked && (
+                        {lesson?.type === "quiz" && lesson.quiz && !locked && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -339,7 +340,7 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
                           </button>
                         )}
 
-                        {lesson.type === "video" && !isLocked && (
+                        {lesson?.type === "video" && !locked && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -353,7 +354,7 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
                           </button>
                         )}
 
-                        {lesson.type === "doc" && !isLocked && (
+                        {lesson.type === "doc" && !locked && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -367,7 +368,7 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
                           </button>
                         )}
 
-                        {isLocked && <Lock className="w-5 h-5 text-gray-400" />}
+                        {locked && <Lock className="w-5 h-5 text-gray-400" />}
                       </div>
                     </div>
                   </div>

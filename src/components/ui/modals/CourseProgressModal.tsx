@@ -1,14 +1,28 @@
-"use client"
+"use client";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useEffect, useState } from "react";
 
 interface CourseProgressModalProps {
-  current: number
-  total: number
-  className?: string
-  isOpen: boolean
-  onClose: () => void
+  current: number;
+  total: number;
+  className?: string;
+  isOpen: boolean;
+  onClose: () => void;
 }
+
+// Pre-defined translations to avoid API calls
+const TRANSLATIONS = {
+  "Your Progress": {
+    en: "Your Progress",
+    nl: "Jouw voortgang"
+  }
+};
 
 export function CourseProgressModal({
   current,
@@ -17,13 +31,31 @@ export function CourseProgressModal({
   isOpen,
   onClose,
 }: CourseProgressModalProps) {
-  const percentage = Math.round((current / total) * 100)
+  const [titleText, setTitleText] = useState("Your Progress");
+  const percentage = Math.round((current / total) * 100);
+
+  useEffect(() => {
+    const lang = localStorage.getItem("selectedLanguage") || "en";
+    const translation = TRANSLATIONS["Your Progress"][lang as keyof typeof TRANSLATIONS["Your Progress"]] || "Your Progress";
+    setTitleText(translation);
+  }, []);
+
+  // Update translation when modal opens (in case language changed)
+  useEffect(() => {
+    if (isOpen) {
+      const lang = localStorage.getItem("selectedLanguage") || "en";
+      const translation = TRANSLATIONS["Your Progress"][lang as keyof typeof TRANSLATIONS["Your Progress"]] || "Your Progress";
+      setTitleText(translation);
+    }
+  }, [isOpen]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="relative">
-          <DialogTitle className="text-xl font-semibold">Your Progress</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">
+            {titleText}
+          </DialogTitle>
         </DialogHeader>
 
         <div className={`flex items-center gap-4 mt-6 ${className}`}>
@@ -36,9 +68,11 @@ export function CourseProgressModal({
               style={{ width: `${percentage}%` }}
             />
           </div>
-          <span className="text-sm font-medium text-foreground">{percentage}%</span>
+          <span className="text-sm font-medium text-foreground">
+            {percentage}%
+          </span>
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

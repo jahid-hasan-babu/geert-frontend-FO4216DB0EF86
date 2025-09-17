@@ -258,15 +258,17 @@ export default function ContactForm() {
                   <div className="space-y-[12px]">
                     <div className="flex items-center space-x-[6px]">
                       <Phone className="w-6 h-5 text-[#404040]" />
-                      <p data-translate className="text-[#404040]">
-                        Phone
-                      </p>
+                      <div className="text-[#404040]">
+                        <div data-translate>Phone</div>
+                        <div className="text-[10px]" data-translate>
+                          ( We are available by phone from Monday to Friday from
+                          9:00 AM to 2:00 PM )
+                        </div>
+                      </div>
                     </div>
                     <div className="border-b-[0.5px] border-[#76BBDD]"></div>
                     <div>
-                      <p className="text-[#404040] text-sm">
-                        +0615087817
-                      </p>
+                      <p className="text-[#404040] text-sm">+0512-361228</p>
                     </div>
                   </div>
                 </div>

@@ -21,6 +21,7 @@ import {
   useEditModuleMutation,
   useEditLessonMutation,
   useDeleteLessonMutation,
+  useGetStudentsInCourseQuery,
 } from "@/redux/features/courses/coursesApi";
 import AddModuleModal from "@/components/ui/modal/add-module-modal";
 import { AddLessonModal } from "@/components/ui/modal/add-lesson-modal";
@@ -57,6 +58,16 @@ interface Course {
   totalStudents: number;
 }
 
+interface Student {
+  userId: string | number;
+  user?: {
+    username?: string;
+    email?: string;
+    phone?: string;
+    profileImage?: string;
+  };
+}
+
 const CourseDetailsPage = () => {
   const { id } = useParams();
   const [course, setCourse] = useState<Course | null>(null);
@@ -77,6 +88,9 @@ const CourseDetailsPage = () => {
   const router = useRouter();
 
   const { data, isLoading } = useGetCourseByIdQuery(id);
+  const { data: studentsData, isLoading: studentIsLoading } =
+    useGetStudentsInCourseQuery(id);
+  console.log("Students Data", studentsData);
   const [editCourse, { isLoading: isEditing }] = useEditCourseMutation();
   const [deleteCourse, { isLoading: isDeleting }] = useDeleteCourseMutation();
   const [editModule] = useEditModuleMutation();
@@ -767,6 +781,77 @@ const CourseDetailsPage = () => {
           </p>
         )}
       </div>
+
+      <div className="mb-8">
+        <TranslateInitializer />
+        <h2 className="text-2xl font-semibold mb-6" data-translate>
+          Students Info
+        </h2>
+
+        <div className="mb-4">
+          Total Enrolled Students: {studentsData?.data?.data?.length || 0}
+        </div>
+
+        <div className="max-h-96 overflow-y-auto border border-gray-200 rounded">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50 sticky top-0">
+              <tr>
+                <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+                  #
+                </th>
+                <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+                  Username
+                </th>
+                <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+                  Email
+                </th>
+                <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+                  Phone
+                </th>
+                <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+                  Profile Image
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {studentsData?.data?.data.map(
+                (student: Student, index: number) => (
+                  <tr key={student.userId}>
+                    <td className="px-4 py-2 text-sm text-gray-700">
+                      {index + 1}
+                    </td>
+                    <td className="px-4 py-2 text-sm text-gray-700">
+                      {student?.user?.username || "-"}
+                    </td>
+                    <td className="px-4 py-2 text-sm text-gray-700">
+                      {student?.user?.email || "-"}
+                    </td>
+                    <td className="px-4 py-2 text-sm text-gray-700">
+                      {student?.user?.phone || "-"}
+                    </td>
+                    <td className="px-4 py-2">
+                      {student?.user?.profileImage ? (
+                        <Image
+                          width={24}
+                          height={24}
+                          src={
+                            student.user.profileImage || "/default-avatar.png"
+                          }
+                          alt={student.user.username || "User Avatar"} // fallback alt
+                          className="w-10 h-10 rounded-full object-cover"
+                        />
+                      ) : (
+                        "-"
+                      )}
+                    </td>
+                  </tr>
+                )
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <div className="mb-8">
         {isEditMode ? (
           <div className="flex gap-4">

@@ -34,7 +34,7 @@ const HelpSupport = () => {
         </h2>
         <p
           data-translate
-          className="text-md md:text-lg text-gray-400 mb-10 mx-auto lg:w-1/4"
+          className="text-md md:text-lg text-gray-400 mb-10 mx-auto lg:w-1/2"
         >
           Quick solutions, helpful resources, and dedicated support all in one
           place.

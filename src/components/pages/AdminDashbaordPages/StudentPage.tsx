@@ -43,8 +43,16 @@ type Student = {
   status: "ACTIVE" | "BLOCKED" | string;
 };
 
-export default function StudentsPage() {
+type StudentCourseItem = {
+  createdAt: string;
+  course: {
+    title: string;
+    coverImage?: string | null;
+    category: { name: string };
+  };
+};
 
+export default function StudentsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [students, setStudents] = useState<Student[]>([]);
@@ -53,8 +61,14 @@ export default function StudentsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
 
+  // Modal for viewing courses
+  const [coursesModalOpen, setCoursesModalOpen] = useState(false);
+  const [studentCourses, setStudentCourses] = useState<StudentCourseItem[]>([]);
+  const [coursesLoading, setCoursesLoading] = useState(false);
+
   const studentsPerPage = 15;
 
+  // Fetch all students
   const fetchStudents = async () => {
     try {
       setLoading(true);
@@ -64,7 +78,7 @@ export default function StudentsPage() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setStudents(res.data.data.data);
-    } catch{
+    } catch {
       toast.error("Failed to load students");
     } finally {
       setLoading(false);
@@ -75,6 +89,7 @@ export default function StudentsPage() {
     fetchStudents();
   }, []);
 
+  // Filter & paginate
   const filteredStudents = students.filter(
     (student) =>
       (student.username || "")
@@ -141,7 +156,7 @@ export default function StudentsPage() {
     }
   };
 
-  // Delete student handlers
+  // Delete student
   const handleDeleteClick = (student: Student) => {
     setSelectedStudent(student);
     setDeleteDialogOpen(true);
@@ -167,9 +182,29 @@ export default function StudentsPage() {
     }
   };
 
+  // Fetch courses for modal
+  const handleViewCourses = async (student: Student) => {
+    try {
+      setCoursesLoading(true);
+      const token = localStorage.getItem("token");
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/courses/get-student-courses/${student.id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setStudentCourses(res.data.data.data || []);
+      setCoursesModalOpen(true);
+    } catch {
+      toast.error("Failed to load courses");
+    } finally {
+      setCoursesLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white p-6">
       <div className="mx-auto">
+        {/* Search & Add */}
         <div className="flex items-center justify-between mb-6">
           <div className="relative flex-1 max-w-5xl">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -187,6 +222,7 @@ export default function StudentsPage() {
           <AddStudentModal onAdd={handleAddStudent} />
         </div>
 
+        {/* Table */}
         <div className="bg-white rounded-lg border mb-3 lg:mb-10">
           <Table>
             <TableHeader>
@@ -197,10 +233,12 @@ export default function StudentsPage() {
                 <TableHead data-translate>Name</TableHead>
                 <TableHead data-translate>Email</TableHead>
                 <TableHead data-translate>Phone</TableHead>
+                <TableHead data-translate>Courses</TableHead>
                 <TableHead data-translate>Status</TableHead>
                 <TableHead className="w-12"></TableHead>
               </TableRow>
             </TableHeader>
+
             <TableBody>
               {loading ? (
                 <TableRow>
@@ -209,9 +247,7 @@ export default function StudentsPage() {
                     className="text-center py-6 text-gray-500"
                   >
                     <Spin
-                      indicator={
-                        <LoadingOutlined style={{ fontSize: 48 }} spin />
-                      }
+                      indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />}
                     />
                   </TableCell>
                 </TableRow>
@@ -241,11 +277,17 @@ export default function StudentsPage() {
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-gray-600">
-                      {student.email}
-                    </TableCell>
+                    <TableCell className="text-gray-600">{student.email}</TableCell>
                     <TableCell className="text-gray-600">
                       {student.phone || "—"}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        onClick={() => handleViewCourses(student)}
+                        className="bg-[#3399CC] text-white px-2 lg:px-4 py-1 lg:py-2 text-sm rounded-full font-semibold shadow-lg cursor-pointer"
+                      >
+                        View Courses
+                      </Button>
                     </TableCell>
                     <TableCell>
                       <Badge
@@ -261,12 +303,7 @@ export default function StudentsPage() {
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="w-8 h-8 cursor-pointer"
-                            title="Options"
-                          >
+                          <Button variant="ghost" size="icon" className="w-8 h-8">
                             <MoreVertical className="w-4 h-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -321,23 +358,16 @@ export default function StudentsPage() {
 
       {/* Delete Confirmation Dialog */}
       {deleteDialogOpen && (
-        <Dialog
-          open={deleteDialogOpen}
-          onOpenChange={() => setDeleteDialogOpen(false)}
-        >
+        <Dialog open={deleteDialogOpen} onOpenChange={() => setDeleteDialogOpen(false)}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Remove Student</DialogTitle>
             </DialogHeader>
             <p>
-              Are you sure you want to remove{" "}
-              {selectedStudent?.username || "this student"}?
+              Are you sure you want to remove {selectedStudent?.username || "this student"}?
             </p>
             <DialogFooter className="flex justify-end gap-2">
-              <Button
-                variant="secondary"
-                onClick={() => setDeleteDialogOpen(false)}
-              >
+              <Button variant="secondary" onClick={() => setDeleteDialogOpen(false)}>
                 Cancel
               </Button>
               <Button variant="destructive" onClick={handleConfirmDelete}>
@@ -347,6 +377,41 @@ export default function StudentsPage() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Courses Modal */}
+      <Dialog open={coursesModalOpen} onOpenChange={setCoursesModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Student Courses</DialogTitle>
+          </DialogHeader>
+
+          {coursesLoading ? (
+            <div className="text-center py-6">
+              <Spin indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />} />
+            </div>
+          ) : studentCourses.length === 0 ? (
+            <p>No courses assigned.</p>
+          ) : (
+            <div className="space-y-3 max-h-[400px] overflow-y-auto mt-2">
+              {studentCourses.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="flex justify-between items-center p-3 bg-gray-50 rounded-md shadow-sm"
+                >
+                  <span>{item.course.title}</span>
+                  <Badge>{item.course.category.name}</Badge>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <DialogFooter className="mt-4 flex justify-end">
+            <Button variant="secondary" onClick={() => setCoursesModalOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
