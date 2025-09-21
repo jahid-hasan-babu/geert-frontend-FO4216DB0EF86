@@ -72,7 +72,7 @@ export default function LoginPage() {
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
       toast.success(<span data-translate>Logged in successfully!</span>);
-      if (user?.role === "SUPERADMIN") router.push("/dashboard");
+      if (user?.role === "SUPERADMIN" || "ADMIN") router.push("/dashboard");
       else router.push("/");
     } catch {
       toast.error("Invalid email or password");
