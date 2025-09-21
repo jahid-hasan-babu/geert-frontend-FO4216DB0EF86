@@ -63,7 +63,9 @@ export default function CourseCard({
       setIsFavorite(newFavoriteState);
       await addToFavorites(course.id).unwrap();
 
-      toast.success(newFavoriteState ? "Added to favorites" : "Removed from favorites");
+      toast.success(
+        newFavoriteState ? "Added to favorites" : "Removed from favorites"
+      );
 
       // Trigger translation refresh in case dynamic text changed
       window.dispatchEvent(new Event("translate-refresh"));
@@ -103,13 +105,15 @@ export default function CourseCard({
               <Spin size="large" />
             </div>
           )}
-          <Image
-            className="w-full h-[260px] object-cover"
-            src={course.coverImage || course_image}
-            width={100}
-            height={100}
-            alt={course.title || "Course Image"}
-          />
+          <div className="relative w-full h-[260px]">
+            <Image
+              src={course.coverImage || course_image}
+              alt={course.title || "Course Image"}
+              fill
+              className="object-cover rounded-t-2xl"
+              sizes="100vw"
+            />
+          </div>
         </div>
 
         {/* Course Details */}

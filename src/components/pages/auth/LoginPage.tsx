@@ -72,8 +72,14 @@ export default function LoginPage() {
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
       toast.success(<span data-translate>Logged in successfully!</span>);
-      if (user?.role === "SUPERADMIN" || "ADMIN") router.push("/dashboard");
-      else router.push("/");
+      if (user?.role === "SUPERADMIN" || user?.role === "ADMIN") {
+        router.push("/dashboard");
+      } else if (user?.role === "STUDENT") {
+        router.push("/");
+      }
+      else {
+        toast.error(<span data-translate>Sorry, You&#39;re not authorized to login thew system!</span>);
+      }
     } catch {
       toast.error("Invalid email or password");
     }
