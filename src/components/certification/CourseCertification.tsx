@@ -10,7 +10,7 @@ interface CertificateData {
   courseTitle: string;
   instructorName: string;
   instructorDesignation?: string | null;
-  courseCompletedDate: string | null;
+  courseCompletedDate?: string | null;
 }
 
 interface ResultData {
@@ -23,21 +23,6 @@ interface ResultData {
 interface Props {
   courseId: string;
 }
-
-const mockCertificateData: CertificateData = {
-  studentName: "John Doe",
-  courseTitle: "Advanced Web Development",
-  instructorName: "Jane Smith",
-  instructorDesignation: "Senior Developer",
-  courseCompletedDate: "2024-01-15",
-};
-
-const mockResultData: ResultData = {
-  finalScore: 95,
-  overallPercent: 92,
-  position: 3,
-  totalStudents: 25,
-};
 
 export default function CourseCertification({ courseId }: Props) {
   const [certificate, setCertificate] = useState<CertificateData | null>(null);
@@ -55,36 +40,43 @@ export default function CourseCertification({ courseId }: Props) {
         const token = localStorage.getItem("token");
         if (!token) throw new Error("No token found");
 
+        // Fetch certificate
         const certRes = await axios.get<{
           success: boolean;
-          data: CertificateData;
+          data?: CertificateData;
+          message?: string;
         }>(
           `${process.env.NEXT_PUBLIC_BASE_URL}/courses/get-certificate/${courseId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
-        if (!certRes.data.success) throw new Error("Certificate not available");
-        setCertificate(certRes.data.data);
 
+        if (!certRes.data.success) {
+          // Course not completed yet
+          setCertificate(null);
+          setError(
+            certRes.data.message ||
+              "Complete the course to generate your certificate."
+          );
+          return;
+        }
+
+        setCertificate(certRes.data.data || null);
+
+        // Fetch result if available
         try {
           const resultRes = await axios.get<{
             success: boolean;
             data: ResultData;
           }>(
             `${process.env.NEXT_PUBLIC_BASE_URL}/courses/get-result/${courseId}`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
+            { headers: { Authorization: `Bearer ${token}` } }
           );
           if (resultRes.data.success) setResult(resultRes.data.data);
         } catch (err) {
           console.warn("Result not available, continuing without it:", err);
         }
       } catch {
-        console.log("API not available, using mock data");
-        setCertificate(mockCertificateData);
-        setResult(mockResultData);
+        setError("Failed to fetch certificate. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -94,22 +86,13 @@ export default function CourseCertification({ courseId }: Props) {
   }, [courseId]);
 
   const handleDownloadPDF = async () => {
-    console.log("[v1] Starting PDF download process");
-    if (!certificate || !canvasRef.current) {
-      console.log("[v1] Missing certificate or canvas ref");
-      return;
-    }
+    if (!certificate || !canvasRef.current) return;
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
-    if (!ctx) {
-      console.log("[v1] Failed to get canvas context");
-      return;
-    }
+    if (!ctx) return;
 
     try {
-      console.log("[v1] Setting canvas dimensions");
-      // Landscape A4 proportions
       canvas.width = 1200;
       canvas.height = 848;
 
@@ -117,105 +100,102 @@ export default function CourseCertification({ courseId }: Props) {
       templateImg.crossOrigin = "anonymous";
 
       templateImg.onload = () => {
-        console.log("[v1] Template image loaded successfully");
-        try {
-          // Draw template
-          ctx.drawImage(templateImg, 0, 0, canvas.width, canvas.height);
+        // Draw template
+        ctx.drawImage(templateImg, 0, 0, canvas.width, canvas.height);
 
-          // Set text styles
-          ctx.fillStyle = "#333333";
-          ctx.textAlign = "center";
+        ctx.fillStyle = "#333333";
+        ctx.textAlign = "center";
 
-          // Header at top
-          ctx.font = "bold 36px Arial";
-          ctx.fillText("Online Cursusvoltooinng", canvas.width / 2, 60);
+        // Header
+        ctx.font = "bold 36px Arial";
+        ctx.fillText("Online Cursusvoltooiing", canvas.width / 2, 60);
+
+        ctx.font = "30px Arial";
+        ctx.fillText("Uitgegeven op", canvas.width / 2, 330);
+
+        // Student Name
+        ctx.font = "bold 40px Arial";
+        ctx.fillText(certificate.studentName, canvas.width / 2, 400);
+
+        ctx.font = "italic 28px Arial";
+        ctx.fillText("voor het succesvol afronden", canvas.width / 2, 450);
+
+        // Course Title
+        ctx.font = "bold 48px Arial";
+        ctx.fillText(certificate.courseTitle, canvas.width / 2, 520);
+
+        // Completion Date
+        if (certificate.courseCompletedDate) {
+          const date = new Date(certificate.courseCompletedDate);
+          const day = date.getDate();
+          const month = date.toLocaleString("default", { month: "long" });
+          const year = date.getFullYear();
+          const formattedDate = `${day} ${month}, ${year}`;
 
           ctx.font = "30px Arial";
-          ctx.fillText("Uitgegeven op", canvas.width / 2, 330);
-
-          // Student Name
-          ctx.font = "bold 40px Arial";
-          ctx.fillText(certificate.studentName, canvas.width / 2, 400);
-
-          //Statci Text
-          ctx.font = "italic 28px Arial";
-          ctx.fillText("vur het succesvol afronden", canvas.width / 2, 450);
-
-          // Course Name + "on" + Completion Date
-          ctx.font = "bold 48px Arial";
-          ctx.fillText(certificate.courseTitle, canvas.width / 2, 520);
-
-          if (certificate.courseCompletedDate) {
-            const date = new Date(certificate.courseCompletedDate);
-            const day = date.getDate();
-            const month = date.toLocaleString("default", { month: "long" }); // Full month name
-            const year = date.getFullYear();
-            const formattedDate = `${day} ${month}, ${year}`;
-
-            ctx.font = "30px Arial";
-            ctx.fillText("on", canvas.width / 2, 560);
-            ctx.fillText(formattedDate, canvas.width / 2, 600);
-          }
-
-          // Results (if available)
-          if (result) {
-            ctx.fillStyle = "#1E40AF"; // blue color
-            ctx.font = "bold 24px Arial";
-            ctx.fillText(
-              `Final Score: ${result.finalScore}`,
-              canvas.width / 2,
-              650
-            );
-            ctx.fillText(
-              `Overall Percent: ${result.overallPercent}%`,
-              canvas.width / 2,
-              690
-            );
-            ctx.fillText(
-              `Class Position: ${result.position}${getOrdinalSuffix(
-                result.position
-              )} of ${result.totalStudents}`,
-              canvas.width / 2,
-              730
-            );
-          }
-
-          // Convert to PDF
-          const imgData = canvas.toDataURL("image/png");
-          const pdf = new jsPDF("landscape", "mm", "a4");
-          pdf.addImage(imgData, "PNG", 0, 0, 297, 210);
-          const fileName = `${certificate.studentName}_Certificate.pdf`;
-          pdf.save(fileName);
-          console.log("[v1] PDF download complete:", fileName);
-        } catch (err) {
-          console.error("[v1] Error generating PDF:", err);
-          alert("Failed to generate PDF. Please try again.");
+          ctx.fillText("on", canvas.width / 2, 560);
+          ctx.fillText(formattedDate, canvas.width / 2, 600);
         }
+
+        // Results (if available)
+        if (result) {
+          ctx.fillStyle = "#1E40AF";
+          ctx.font = "bold 24px Arial";
+          ctx.fillText(
+            `Final Score: ${result.finalScore}`,
+            canvas.width / 2,
+            650
+          );
+          ctx.fillText(
+            `Overall Percent: ${result.overallPercent}%`,
+            canvas.width / 2,
+            690
+          );
+          ctx.fillText(
+            `Class Position: ${result.position}${getOrdinalSuffix(
+              result.position
+            )} of ${result.totalStudents}`,
+            canvas.width / 2,
+            730
+          );
+        }
+
+        // Generate PDF
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF("landscape", "mm", "a4");
+        pdf.addImage(imgData, "PNG", 0, 0, 297, 210);
+        pdf.save(`${certificate.studentName}_Certificate.pdf`);
       };
 
-      templateImg.onerror = (err) => {
-        console.error("[v1] Failed to load certificate template:", err);
+      templateImg.onerror = () => {
         alert("Failed to load certificate template.");
       };
 
-      console.log("[v1] Loading template image:", "/certificate_template.png");
       templateImg.src = "/certificate_template.png";
     } catch (err) {
-      console.error("[v1] Error in handleDownloadPDF:", err);
+      console.error("Error generating PDF:", err);
       alert("Failed to generate PDF. Please try again.");
     }
   };
+
+  if (error)
+    return (
+      <p className="text-center text-red-500 font-semibold" data-translate>
+        {error}
+      </p>
+    );
+
+  if (!certificate)
+    return (
+      <p className="text-center text-gray-700 font-semibold" data-translate>
+        Complete the course to generate your certificate.
+      </p>
+    );
 
   if (loading)
     return (
       <p className="text-center text-gray-500" data-translate>
         Loading certificate...
-      </p>
-    );
-  if (error || !certificate)
-    return (
-      <p className="text-center text-red-500" data-translate>
-        {error || "Certificate not available."}
       </p>
     );
 
@@ -249,21 +229,6 @@ export default function CourseCertification({ courseId }: Props) {
             ? new Date(certificate.courseCompletedDate).toLocaleDateString()
             : "Not Available"}
         </p>
-
-        {result && (
-          <>
-            <p className="text-blue-600 font-bold text-lg" data-translate>
-              Final Score: {result.finalScore}
-            </p>
-            <p className="text-blue-600 font-bold text-lg" data-translate>
-              Overall Percent: {result.overallPercent}%
-            </p>
-            <p className="text-blue-600 font-bold text-lg" data-translate>
-              Class Position: {result.position}
-              {getOrdinalSuffix(result.position)} of {result.totalStudents}
-            </p>
-          </>
-        )}
         <p className="text-gray-500 mt-4 text-xs" data-translate>
           Congratulations on your achievement!
         </p>
@@ -278,7 +243,6 @@ export default function CourseCertification({ courseId }: Props) {
         <span>Download PDF</span>
       </button>
 
-      {/* Hidden canvas for PDF generation */}
       <canvas
         ref={canvasRef}
         style={{ display: "none" }}

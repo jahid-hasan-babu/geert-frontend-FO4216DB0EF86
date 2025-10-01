@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Modal, Form, Input, Select, Button, Upload, InputNumber } from "antd";
+import { Modal, Form, Input, Select, Button, Upload } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { useAddCourseLessonMutation } from "@/redux/features/courses/coursesApi";
 import Editor from "@/components/ui/Editor/Editor";
@@ -128,54 +128,33 @@ export const AddLessonModal: React.FC<AddLessonModalProps> = ({
     setIsUploading(true);
     setUploadProgress(0);
 
-    // Simulate upload progress (replace with real progress tracking if possible)
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += Math.random() * 15 + 5;
-      if (progress >= 100) {
-        progress = 100;
-        clearInterval(interval);
-        setIsUploading(false);
-        toast.success(
-          <span data-translate>Video file selected successfully!</span>
-        );
-      }
-      setUploadProgress(Math.min(progress, 100));
-    }, 200 + Math.random() * 300);
+    // Extract video duration
+    const video = document.createElement("video");
+    video.preload = "metadata";
+    video.src = URL.createObjectURL(file);
+
+    video.onloadedmetadata = () => {
+      const totalSeconds = Math.floor(video.duration);
+
+      const hours = Math.floor(totalSeconds / 3600)
+        .toString()
+        .padStart(2, "0");
+      const minutes = Math.floor((totalSeconds % 3600) / 60)
+        .toString()
+        .padStart(2, "0");
+      const seconds = (totalSeconds % 60).toString().padStart(2, "0");
+
+      form.setFieldsValue({
+        duration: `${hours}:${minutes}:${seconds}`,
+        durationSecs: totalSeconds,
+      });
+
+      setIsUploading(false);
+      toast.success("Video file selected successfully!");
+      URL.revokeObjectURL(video.src);
+    };
 
     return false; // Prevent automatic upload
-  };
-
-  const convertTimeToSeconds = (timeString: string) => {
-    if (!timeString) return 0;
-
-    const [minutesStr, secondsStr] = timeString.split(":");
-    // split gives strings
-    const minutes = parseInt(minutesStr, 10);
-    const seconds = parseInt(secondsStr, 10);
-
-    if (
-      isNaN(minutes) ||
-      isNaN(seconds) ||
-      minutes < 0 ||
-      seconds < 0 ||
-      seconds > 59
-    ) {
-      toast.error("Invalid time format. Please use MM:SS (e.g., 07:30).");
-      return 0;
-    }
-
-    return minutes * 60 + seconds; // returns a number
-  };
-
-  // Handler for duration input
-  const handleDurationChange = (value: string): void => {
-    const timeString = value == null ? "0" : value;
-    // value == null → covers both null and undefined
-
-    const seconds = Number(convertTimeToSeconds(timeString));
-    form.setFieldsValue({ duration: timeString });
-    form.setFieldsValue({ durationSecs: seconds });
   };
 
   // Handler for editor changes
@@ -388,33 +367,10 @@ export const AddLessonModal: React.FC<AddLessonModalProps> = ({
                 <div style={{ display: "flex", gap: "16px" }}>
                   <Form.Item
                     name="duration"
-                    label="Duration (MM:SS)"
-                    rules={[
-                      { required: true, message: "Please enter duration" },
-                      {
-                        pattern: /^([0-5][0-9]|[0-9]):([0-5][0-9])$/,
-                        message: "Please enter valid time format (MM:SS)",
-                      },
-                    ]}
+                    label="Duration (HH:MM:SS)"
                     style={{ flex: 1 }}
                   >
-                    <Input
-                      placeholder="07:30"
-                      onChange={(e) => handleDurationChange(e.target.value)}
-                    />
-                  </Form.Item>
-                  <Form.Item
-                    name="durationSecs"
-                    label="Duration (Seconds)"
-                    style={{ flex: 1 }}
-                  >
-                    <InputNumber
-                      min={0}
-                      max={7200} // 2 hours max
-                      placeholder="450"
-                      style={{ width: "100%" }}
-                      disabled
-                    />
+                    <Input placeholder="Upload Video First" disabled />
                   </Form.Item>
                 </div>
               );

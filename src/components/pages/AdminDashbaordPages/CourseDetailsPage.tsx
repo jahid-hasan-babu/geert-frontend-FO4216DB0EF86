@@ -112,6 +112,7 @@ const CourseDetailsPage = () => {
     title: "",
     description: "",
     duration: "",
+    durationSecs: 0, // <--- new
     videoUrl: null as File | null,
   });
 
@@ -293,19 +294,22 @@ const CourseDetailsPage = () => {
       description: lesson?.description,
       duration: lesson?.duration,
       videoUrl: null,
+      durationSecs: lesson?.durationSecs,
     });
   };
 
   const handleEditLessonSubmit = async () => {
     if (!editingLesson) return;
     setIsEditingLesson(true);
+
     try {
       const formData = new FormData();
-      const { title, description, duration, videoUrl } = editLessonData;
+      const { title, description, duration, durationSecs, videoUrl } =
+        editLessonData;
 
       formData.append(
         "bodyData",
-        JSON.stringify({ title, description, duration })
+        JSON.stringify({ title, description, duration, durationSecs })
       );
 
       if (videoUrl) {
@@ -601,26 +605,60 @@ const CourseDetailsPage = () => {
                                 />
                               )}
                               {editingLesson?.lesson?.type === "video" && (
-                                <Input
-                                  value={editLessonData.duration}
-                                  onChange={(e) =>
-                                    setEditLessonData((prev) => ({
-                                      ...prev,
-                                      duration: e.target.value,
-                                    }))
-                                  }
-                                  placeholder="Durtation (MM:SS)"
-                                />
+                                <>
+                                  <Input
+                                    value={editLessonData.duration}
+                                    placeholder="Duration (HH:MM:SS)"
+                                    disabled
+                                  />
+                                  <Input
+                                    type="file"
+                                    accept="video/*"
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0] || null;
+                                      if (!file) return;
+
+                                      setEditLessonData((prev) => ({
+                                        ...prev,
+                                        videoUrl: file,
+                                      }));
+
+                                      const video =
+                                        document.createElement("video");
+                                      video.preload = "metadata";
+                                      video.src = URL.createObjectURL(file);
+
+                                      video.onloadedmetadata = () => {
+                                        const totalSeconds = Math.floor(
+                                          video.duration
+                                        );
+
+                                        const hours = Math.floor(
+                                          totalSeconds / 3600
+                                        )
+                                          .toString()
+                                          .padStart(2, "0");
+                                        const minutes = Math.floor(
+                                          (totalSeconds % 3600) / 60
+                                        )
+                                          .toString()
+                                          .padStart(2, "0");
+                                        const seconds = (totalSeconds % 60)
+                                          .toString()
+                                          .padStart(2, "0");
+
+                                        setEditLessonData((prev) => ({
+                                          ...prev,
+                                          duration: `${hours}:${minutes}:${seconds}`,
+                                          durationSecs: totalSeconds, // <--- add this
+                                        }));
+
+                                        URL.revokeObjectURL(video.src);
+                                      };
+                                    }}
+                                  />
+                                </>
                               )}
-                              <Input
-                                type="file"
-                                onChange={(e) =>
-                                  setEditLessonData((prev) => ({
-                                    ...prev,
-                                    videoUrl: e.target.files?.[0] || null,
-                                  }))
-                                }
-                              />
                               <div className="flex gap-2">
                                 <Button
                                   size="sm"

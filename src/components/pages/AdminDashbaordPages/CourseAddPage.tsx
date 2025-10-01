@@ -98,7 +98,7 @@ export default function CourseAddPage() {
     description: "",
     categoryId: "",
     duration: "0",
-    price: 59,
+    price: null, // <-- null instead of 0
     instructorId: "",
     instructorEmail: "",
   });
@@ -134,13 +134,13 @@ export default function CourseAddPage() {
     }
   };
 
-  const handleInputChange = (field: string, value: string | number) => {
-    setCourseData((prev) => ({ ...prev, [field]: value }));
-    // Clear validation errors when user starts typing
-    if (validationErrors.length > 0) {
-      setValidationErrors([]);
-    }
-  };
+  const handleInputChange = (field: string, value: string | number | null) => {
+      setCourseData((prev) => ({ ...prev, [field]: value }));
+      // Clear validation errors when user starts typing
+      if (validationErrors.length > 0) {
+        setValidationErrors([]);
+      }
+    };
 
   const handleDescriptionChange = (content: string) => {
     setCourseData((prev) => ({ ...prev, description: content }));
@@ -332,7 +332,7 @@ export default function CourseAddPage() {
         description: "",
         categoryId: "",
         duration: "",
-        price: 59,
+        price: null,
         instructorId: "",
         instructorEmail: "",
       });
@@ -364,7 +364,7 @@ export default function CourseAddPage() {
 
   return (
     <div className="mx-auto p-6 space-y-8 bg-white">
-      <TranslateInitializer/>
+      <TranslateInitializer />
       {validationErrors.length > 0 && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -420,10 +420,15 @@ export default function CourseAddPage() {
 
       {/* Course Details */}
       <div className="space-y-6">
-        <h2 className="text-2xl font-semibold text-gray-900" data-translate>Course Details</h2>
+        <h2 className="text-2xl font-semibold text-gray-900" data-translate>
+          Course Details
+        </h2>
         <div className="space-y-4 border-2 border-gray-100 p-4 rounded-lg">
           <div>
-            <label className="block text-sm font-medium text-[#585858] mb-2" data-translate>
+            <label
+              className="block text-sm font-medium text-[#585858] mb-2"
+              data-translate
+            >
               Course Title *
             </label>
             <Input
@@ -436,7 +441,10 @@ export default function CourseAddPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#585858] mb-2" data-translate>
+            <label
+              className="block text-sm font-medium text-[#585858] mb-2"
+              data-translate
+            >
               Description *
             </label>
             <Editor
@@ -449,7 +457,10 @@ export default function CourseAddPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" data-translate>
+              <label
+                className="block text-sm font-medium text-gray-700 mb-2"
+                data-translate
+              >
                 Course Category *
               </label>
               <Select
@@ -477,7 +488,10 @@ export default function CourseAddPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" data-translate>
+              <label
+                className="block text-sm font-medium text-gray-700 mb-2"
+                data-translate
+              >
                 Course Duration *
               </label>
               <div className="relative">
@@ -514,15 +528,21 @@ export default function CourseAddPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" data-translate>
+              <label
+                className="block text-sm font-medium text-gray-700 mb-2"
+                data-translate
+              >
                 Price (€) *
               </label>
               <Input
                 type="number"
-                placeholder="59"
-                value={courseData.price}
+                placeholder="0"
+                value={courseData.price !== null ? courseData.price : ""} // <-- show empty if null
                 onChange={(e) =>
-                  handleInputChange("price", Number(e.target.value))
+                  handleInputChange(
+                    "price",
+                    e.target.value === "" ? null : Number(e.target.value) // <-- store null if empty
+                  )
                 }
                 className="w-full"
                 min="0"
@@ -546,7 +566,10 @@ export default function CourseAddPage() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2" data-translate>
+            <label
+              className="block text-sm font-medium text-gray-700 mb-2"
+              data-translate
+            >
               Instructor Name *
             </label>
             <Select
@@ -585,7 +608,10 @@ export default function CourseAddPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2" data-translate>
+            <label
+              className="block text-sm font-medium text-gray-700 mb-2"
+              data-translate
+            >
               Instructor Email *
             </label>
             <Input
