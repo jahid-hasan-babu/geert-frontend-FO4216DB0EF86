@@ -23,7 +23,7 @@ export default function ForgotPasswordModal({
   const [loading, setLoading] = useState(false);
 
   const handleSendEmail = async () => {
-    if (!fpEmail) return toast.error("Enter your email");
+    if (!fpEmail) return toast.error("Voer je e-mailadres in");
     setLoading(true);
     try {
       const response = await axios.post(
@@ -32,20 +32,18 @@ export default function ForgotPasswordModal({
       );
       setUserId(response.data.data.userId);
 
-      toast.success(<span data-translate>OTP sent to your email!</span>);
-
+      toast.success("OTP is naar je e-mailadres verzonden!");
       setStep(2);
     } catch (error) {
       const err = error as AxiosError<{ message: string }>;
-      toast.error(err.response?.data?.message || "Failed to send OTP");
+      toast.error(err.response?.data?.message || "Verzenden van OTP mislukt");
     } finally {
       setLoading(false);
     }
   };
 
   const handleVerifyOtp = async () => {
-    if (!otpCode) return toast.error("Enter OTP");
-
+    if (!otpCode) return toast.error("Voer de OTP-code in");
     setLoading(true);
     try {
       const response = await axios.post(
@@ -54,20 +52,18 @@ export default function ForgotPasswordModal({
       );
       setAccessToken(response.data.data.accessToken);
 
-      toast.success(<span data-translate>OTP verified! Reset your password now.</span>);
-
+      toast.success("OTP geverifieerd! Stel nu je wachtwoord opnieuw in.");
       setStep(3);
     } catch (error) {
       const err = error as AxiosError<{ message: string }>;
-      toast.error(err.response?.data?.message || "OTP verification failed");
+      toast.error(err.response?.data?.message || "OTP-verificatie mislukt");
     } finally {
       setLoading(false);
     }
   };
 
   const handleResetPassword = async () => {
-    if (!newPassword) return toast.error("Enter new password");
-
+    if (!newPassword) return toast.error("Voer een nieuw wachtwoord in");
     setLoading(true);
     try {
       await axios.post(
@@ -76,7 +72,7 @@ export default function ForgotPasswordModal({
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
 
-      toast.success(<span data-translate>Password reset successfully!</span>);
+      toast.success("Wachtwoord succesvol opnieuw ingesteld!");
 
       onClose();
       setStep(1);
@@ -85,7 +81,7 @@ export default function ForgotPasswordModal({
       setNewPassword("");
     } catch (error) {
       const err = error as AxiosError<{ message: string }>;
-      toast.error(err.response?.data?.message || "Password reset failed");
+      toast.error(err.response?.data?.message || "Wachtwoord reset mislukt");
     } finally {
       setLoading(false);
     }
@@ -95,7 +91,7 @@ export default function ForgotPasswordModal({
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg max-w-md w-full p-6 relative">
+      <div className="bg-white rounded-lg max-w-lg w-full p-6 relative">
         <button
           className="absolute top-3 right-3 cursor-pointer"
           onClick={() => {
@@ -108,8 +104,8 @@ export default function ForgotPasswordModal({
 
         {step === 1 && (
           <div className="space-y-4">
-            <h2 className="text-xl font-medium">Forgot Password</h2>
-            <p>Enter your email to receive OTP code</p>
+            <h2 className="text-xl font-medium" data-translate>Forgot Password</h2>
+            <p data-translate>Enter your email to receive OTP code</p>
             <input
               type="email"
               placeholder="Email"
@@ -121,16 +117,17 @@ export default function ForgotPasswordModal({
               onClick={handleSendEmail}
               disabled={loading}
               className="w-full bg-[#3399CC] text-white py-2 rounded-lg cursor-pointer"
+              data-translate
             >
-              {loading ? "Sending..." : "Send OTP"}
+              {loading ? "Sending..." : "Enter your email address to receive the verification code"}
             </button>
           </div>
         )}
 
         {step === 2 && (
           <div className="space-y-4">
-            <h2 className="text-xl font-medium">Verify OTP</h2>
-            <p>Enter the OTP sent to your email</p>
+            <h2 className="text-xl font-medium" data-translate>Verify OTP</h2>
+            <p data-translate>Enter the OTP sent to your email</p>
             <input
               type="number"
               placeholder="OTP"
@@ -142,6 +139,7 @@ export default function ForgotPasswordModal({
               onClick={handleVerifyOtp}
               disabled={loading}
               className="w-full button-bg text-white py-2 rounded-lg"
+              data-translate
             >
               {loading ? "Verifying..." : "Verify OTP"}
             </button>
@@ -150,7 +148,7 @@ export default function ForgotPasswordModal({
 
         {step === 3 && (
           <div className="space-y-4">
-            <h2 className="text-xl font-medium">Reset Password</h2>
+            <h2 className="text-xl font-medium" data-translate>Reset Password</h2>
             <input
               type="password"
               placeholder="New Password"
@@ -162,6 +160,7 @@ export default function ForgotPasswordModal({
               onClick={handleResetPassword}
               disabled={loading}
               className="w-full button-bg text-white py-2 rounded-lg cursor-pointer"
+              data-translate
             >
               {loading ? "Resetting..." : "Reset Password"}
             </button>
