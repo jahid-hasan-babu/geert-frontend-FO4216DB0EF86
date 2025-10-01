@@ -247,7 +247,9 @@ export default function StudentsPage() {
                     className="text-center py-6 text-gray-500"
                   >
                     <Spin
-                      indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />}
+                      indicator={
+                        <LoadingOutlined style={{ fontSize: 48 }} spin />
+                      }
                     />
                   </TableCell>
                 </TableRow>
@@ -265,7 +267,7 @@ export default function StudentsPage() {
                             alt="avatar"
                             width={32}
                             height={32}
-                            className="rounded-full object-cover bg-blue-500"
+                            className="w-8 h-8 rounded-full object-cover bg-blue-500"
                           />
                         ) : (
                           <div className="w-8 h-8 bg-sky-100 text-sky-600 rounded-full flex items-center justify-center font-medium">
@@ -277,7 +279,10 @@ export default function StudentsPage() {
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-gray-600">{student.email}</TableCell>
+
+                    <TableCell className="text-gray-600">
+                      {student.email}
+                    </TableCell>
                     <TableCell className="text-gray-600">
                       {student.phone || "—"}
                     </TableCell>
@@ -303,7 +308,11 @@ export default function StudentsPage() {
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="w-8 h-8">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="w-8 h-8"
+                          >
                             <MoreVertical className="w-4 h-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -358,16 +367,23 @@ export default function StudentsPage() {
 
       {/* Delete Confirmation Dialog */}
       {deleteDialogOpen && (
-        <Dialog open={deleteDialogOpen} onOpenChange={() => setDeleteDialogOpen(false)}>
+        <Dialog
+          open={deleteDialogOpen}
+          onOpenChange={() => setDeleteDialogOpen(false)}
+        >
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Remove Student</DialogTitle>
             </DialogHeader>
             <p>
-              Are you sure you want to remove {selectedStudent?.username || "this student"}?
+              Are you sure you want to remove{" "}
+              {selectedStudent?.username || "this student"}?
             </p>
             <DialogFooter className="flex justify-end gap-2">
-              <Button variant="secondary" onClick={() => setDeleteDialogOpen(false)}>
+              <Button
+                variant="secondary"
+                onClick={() => setDeleteDialogOpen(false)}
+              >
                 Cancel
               </Button>
               <Button variant="destructive" onClick={handleConfirmDelete}>
@@ -387,7 +403,9 @@ export default function StudentsPage() {
 
           {coursesLoading ? (
             <div className="text-center py-6">
-              <Spin indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />} />
+              <Spin
+                indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />}
+              />
             </div>
           ) : studentCourses.length === 0 ? (
             <p>No courses assigned.</p>
@@ -406,7 +424,10 @@ export default function StudentsPage() {
           )}
 
           <DialogFooter className="mt-4 flex justify-end">
-            <Button variant="secondary" onClick={() => setCoursesModalOpen(false)}>
+            <Button
+              variant="secondary"
+              onClick={() => setCoursesModalOpen(false)}
+            >
               Close
             </Button>
           </DialogFooter>

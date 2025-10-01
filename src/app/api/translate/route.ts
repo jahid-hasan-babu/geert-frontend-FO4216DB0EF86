@@ -40,7 +40,7 @@ export async function POST(req: Request) {
       Save: " Opslaan ",
       "Develop your skills with our practice-oriented e-learning courses": "Ontwikkel je skills met onze praktijkgerichte e-learning cursussen",
       "+ Add Student" : "+ Cursist toevoegen",
-      Support: "Support",
+      Service: "Service",
       " ... Read More": "Less minder"
     };
 

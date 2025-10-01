@@ -30,7 +30,7 @@ const navLinks = [
   { href: "/", label: "Homepage" },
   { href: "/courses", label: "Course" },
   { href: "/contact", label: "Contact" },
-  { href: "/help-support", label: "Support" },
+  { href: "/help-support", label: "Service" },
 ];
 
 interface User {
