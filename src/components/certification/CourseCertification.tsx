@@ -130,11 +130,11 @@ export default function CourseCertification({ courseId }: Props) {
           const day = date.getDate();
           const month = date.toLocaleString("default", { month: "long" });
           const year = date.getFullYear();
-          const formattedDate = `${day} ${month}, ${year}`;
+          const formattedDate = `${day} - ${month} - ${year}`;
 
-          ctx.font = "30px Arial";
-          ctx.fillText("on", canvas.width / 2, 560);
-          ctx.fillText(formattedDate, canvas.width / 2, 600);
+          ctx.font = "18px Arial";
+          // ctx.fillText("on", canvas.width / 2, 560);
+          ctx.fillText(formattedDate, canvas.width / 3.05, 710);
         }
 
         // Results (if available)

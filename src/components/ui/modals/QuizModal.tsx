@@ -253,7 +253,7 @@ export const QuizModal: React.FC<QuizModalProps> = ({
         ))}
 
         <Button onClick={handleSubmit} disabled={loading} className="mt-4">
-          {loading ? "Submitting..." : "Submit Quiz"}
+          {loading ? "Bezig met verzenden..." : "Verzend antwoorden"}
         </Button>
       </DialogContent>
     </Dialog>
